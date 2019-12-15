@@ -43,7 +43,8 @@
   </target>
 
   <target name="compile" depends="init">
-    <javac srcdir="${src.dir}"
+    <javac includeantruntime="false"
+           srcdir="${src.dir}"
            destdir="${build.dir}"
            classpathref="project.classpath"
            includes="**/*.java"
