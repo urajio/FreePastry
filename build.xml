@@ -45,49 +45,6 @@
     </javac>
   </target>
 
-  <!-- Environment variables for the Checker Framework -->
-  <!-- Override on the command line, e.g.:  ant -Djsr308.dir=$HOME/jsr308  -->
-  <property environment="env"/>
-  <property name="jsr308.dir" value="C:/jsr308"/>
-  <property name="jsr308.checkers.dir" value="${jsr308.dir}/checkers"/>
-  <property name="jsr308.javac" value="${jsr308.dir}/jdk1.7.0/bin/javac"/>
-  <property name="jsr308.processor" value="checkers.interning.InterningChecker"/>
-
-  <!-- The classpath for using the Checker Framework -->
-  <path id="checkers.classpath">
-    <fileset dir="${lib.dir}">
-      <include name="**/*.jar"/>
-    </fileset>
-    <fileset dir="${jsr308.checkers.dir}">
-      <include name="checkers.jar"/>
-    </fileset>
-    <pathelement path="${build.dir}"/>
-  </path>
-
-  <!-- Running a checker from the Checker Framework -->
-  <!--
-    "clean" target is because the javac target doesn't re-compile .java
-    files for which a .class file already exists.
-    "executable" and "fork" fields ensure we call an external program, not
-    just run javac via a Java method call.  That's because the JSR 308
-    compiler might not be the one that is running Ant.
-  -->
-  <target name="checker" depends="clean,init">
-    <javac srcdir="${src.dir}"
-       destdir="${build.dir}"
-       classpathref="checkers.classpath"
-       includes="**/*.java"
-       deprecation="no"
-       debuglevel="lines,vars,source"
-       fork="yes"
-       executable="${jsr308.javac}"
-       debug="true">
-      <compilerarg value="-version"/>
-      <compilerarg value="-processor"/>
-      <compilerarg value="${jsr308.processor}"/>
-    </javac>
-  </target>
-
 
   <target name="etags" depends="tags">
   </target>
