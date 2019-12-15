@@ -331,8 +331,8 @@ public interface Continuation<R, E extends Exception> {
    */
   public static class MultiContinuation {
   
-    protected Object result[];
-    protected boolean haveResult[];
+    protected Object[] result;
+    protected boolean[] haveResult;
     protected Continuation parent;
     protected boolean done;
     
@@ -400,8 +400,8 @@ public interface Continuation<R, E extends Exception> {
      * will cause this continuation to be permanently marked as done.
      */
     public boolean isDone() throws Exception {
-      for (int i=0; i<haveResult.length; i++) 
-        if (! haveResult[i]) 
+      for (boolean b : haveResult)
+        if (!b)
           return false;
       
       return true;
