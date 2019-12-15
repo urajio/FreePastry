@@ -58,7 +58,6 @@ import rice.pastry.commonapi.PastryEndpoint;
 import rice.pastry.socket.SocketPastryNodeFactory;
 import rice.pastry.standard.RandomNodeIdFactory;
 import rice.selector.TimerTask;
-import rice.tutorial.transportlayer.BandwidthLimitingTransportLayer;
 
 public class BandwidthMeasuringTLTest implements Application {
 

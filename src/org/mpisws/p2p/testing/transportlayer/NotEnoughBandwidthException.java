@@ -34,45 +34,30 @@ or otherwise) arising in any way out of the use of this software, even if
 advised of the possibility of such damage.
 
 *******************************************************************************/ 
-/*
- * Created on Feb 15, 2005
- */
-package rice.tutorial.transportlayer;
+package org.mpisws.p2p.testing.transportlayer;
 
-import rice.p2p.commonapi.Id;
-import rice.p2p.commonapi.Message;
+import java.io.IOException;
 
-/**
- * An example message.
- * 
- * @author Jeff Hoye
- */
-public class MyMsg implements Message {
-  /**
-   * Where the Message came from.
-   */
-  Id from;
-  /**
-   * Where the Message is going.
-   */
-  Id to;
+public class NotEnoughBandwidthException extends IOException {
+  long bucketSize;
+  int attemptedToWrite;
   
-  /**
-   * Constructor.
-   */
-  public MyMsg(Id from, Id to) {
-    this.from = from;
-    this.to = to;
-  }
-  
-  public String toString() {
-    return "MyMsg from "+from+" to "+to;
+  public NotEnoughBandwidthException(long bucketSize, int attemptedToWrite) {
+    this.bucketSize = bucketSize;
+    this.attemptedToWrite = attemptedToWrite;
   }
 
   /**
-   * Use low priority to prevent interference with overlay maintenance traffic.
+   * @return The amount allowed to write (right now).
    */
-  public int getPriority() {
-    return Message.LOW_PRIORITY;
+  public long getAmountAllowedToWrite() {
+    return bucketSize;
+  }
+  
+  /**
+   * @return The amount we attempted to write.
+   */
+  public int getAttemptedToWrite() {
+    return attemptedToWrite;
   }
 }

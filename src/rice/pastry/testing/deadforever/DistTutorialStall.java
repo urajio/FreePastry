@@ -53,7 +53,6 @@ import rice.pastry.PastryNodeFactory;
 import rice.pastry.leafset.LeafSet;
 import rice.pastry.socket.SocketPastryNodeFactory;
 import rice.pastry.standard.RandomNodeIdFactory;
-import rice.tutorial.lesson3.MyApp;
 
 /**
  * This tutorial shows how to setup a FreePastry node using the Socket Protocol.

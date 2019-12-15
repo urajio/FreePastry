@@ -58,7 +58,6 @@ import rice.pastry.routing.*;
 import rice.pastry.standard.RandomNodeIdFactory;
 import rice.selector.SelectorManager;
 import rice.selector.TimerTask;
-import rice.tutorial.direct.MyMsg;
 
 /**
  * @author Jeff Hoye
@@ -225,7 +224,7 @@ public class RoutingTableTest {
       Id randId = nidFactory.generateNodeId();
       
       // send to that key
-      app.routeMyMsg(randId);
+      app.routeRoutingTableTestMyMsg(randId);
     }
   }
   
@@ -756,20 +755,20 @@ public class RoutingTableTest {
     /**
      * Called to route a message to the id
      */
-    public void routeMyMsg(Id id) {
+    public void routeRoutingTableTestMyMsg(Id id) {
       if (logHeavy)
         System.out.println(this+" sending to "+id);    
-      Message msg = new MyMsg(endpoint.getId(), id);
+      Message msg = new RoutingTableTestMyMsg(endpoint.getId(), id);
       endpoint.route(id, msg, null);
     }
     
     /**
      * Called to directly send a message to the nh
      */
-    public void routeMyMsgDirect(NodeHandle nh) {
+    public void routeRoutingTableTestMyMsgDirect(NodeHandle nh) {
       if (logHeavy)
         System.out.println(this+" sending direct to "+nh);    
-      Message msg = new MyMsg(endpoint.getId(), nh.getId());
+      Message msg = new RoutingTableTestMyMsg(endpoint.getId(), nh.getId());
       endpoint.route(null, msg, nh);
     }
       

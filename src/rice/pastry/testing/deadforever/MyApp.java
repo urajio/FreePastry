@@ -40,17 +40,9 @@ advised of the possibility of such damage.
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-package rice.tutorial.forwarding;
+package rice.pastry.testing.deadforever;
 
-import java.io.IOException;
-
-import rice.p2p.commonapi.Application;
-import rice.p2p.commonapi.Endpoint;
-import rice.p2p.commonapi.Id;
-import rice.p2p.commonapi.Message;
-import rice.p2p.commonapi.Node;
-import rice.p2p.commonapi.NodeHandle;
-import rice.p2p.commonapi.RouteMessage;
+import rice.p2p.commonapi.*;
 
 /**
  * A very simple application.
@@ -64,29 +56,17 @@ public class MyApp implements Application {
    * node the message is intended for.
    */
   protected Endpoint endpoint;
-  
-  /**
-   * The node we were constructed on.
-   */
-  protected Node node;
 
   public MyApp(Node node) {
     // We are only going to use one instance of this application on each PastryNode
     this.endpoint = node.buildEndpoint(this, "myinstance");
     
-    this.node = node;
-        
+    // the rest of the initialization code could go here
+    
     // now we can receive messages
     this.endpoint.register();
   }
 
-  /**
-   * Getter for the node.
-   */
-  public Node getNode() {
-    return node;
-  }
-  
   /**
    * Called to route a message to the id
    */
@@ -120,15 +100,10 @@ public class MyApp implements Application {
   }
   
   /**
-   * @return true if it should continue along the path.  false will deliver it locally
+   * Called a message travels along your path.
+   * Don't worry about this method for now.
    */
   public boolean forward(RouteMessage message) {
-    try {
-      MyMsg msg = (MyMsg)message.getMessage(endpoint.getDeserializer());
-      msg.addHop(endpoint.getLocalNodeHandle());    
-    } catch (IOException ioe) {
-      ioe.printStackTrace(); 
-    }
     return true;
   }
   

@@ -37,21 +37,17 @@ advised of the possibility of such damage.
 /*
  * Created on Feb 15, 2005
  */
-package rice.tutorial.rawserialization;
+package rice.pastry.testing;
 
-import java.io.IOException;
-
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.Message;
 
 /**
  * An example message.
  * 
  * @author Jeff Hoye
  */
-public class MyMsg implements RawMessage {
-  protected static final short TYPE = 1;
-  
+public class RoutingTableTestMyMsg implements Message {
   /**
    * Where the Message came from.
    */
@@ -60,11 +56,11 @@ public class MyMsg implements RawMessage {
    * Where the Message is going.
    */
   Id to;
-  
+
   /**
    * Constructor.
    */
-  public MyMsg(Id from, Id to) {
+  public RoutingTableTestMyMsg(Id from, Id to) {
     this.from = from;
     this.to = to;
   }
@@ -78,31 +74,5 @@ public class MyMsg implements RawMessage {
    */
   public int getPriority() {
     return Message.LOW_PRIORITY;
-  }
-
-  public short getType() {
-    return TYPE;
-  }
-
-  /**
-   * Deserializing constructor.  This does the "real" deserialization.
-   * 
-   * @param buf
-   * @param endpoint
-   * @throws IOException
-   */
-  public MyMsg(InputBuffer buf, Endpoint endpoint) throws IOException {
-    from = endpoint.readId(buf, buf.readShort()); 
-    to = endpoint.readId(buf, buf.readShort()); 
-  }
-  
-  public void serialize(OutputBuffer buf) throws IOException {
-    // serialize from, and its type
-    buf.writeShort(from.getType());
-    from.serialize(buf);
-    
-    // serialize to, and its type
-    buf.writeShort(to.getType());
-    to.serialize(buf);    
   }
 }

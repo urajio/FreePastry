@@ -37,21 +37,17 @@ advised of the possibility of such damage.
 /*
  * Created on Feb 15, 2005
  */
-package rice.tutorial.rawserialization2;
+package rice.pastry.testing.deadforever;
 
-import java.io.IOException;
-
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.past.messaging.LookupMessage;
-import rice.p2p.util.rawserialization.JavaSerializer;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.Message;
 
 /**
  * An example message.
  * 
  * @author Jeff Hoye
  */
-public class MyMsg extends LookupMessage {
+public class MyMsg implements Message {
   /**
    * Where the Message came from.
    */
@@ -64,9 +60,8 @@ public class MyMsg extends LookupMessage {
   /**
    * Constructor.
    */
-  public MyMsg(NodeHandle from, Id to) {
-    super(0,from.getId(),from,to);
-    this.from = from.getId();
+  public MyMsg(Id from, Id to) {
+    this.from = from;
     this.to = to;
   }
   
@@ -79,9 +74,5 @@ public class MyMsg extends LookupMessage {
    */
   public int getPriority() {
     return Message.LOW_PRIORITY;
-  }
-
-  public void serialize(OutputBuffer buf) throws IOException {
-    JavaSerializer.serialize(this, buf);
   }
 }

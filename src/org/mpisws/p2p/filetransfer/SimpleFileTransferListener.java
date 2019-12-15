@@ -36,8 +36,6 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.filetransfer;
 
-import rice.tutorial.sendfile.MyApp;
-
 /**
  * Prints out the progress of the FileTransfer
  * 
