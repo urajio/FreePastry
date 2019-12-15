@@ -46,16 +46,6 @@
   </target>
 
 
-  <target name="etags" depends="tags">
-  </target>
-  <target name="tags" description="Create Emacs TAGS table">
-    <exec executable="/bin/sh">
-      <arg value="-c"/>
-      <arg value="etags `find -name '*.java' | sort-directory-order.pl`"/>
-    </exec>
-  </target>
-
-
   <!-- todo add *.html, *.htm -->
   <target name="javadoc" depends="init" unless="dontjavadoc">
     <javadoc destdir="${javadoc.dir}"
