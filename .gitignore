@@ -1,3 +1,4 @@
-classes
 pastry.jar
-/classes/
+classes
+*.iml
+.idea
