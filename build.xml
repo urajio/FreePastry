@@ -6,20 +6,11 @@
   <property name="license.dir" value="license"/>
   <property name="build.dir" value="classes" />  
   <property name="lib.dir" value="lib" />
-  <property name="pretty.dir" value="pretty" />
-  <property name="pretty.lib.dir" value="pretty/lib" />
   <property name="docs.dir" value="docs" />
   <property name="javadoc.dir" value="${docs.dir}/javadoc" />
   <property name="license.file" value="License.txt"/>
   <property name="license.path" value="${license.dir}/${license.file}"/>
 
-  
-  <!-- Jars that Pretty package needs -->
-  <path id="pretty.classpath">
-    <fileset dir="${pretty.lib.dir}">
-      <include name="**/*.jar"/>
-    </fileset>
-  </path>
 
   <!-- The classpath -->
   <path id="project.classpath">
@@ -106,27 +97,6 @@
       <arg value="etags `find -name '*.java' | sort-directory-order.pl`"/>
     </exec>
   </target>
-
-
-  <target name="compileappend" depends="init">
-    <javac srcdir="${pretty.lib.dir}"
-           destdir="."
-           deprecation="yes"
-           debuglevel="lines,vars,source"
-           debug="true">
-    </javac>
-  </target> 
-
-  
-  <target name="appendlicense" depends="compileappend">
-    <taskdef name="append" 
-             classname="Append"
-             classpath="."/>
-    <append srcfile="${license.path}">      
-      <fileset dir="${src.dir}" includes="**/*.java"/> 
-    </append>
-  </target>  
-  
 
 
   <!-- todo add *.html, *.htm -->
