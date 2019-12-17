@@ -36,18 +36,17 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.peerreview;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import rice.environment.Environment;
 import rice.pastry.NodeHandle;
 import rice.pastry.NodeHandleFactory;
-import rice.pastry.NodeIdFactory;
 import rice.pastry.PastryNode;
 import rice.pastry.socket.SocketPastryNodeFactory;
 import rice.pastry.transport.NodeHandleAdapter;
 import rice.pastry.transport.TLDeserializer;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CallbackFactory extends SocketPastryNodeFactory {
   
@@ -56,7 +55,7 @@ public class CallbackFactory extends SocketPastryNodeFactory {
   public CallbackFactory(Environment env)
       throws IOException {
     super(null,0, env);
-    localHandleTable = new HashMap<PastryNode, NodeHandle>();
+    localHandleTable = new HashMap<>();
   }
 
   
@@ -64,7 +63,7 @@ public class CallbackFactory extends SocketPastryNodeFactory {
   public NodeHandleAdapter getNodeHandleAdapter(
       PastryNode pn, 
       NodeHandleFactory handleFactory2, 
-      TLDeserializer deserializer) throws IOException {
+      TLDeserializer deserializer) {
     return null;
   }
   

@@ -36,14 +36,13 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.messaging;
 
-import java.security.*;
-import java.io.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.post.PostEntityAddress;
 
-import rice.post.*;
-import rice.post.messaging.*;
-
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
+import java.io.IOException;
 
 /**
  * This message is broadcast to the sender of a NotificationMessage in

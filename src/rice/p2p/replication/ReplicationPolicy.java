@@ -37,11 +37,11 @@ advised of the possibility of such damage.
 
 package rice.p2p.replication;
 
-import java.util.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.commonapi.IdSet;
 
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.replication.messaging.*;
+import java.util.Iterator;
 
 /**
  * @(#) ReplicationPolicy.java This interface represents a policy for Replication, 
@@ -63,14 +63,14 @@ public interface ReplicationPolicy {
    * @param factory The factory to use to create IdSets
    * @return A subset of the remote ids which need to be fetched
    */
-  public IdSet difference(IdSet local, IdSet remote, IdFactory factory);
+  IdSet difference(IdSet local, IdSet remote, IdFactory factory);
   
   /**
    * The default policy for Replication, which simply does a direct diff between the sets
    *
    * @author Alan Mislove
    */
-  public static class DefaultReplicationPolicy implements ReplicationPolicy {
+  class DefaultReplicationPolicy implements ReplicationPolicy {
     
     /**
      * This method simply returns remote-local.

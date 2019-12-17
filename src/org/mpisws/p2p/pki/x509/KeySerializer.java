@@ -36,22 +36,22 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.pki.x509;
 
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
 import java.io.IOException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 
-import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.p2p.commonapi.rawserialization.OutputBuffer;
-
 public interface KeySerializer {
-  public static final byte KEY_PRIVATE = 0;
-  public static final byte KEY_PUBLIC = 1;
-  public static final byte KEY_SECRET = 2;
+  byte KEY_PRIVATE = 0;
+  byte KEY_PUBLIC = 1;
+  byte KEY_SECRET = 2;
   
-  public void serialize(Key k, OutputBuffer buf) throws IOException;
-  public Key deserialize(InputBuffer buf) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException;
+  void serialize(Key k, OutputBuffer buf) throws IOException;
+  Key deserialize(InputBuffer buf) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException;
   
 //private void encodeKey(Key key, DataOutputStream dataoutputstream)
 //throws IOException

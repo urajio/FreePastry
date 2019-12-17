@@ -46,8 +46,8 @@ package rice.p2p.commonapi;
  */
 public interface CancellableTask extends Cancellable {
   
-  public void run();
+  void run();
   
-  public long scheduledExecutionTime();
+  long scheduledExecutionTime();
   
 }

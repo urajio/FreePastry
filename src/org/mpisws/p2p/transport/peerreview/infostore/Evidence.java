@@ -36,13 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.infostore;
 
-import java.io.IOException;
-
 import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
-
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
+import java.io.IOException;
+
 public interface Evidence extends PeerReviewConstants {
-  public short getEvidenceType();
-  public void serialize(OutputBuffer buf) throws IOException;
+  short getEvidenceType();
+  void serialize(OutputBuffer buf) throws IOException;
 }

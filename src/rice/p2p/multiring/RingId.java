@@ -37,12 +37,14 @@ advised of the possibility of such damage.
 
 package rice.p2p.multiring;
 
-import java.lang.ref.*;
-import java.io.*;
-import java.util.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.WeakHashMap;
 
 /**
  * @(#) RingId.java
@@ -64,7 +66,7 @@ public class RingId implements Id {
   /**
    * Support for coalesced Ids - ensures only one copy of each Id is in memory
    */
-  private static WeakHashMap RINGID_MAP = new WeakHashMap();
+  private static final WeakHashMap RINGID_MAP = new WeakHashMap();
   
   /**
    * The id which this ringId represents
@@ -128,7 +130,7 @@ public class RingId implements Id {
    *
    * @return The real RingId
    */
-  private Object readResolve() throws ObjectStreamException {
+  private Object readResolve() {
     // commented out to preserve backward compatibility with serialization 
     // should be able to reenable in the future
     //return resolve(this);

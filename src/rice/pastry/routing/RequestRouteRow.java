@@ -36,12 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.routing;
 
-import rice.p2p.commonapi.rawserialization.*;
-import rice.pastry.*;
-import rice.pastry.messaging.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.pastry.NodeHandle;
+import rice.pastry.messaging.PRawMessage;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Request a row from the routing table from another node.
@@ -124,13 +126,11 @@ public class RequestRouteRow extends PRawMessage implements Serializable {
     setSender(sender);
     
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        row = buf.readShort();
-        setPriority(MAX_PRIORITY);
-        break;
-      default:
-        throw new IOException("Unknown Version: "+version);
-    }
+      if (version == 0) {
+          row = buf.readShort();
+          setPriority(MAX_PRIORITY);
+      } else {
+          throw new IOException("Unknown Version: " + version);
+      }
   }
 }

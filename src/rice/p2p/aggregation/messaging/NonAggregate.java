@@ -39,12 +39,19 @@ advised of the possibility of such damage.
  */
 package rice.p2p.aggregation.messaging;
 
-import java.io.IOException;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.past.Past;
+import rice.p2p.past.PastContent;
+import rice.p2p.past.PastContentHandle;
+import rice.p2p.past.PastException;
+import rice.p2p.past.rawserialization.JavaSerializedPastContent;
+import rice.p2p.past.rawserialization.PastContentDeserializer;
+import rice.p2p.past.rawserialization.RawPastContent;
 
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.past.*;
-import rice.p2p.past.rawserialization.*;
+import java.io.IOException;
 
 /**
  * Just wraps a header in Past to know that it is something other than an Aggregate
@@ -94,18 +101,16 @@ public class NonAggregate implements RawPastContent {
   
   public NonAggregate(InputBuffer buf, Endpoint endpoint, RawPastContent subContent, PastContentDeserializer pcd) throws IOException {
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        short subType = buf.readShort();
-        PastContent temp = pcd.deserializePastContent(buf, endpoint, subType);
-        if (subType == 0) {
-          this.content = new JavaSerializedPastContent(temp);
-        } else {
-          this.content = (RawPastContent)temp; 
-        }
-        break;
-      default:
-        throw new IOException("Unknown Version: "+version);
-    }
+      if (version == 0) {
+          short subType = buf.readShort();
+          PastContent temp = pcd.deserializePastContent(buf, endpoint, subType);
+          if (subType == 0) {
+              this.content = new JavaSerializedPastContent(temp);
+          } else {
+              this.content = (RawPastContent) temp;
+          }
+      } else {
+          throw new IOException("Unknown Version: " + version);
+      }
   }
 }

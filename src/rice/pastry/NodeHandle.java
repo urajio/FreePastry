@@ -40,11 +40,13 @@ package rice.pastry;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.p2p.commonapi.rawserialization.RawSerializable;
-import rice.pastry.messaging.*;
-import rice.pastry.socket.TransportLayerNodeHandle;
+import rice.pastry.messaging.Message;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Observer;
 
 
 /**
@@ -168,9 +170,8 @@ public abstract class NodeHandle extends rice.p2p.commonapi.NodeHandle implement
    * not technically part of the ring yet.
    *
    * @param msg the bootstrap message.
-   * @throws IOException 
    */
-  public void bootstrap(Message msg) throws IOException {
+  public void bootstrap(Message msg) {
     receiveMessage(msg);
   }
 
@@ -205,13 +206,12 @@ public abstract class NodeHandle extends rice.p2p.commonapi.NodeHandle implement
     }
 
     public int compareTo(ObsPri o) {
-      ObsPri that = (ObsPri)o;
-      int ret = that.pri - pri;
+      int ret = ((ObsPri)o).pri - pri;
       if (ret == 0) {
-        if (that.equals(o)) {
+        if (((ObsPri)o).equals(o)) {
           return 0;
         } else {
-          return System.identityHashCode(that)-System.identityHashCode(this);
+          return System.identityHashCode((ObsPri)o)-System.identityHashCode(this);
         }
       }
 //      System.out.println(this+".compareTo("+that+"):"+ret);
@@ -223,13 +223,13 @@ public abstract class NodeHandle extends rice.p2p.commonapi.NodeHandle implement
     }
   }
 
-  transient List<ObsPri> obs = new ArrayList<ObsPri>();
+  transient List<ObsPri> obs = new ArrayList<>();
   /**
    * Need to construct obs in deserialization.
    */
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
     in.defaultReadObject();
-    obs = new ArrayList<ObsPri>();
+    obs = new ArrayList<>();
   }
   
   public void addObserver(Observer o) {
@@ -291,7 +291,7 @@ public abstract class NodeHandle extends rice.p2p.commonapi.NodeHandle implement
   public void notifyObservers(Object arg) {
     List<ObsPri> l;
     synchronized(obs) {
-      l = new ArrayList<ObsPri>(obs);    
+      l = new ArrayList<>(obs);
 //      logger.log(this+"notifyObservers("+arg+")list1:"+obs);
 //      logger.log(this+"notifyObservers("+arg+")list2:"+l);
     }

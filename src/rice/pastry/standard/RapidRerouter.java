@@ -36,27 +36,24 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.standard;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.exception.NodeIsFaultyException;
 import org.mpisws.p2p.transport.liveness.LivenessListener;
 import org.mpisws.p2p.transport.priority.QueueOverflowException;
-
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Cancellable;
 import rice.pastry.NodeHandle;
 import rice.pastry.PastryNode;
-import rice.pastry.messaging.Message;
 import rice.pastry.messaging.MessageDispatch;
 import rice.pastry.routing.RouteMessage;
 import rice.pastry.routing.RouterStrategy;
 import rice.pastry.routing.SendOptions;
 import rice.pastry.transport.PMessageNotification;
 import rice.pastry.transport.PMessageReceipt;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 /**
  * The superclass makes the routing decisions.  This class handles the rapid-rerouting.
@@ -74,11 +71,11 @@ public class RapidRerouter extends StandardRouter implements LivenessListener<No
   /**
    * These messages should be rapidly rerouted if the node goes suspected.
    */
-  Map<NodeHandle, Collection<RouterNotification>> pending;
+  final Map<NodeHandle, Collection<RouterNotification>> pending;
   
   public RapidRerouter(PastryNode thePastryNode, MessageDispatch dispatch, RouterStrategy strategy) {
     super(thePastryNode, dispatch, strategy);
-    pending = new HashMap<NodeHandle, Collection<RouterNotification>>();
+    pending = new HashMap<>();
     
     thePastryNode.addLivenessListener(this);
   }
@@ -139,7 +136,7 @@ public class RapidRerouter extends StandardRouter implements LivenessListener<No
     synchronized(pending) {
       Collection<RouterNotification> c = pending.get(handle);
       if (c == null) {
-        c = new HashSet<RouterNotification>();
+        c = new HashSet<>();
         pending.put(handle, c);
       }
       c.add(notifyMe);

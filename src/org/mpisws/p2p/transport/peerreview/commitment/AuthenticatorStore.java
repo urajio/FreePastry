@@ -48,12 +48,12 @@ import java.util.List;
  * haven't been sent to the corresponding witness sets yet.
  */
 public interface AuthenticatorStore<Identifier> {
-  public void setFilename(File file) throws IOException;
-  public Authenticator getMostRecentAuthenticator(Identifier id);
-  public Authenticator getOldestAuthenticator(Identifier id);
-  public Authenticator getLastAuthenticatorBefore(Identifier id, long seq);
+  void setFilename(File file) throws IOException;
+  Authenticator getMostRecentAuthenticator(Identifier id);
+  Authenticator getOldestAuthenticator(Identifier id);
+  Authenticator getLastAuthenticatorBefore(Identifier id, long seq);
   
-  public void disableMemoryBuffer();
+  void disableMemoryBuffer();
 
   /**
    * Also writes it to disk.
@@ -61,7 +61,7 @@ public interface AuthenticatorStore<Identifier> {
    * @param authenticator
    * @throws IOException 
    */
-  public void addAuthenticator(Identifier id, Authenticator authenticator);
+  void addAuthenticator(Identifier id, Authenticator authenticator);
   
   /**
    * Commits the Authenticators in memory to disk, overwriting the old store.
@@ -71,28 +71,28 @@ public interface AuthenticatorStore<Identifier> {
    * file and then write out the authenticators currently in memory.
    * @throws IOException 
    */
-  public void garbageCollect() throws IOException;
+  void garbageCollect() throws IOException;
   
-  public int numAuthenticatorsFor(Identifier id);
+  int numAuthenticatorsFor(Identifier id);
   
-  public int numAuthenticatorsFor(Identifier id, long minseq, long maxseq);
+  int numAuthenticatorsFor(Identifier id, long minseq, long maxseq);
   
-  public void flushAuthenticatorsFor(Identifier id, long minseq, long maxseq);
-  public void flushAuthenticatorsFor(Identifier id);
+  void flushAuthenticatorsFor(Identifier id, long minseq, long maxseq);
+  void flushAuthenticatorsFor(Identifier id);
 
-  public Authenticator statAuthenticator(Identifier id, long seq);
+  Authenticator statAuthenticator(Identifier id, long seq);
 
   /**
    * Retrieve all the authenticators within a given range of sequence numbers
    */
-  public List<Authenticator> getAuthenticators(Identifier id, long minseq, long maxseq);
-  public List<Authenticator> getAuthenticators(Identifier id);
-  public List<Identifier> getSubjects();
-  public int getNumSubjects();
+  List<Authenticator> getAuthenticators(Identifier id, long minseq, long maxseq);
+  List<Authenticator> getAuthenticators(Identifier id);
+  List<Identifier> getSubjects();
+  int getNumSubjects();
   
-  public int getAuthenticatorSizeBytes();
+  int getAuthenticatorSizeBytes();
 
-  public void flush(Identifier id);
-  public void flushAll();
+  void flush(Identifier id);
+  void flushAll();
   
 }

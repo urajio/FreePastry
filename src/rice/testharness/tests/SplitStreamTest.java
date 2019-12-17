@@ -36,24 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.testharness.tests;
 
-import rice.testharness.*;
-import rice.testharness.messaging.*;
-
-import rice.pastry.PastryNode;
-
-import rice.p2p.scribe.*;
-import rice.p2p.scribe.messaging.*;
 import rice.p2p.commonapi.*;
-
 import rice.p2p.splitstream.*;
+import rice.pastry.PastryNode;
+import rice.testharness.Test;
+import rice.testharness.TestHarness;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
-import java.rmi.Naming;
-import java.rmi.RMISecurityManager;
-import java.rmi.RemoteException;
-import java.security.*;
+import java.io.PrintStream;
+import java.util.StringTokenizer;
 
 /**
  * A test class which picks a number of random node IDs and tests a pastry and
@@ -162,7 +152,7 @@ public class SplitStreamTest extends Test {
     // if DATA_SIZE = 256 KB, it means, on each stripe we push
     // 4KB
     for (int j = 0; j < DATA_SIZE * 1024 / base; j++) {
-      content[j] = (new Byte("0")).byteValue();
+      content[j] = new Byte("0");
     }
   }
 
@@ -198,13 +188,13 @@ public class SplitStreamTest extends Test {
     //      scribe.getTopics(ssclient);
     //      ssclient.getChannel();
     Stripe[] stripe = ssclient.getStripes();
-    for (int i = 0; i < stripe.length; i++) {
-      NodeHandle parent = stripe[i].getParent();
-      NodeHandle[] children = stripe[i].getChildren();
-      System.out.println(stripe[i] + " parent: " + parent + " numChildren: "
-          + children.length);
-      for (int j = 0; j < children.length; j++) {
-        System.out.println(stripe[i] + " child: " + children[j]);
+    for (Stripe value : stripe) {
+      NodeHandle parent = value.getParent();
+      NodeHandle[] children = value.getChildren();
+      System.out.println(value + " parent: " + parent + " numChildren: "
+              + children.length);
+      for (NodeHandle child : children) {
+        System.out.println(value + " child: " + child);
       }
     }
   }
@@ -223,7 +213,7 @@ public class SplitStreamTest extends Test {
       return;
     }
     String str = (new Integer(sequenceNum)).toString();
-    str += "\t" + (new Long(_localNode.getEnvironment().getTimeSource().currentTimeMillis()).toString());
+    str += "\t" + (_localNode.getEnvironment().getTimeSource().currentTimeMillis());
     str += "\t";
     byte[] toSend = new byte[DATA_SIZE * 1024 / base];
     System.arraycopy(str.getBytes(), 0, toSend, 0, str.getBytes().length);
@@ -385,15 +375,15 @@ public class SplitStreamTest extends Test {
 
     public void subscribeStripes() {
       log("Subscribing to all Stripes.");
-      for (int i = 0; i < stripes.length; i++) {
-        stripes[i].subscribe(this);
+      for (Stripe stripe : stripes) {
+        stripe.subscribe(this);
       }
     }
 
     public void publishAll(byte[] b) {
       log("Publishing to all Stripes.");
-      for (int i = 0; i < stripes.length; i++) {
-        publish(b, stripes[i]);
+      for (Stripe stripe : stripes) {
+        publish(b, stripe);
       }
     }
 

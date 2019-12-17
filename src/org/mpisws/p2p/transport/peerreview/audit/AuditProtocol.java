@@ -36,18 +36,17 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.audit;
 
-import java.io.IOException;
-
 import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
 import org.mpisws.p2p.transport.peerreview.evidence.AuditResponse;
 import org.mpisws.p2p.transport.peerreview.infostore.Evidence;
 import org.mpisws.p2p.transport.peerreview.message.PeerReviewMessage;
-
 import rice.p2p.commonapi.rawserialization.RawSerializable;
 
+import java.io.IOException;
+
 public interface AuditProtocol<Handle extends RawSerializable, Identifier> extends PeerReviewConstants {
-  public Evidence statOngoingAudit(Identifier subject, long evidenceSeq);
-  public void processAuditResponse(Identifier subject, long timestamp, AuditResponse<Handle> auditResponse) throws IOException;
-  public void handleIncomingDatagram(Handle handle, PeerReviewMessage message);
+  Evidence statOngoingAudit(Identifier subject, long evidenceSeq);
+  void processAuditResponse(Identifier subject, long timestamp, AuditResponse<Handle> auditResponse) throws IOException;
+  void handleIncomingDatagram(Handle handle, PeerReviewMessage message);
 
 }

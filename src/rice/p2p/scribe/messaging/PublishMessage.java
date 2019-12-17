@@ -37,13 +37,17 @@ advised of the possibility of such damage.
 
 package rice.p2p.scribe.messaging;
 
-import java.io.IOException;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.scribe.ScribeContent;
+import rice.p2p.scribe.Topic;
+import rice.p2p.scribe.rawserialization.JavaSerializedScribeContent;
+import rice.p2p.scribe.rawserialization.RawScribeContent;
+import rice.p2p.scribe.rawserialization.ScribeContentDeserializer;
 
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.scribe.*;
-import rice.p2p.scribe.rawserialization.*;
+import java.io.IOException;
 
 /**
  * @(#) PublishMessage.java
@@ -120,12 +124,10 @@ public class PublishMessage extends ScribeMessage {
    
   public static PublishMessage build(InputBuffer buf, Endpoint endpoint, ScribeContentDeserializer scd) throws IOException {
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        return new PublishMessage(buf, endpoint, scd);
-      default:
-        throw new IOException("Unknown Version: "+version);
-    }
+      if (version == 0) {
+          return new PublishMessage(buf, endpoint, scd);
+      }
+      throw new IOException("Unknown Version: " + version);
   }
   
   /**

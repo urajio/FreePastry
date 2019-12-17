@@ -36,30 +36,19 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.direct;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.TransportLayer;
 import org.mpisws.p2p.transport.direct.Delivery;
 import org.mpisws.p2p.transport.direct.DirectTransportLayer;
 import org.mpisws.p2p.transport.direct.GenericNetworkSimulator;
-import org.mpisws.p2p.transport.liveness.LivenessListener;
 import org.mpisws.p2p.transport.liveness.LivenessProvider;
-import org.mpisws.p2p.transport.proximity.ProximityProvider;
-
 import rice.environment.Environment;
 import rice.environment.params.Parameters;
 import rice.environment.random.RandomSource;
 import rice.environment.random.simple.SimpleRandomSource;
 import rice.p2p.commonapi.CancellableTask;
-import rice.p2p.commonapi.rawserialization.RawMessage;
-import rice.pastry.Id;
-import rice.pastry.NodeHandle;
 import rice.pastry.PastryNode;
-import rice.pastry.ScheduledMessage;
-import rice.pastry.messaging.Message;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NetworkSimulatorImpl<Identifier, MessageType> implements NetworkSimulator<Identifier, MessageType> {
   protected BasicNetworkSimulator<Identifier, MessageType> simulator;
@@ -87,7 +76,7 @@ public class NetworkSimulatorImpl<Identifier, MessageType> implements NetworkSim
     }
     generator.setRandom(random);
     this.generator = generator;
-    simulator = new BasicNetworkSimulator<Identifier, MessageType>(env, random, this);
+    simulator = new BasicNetworkSimulator<>(env, random, this);
     livenessProvider = simulator;
   }
 
@@ -165,7 +154,7 @@ public class NetworkSimulatorImpl<Identifier, MessageType> implements NetworkSim
 
   
   /************** SimulatorListeners handling *******************/
-  List<GenericSimulatorListener<Identifier, MessageType>> listeners = new ArrayList<GenericSimulatorListener<Identifier, MessageType>>();  
+  final List<GenericSimulatorListener<Identifier, MessageType>> listeners = new ArrayList<>();
   public boolean addSimulatorListener(GenericSimulatorListener<Identifier, MessageType> sl) {
     synchronized(listeners) {
       if (listeners.contains(sl)) return false;
@@ -185,7 +174,7 @@ public class NetworkSimulatorImpl<Identifier, MessageType> implements NetworkSim
     
     // so we aren't holding a lock while iterating/calling
     synchronized(listeners) {
-       temp = new ArrayList<GenericSimulatorListener<Identifier, MessageType>>(listeners);
+       temp = new ArrayList<>(listeners);
     }
   
     for(GenericSimulatorListener<Identifier, MessageType> listener : temp) {
@@ -198,7 +187,7 @@ public class NetworkSimulatorImpl<Identifier, MessageType> implements NetworkSim
     
     // so we aren't holding a lock while iterating/calling
     synchronized(listeners) {
-       temp = new ArrayList<GenericSimulatorListener<Identifier, MessageType>>(listeners);
+       temp = new ArrayList<>(listeners);
     }
   
     for(GenericSimulatorListener<Identifier, MessageType> listener : temp) {

@@ -36,13 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.testing;
 
-import rice.pastry.*;
-import rice.pastry.client.*;
-import rice.pastry.messaging.*;
-import rice.pastry.routing.*;
+import rice.pastry.Id;
+import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
+import rice.pastry.client.CommonAPIAppl;
+import rice.pastry.messaging.Message;
+import rice.pastry.routing.RouteMessage;
+import rice.pastry.routing.SendOptions;
 
 import java.io.IOException;
-import java.util.*;
 
 /**
  * RegrTestApp

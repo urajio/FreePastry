@@ -36,15 +36,13 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.pns.messages;
 
-import java.io.IOException;
-
-import rice.p2p.commonapi.NodeHandle;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.pastry.NodeHandleFactory;
 import rice.pastry.leafset.LeafSet;
-import rice.pastry.messaging.Message;
 import rice.pastry.messaging.PRawMessage;
+
+import java.io.IOException;
 
 public class LeafSetResponse extends PRawMessage {
   public static final short TYPE = 2;
@@ -68,10 +66,9 @@ public class LeafSetResponse extends PRawMessage {
 
   public static rice.p2p.commonapi.Message build(InputBuffer buf, NodeHandleFactory nhf, int dest) throws IOException {
     byte version = buf.readByte();
-    switch(version) {
-    case 0:
-      return new LeafSetResponse(LeafSet.build(buf, nhf), dest);    
-    }
+      if (version == 0) {
+          return new LeafSetResponse(LeafSet.build(buf, nhf), dest);
+      }
     throw new IllegalStateException("Unknown version:"+version);
   }
 }

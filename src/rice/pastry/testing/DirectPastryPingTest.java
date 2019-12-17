@@ -37,16 +37,11 @@ advised of the possibility of such damage.
 package rice.pastry.testing;
 
 import rice.environment.Environment;
-import rice.environment.params.simple.SimpleParameters;
-import rice.environment.time.simulated.DirectTimeSource;
-import rice.pastry.*;
-import rice.pastry.direct.*;
-import rice.pastry.standard.*;
-import rice.pastry.join.*;
 
-import java.util.*;
-import java.io.*;
-import java.lang.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 /**
  * DirectPastryPingTest
@@ -105,7 +100,7 @@ public class DirectPastryPingTest {
     return false;
   }
 
-  public static void main(String args[]) throws IOException {
+  public static void main(String[] args) {
     boolean quit = false;
     Environment env = Environment.directEnvironment();
     BufferedReader input = new BufferedReader(new InputStreamReader(System.in));

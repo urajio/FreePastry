@@ -37,11 +37,11 @@ advised of the possibility of such damage.
 
 package rice.p2p.past;
 
-import rice.*;
-import rice.Continuation.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.past.messaging.*;
-import rice.persistence.*;
+import rice.Continuation;
+import rice.Continuation.StandardContinuation;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.NodeHandle;
+import rice.persistence.Cache;
 
 /**
  * @(#) PastPolicy.java This interface represents a policy for Past, which is asked whenever
@@ -67,7 +67,7 @@ public interface PastPolicy {
    * @param backup The backup cache, where the object *might* be located
    * @param command The command to call with the replica to store
    */
-  public void fetch(Id id, NodeHandle hint, Cache backup, Past past, Continuation command);
+  void fetch(Id id, NodeHandle hint, Cache backup, Past past, Continuation command);
   
   /**
    * This method is call before an insert() is processed on the local node.  This allows applications
@@ -77,7 +77,7 @@ public interface PastPolicy {
    * @param content The content about to be stored
    * @return Whether the insert should be allowed
    */
-  public boolean allowInsert(PastContent content);
+  boolean allowInsert(PastContent content);
   
   /**
    * The default policy for Past, which fetches any available copy of a replicated object and
@@ -85,7 +85,7 @@ public interface PastPolicy {
    *
    * @author Alan Mislove
    */
-  public static class DefaultPastPolicy implements PastPolicy {
+  class DefaultPastPolicy implements PastPolicy {
     
     /**
      * This method fetches the object via a lookup() call.

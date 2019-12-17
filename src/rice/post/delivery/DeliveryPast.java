@@ -37,11 +37,9 @@ advised of the possibility of such damage.
 
 package rice.post.delivery;
 
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.past.*;
-import rice.p2p.past.gc.*;
-import rice.post.*;
+import rice.Continuation;
+import rice.p2p.past.gc.GCPast;
+import rice.post.PostEntityAddress;
 
 /**
  * Interface which represents a POST-specific pending-delivery PAST storage.
@@ -59,7 +57,7 @@ public interface DeliveryPast extends GCPast {
    * any outstanding messages.  If so, then we remove the outstanding message
    * from our pending list.
    */
-  public void synchronize(Continuation command);
+  void synchronize(Continuation command);
   
   /**
    * Returns the list of PostEntityaddress for which we are the primary replica
@@ -67,7 +65,7 @@ public interface DeliveryPast extends GCPast {
    *
    * @param command The command to return the results to
    */
-  public void getGroups(Continuation command);
+  void getGroups(Continuation command);
   
   /**
    * Returns the first message which is still pending to the given address.  If no
@@ -76,6 +74,6 @@ public interface DeliveryPast extends GCPast {
    * @param address The address for the message
    * @param command The command to return the results to
    */
-  public void getMessage(PostEntityAddress address, Continuation command);
+  void getMessage(PostEntityAddress address, Continuation command);
   
 }

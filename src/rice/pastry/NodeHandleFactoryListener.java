@@ -45,5 +45,5 @@ package rice.pastry;
  *
  */
 public interface NodeHandleFactoryListener<NH extends NodeHandle> {
-  public void nodeHandleFound(NH nodeHandle);
+  void nodeHandleFound(NH nodeHandle);
 }

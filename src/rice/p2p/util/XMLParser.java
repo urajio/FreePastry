@@ -36,9 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.util;
 
-import org.xmlpull.v1.*;
-import java.io.*;
-import java.util.*;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.util.Stack;
 
 /** 
 * This class is a memory-efficient implementation of most of the XML
@@ -145,7 +150,7 @@ public class XMLParser implements XmlPullParser {
    * allowing the parser to free internal resources
    * such as parsing buffers.
    */
-  public void setInput(Reader in) throws XmlPullParserException {
+  public void setInput(Reader in) {
     this.reader = in;
   }
   
@@ -217,7 +222,7 @@ public class XMLParser implements XmlPullParser {
    * @see #next()
    * @see #nextToken()
    */
-  public int getEventType() throws XmlPullParserException {
+  public int getEventType() {
     return 0;
   }
   
@@ -281,7 +286,7 @@ public class XMLParser implements XmlPullParser {
    * via nextToken only.
    *
    */
-  public boolean isWhitespace() throws XmlPullParserException {
+  public boolean isWhitespace() {
     return isWhitespace(text);
   }
   
@@ -402,9 +407,9 @@ public class XMLParser implements XmlPullParser {
    * @param char The char
    */
   protected boolean contains(char[] chars, char c) {
-    for (int i=0; i<chars.length; i++)
-      if (chars[i] == c)
-        return true;
+      for (char aChar : chars)
+          if (aChar == c)
+              return true;
     
     return false;
   }
@@ -607,7 +612,7 @@ public class XMLParser implements XmlPullParser {
    *
    * @param The name of the parsed tag
    */
-  protected int parseText() throws XmlPullParserException, IOException {
+  protected int parseText() throws IOException {
     clearAttributes();
     this.text = convert(parseUntil('<'));
     this.inTag = false;
@@ -625,9 +630,8 @@ public class XMLParser implements XmlPullParser {
   protected String convert(String string) {
     if (string.indexOf('&') < 0)
       return string;
-    
-    for (int i=0; i<ENTITIES.length; i++)
-      string = string.replaceAll(ENTITIES[i][0], ENTITIES[i][1]);
+
+      for (String[] entity : ENTITIES) string = string.replaceAll(entity[0], entity[1]);
     
     return string; 
   }
@@ -712,7 +716,7 @@ public class XMLParser implements XmlPullParser {
    *   ----- UNSUPPORTED METHODS -----
    */
   
-  public void setFeature(String name, boolean state) throws XmlPullParserException {
+  public void setFeature(String name, boolean state) {
     throw new UnsupportedOperationException();
   }
   
@@ -720,7 +724,7 @@ public class XMLParser implements XmlPullParser {
     throw new UnsupportedOperationException();
   }
   
-  public void setProperty(String name, Object value) throws XmlPullParserException {
+  public void setProperty(String name, Object value) {
     throw new UnsupportedOperationException();
   }
   
@@ -728,7 +732,7 @@ public class XMLParser implements XmlPullParser {
     throw new UnsupportedOperationException();
   }
   
-  public void setInput(InputStream inputStream, String inputEncoding) throws XmlPullParserException {
+  public void setInput(InputStream inputStream, String inputEncoding) {
     throw new UnsupportedOperationException();
   }
   
@@ -736,19 +740,19 @@ public class XMLParser implements XmlPullParser {
     throw new UnsupportedOperationException();
   }
   
-  public void defineEntityReplacementText(String entityName, String replacementText ) throws XmlPullParserException {
+  public void defineEntityReplacementText(String entityName, String replacementText ) {
     throw new UnsupportedOperationException();
   }
   
-  public int getNamespaceCount(int depth) throws XmlPullParserException {
+  public int getNamespaceCount(int depth) {
     throw new UnsupportedOperationException();
   }
   
-  public String getNamespacePrefix(int pos) throws XmlPullParserException  {
+  public String getNamespacePrefix(int pos) {
     throw new UnsupportedOperationException();
   }
   
-  public String getNamespaceUri(int pos) throws XmlPullParserException {
+  public String getNamespaceUri(int pos) {
     throw new UnsupportedOperationException();
   }
   
@@ -784,7 +788,7 @@ public class XMLParser implements XmlPullParser {
     throw new UnsupportedOperationException();
   }
   
-  public boolean isEmptyElementTag() throws XmlPullParserException {
+  public boolean isEmptyElementTag() {
     throw new UnsupportedOperationException();
   }
   
@@ -804,19 +808,19 @@ public class XMLParser implements XmlPullParser {
     throw new UnsupportedOperationException();
   }
   
-  public int nextToken() throws XmlPullParserException, IOException {
+  public int nextToken() {
     throw new UnsupportedOperationException();
   }
   
-  public void require(int type, String namespace, String name) throws XmlPullParserException, IOException {
+  public void require(int type, String namespace, String name) {
     throw new UnsupportedOperationException();
   }
   
-  public String nextText() throws XmlPullParserException, IOException {
+  public String nextText() {
     throw new UnsupportedOperationException();
   }
   
-  public int nextTag() throws XmlPullParserException, IOException {
+  public int nextTag() {
     throw new UnsupportedOperationException();
   }
   

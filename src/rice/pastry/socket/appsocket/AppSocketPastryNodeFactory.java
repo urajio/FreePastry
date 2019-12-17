@@ -36,38 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.socket.appsocket;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.ClosedChannelException;
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
-import org.mpisws.p2p.transport.TransportLayerListener;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.identity.IdentityImpl;
-import org.mpisws.p2p.transport.liveness.LivenessListener;
-import org.mpisws.p2p.transport.liveness.LivenessProvider;
-import org.mpisws.p2p.transport.liveness.OverrideLiveness;
-import org.mpisws.p2p.transport.liveness.PingListener;
-import org.mpisws.p2p.transport.liveness.Pinger;
+import org.mpisws.p2p.transport.liveness.*;
 import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
 import org.mpisws.p2p.transport.sourceroute.SourceRoute;
 import org.mpisws.p2p.transport.util.OptionsFactory;
 import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
 import org.mpisws.p2p.transport.wire.SocketManager;
 import org.mpisws.p2p.transport.wire.WireTransportLayerImpl;
-
 import rice.Continuation;
 import rice.environment.Environment;
 import rice.p2p.commonapi.Cancellable;
@@ -81,10 +58,17 @@ import rice.pastry.PastryNode;
 import rice.pastry.socket.SocketNodeHandleFactory;
 import rice.pastry.socket.SocketPastryNodeFactory;
 import rice.pastry.socket.TransportLayerNodeHandle;
-import rice.pastry.socket.nat.NATHandler;
 import rice.pastry.transport.NodeHandleAdapter;
 import rice.pastry.transport.SocketAdapter;
 import rice.pastry.transport.TLDeserializer;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Extends SocketPastryNodeFactory and adds getSocketFactory() to allow access to
@@ -99,7 +83,7 @@ public class AppSocketPastryNodeFactory extends SocketPastryNodeFactory {
    * Used for getSocketChannel.  The AppSocketFactroyLayer stores the channel here, 
    * and then it is retrieved when the channel is opened.
    */
-  protected Map<Integer, SocketManager> socketTable = new HashMap<Integer, SocketManager>();
+  protected Map<Integer, SocketManager> socketTable = new HashMap<>();
 
   public AppSocketPastryNodeFactory(NodeIdFactory nf, int startPort,
       Environment env) throws IOException {
@@ -256,7 +240,7 @@ public class AppSocketPastryNodeFactory extends SocketPastryNodeFactory {
 
               public void receiveResult(
                   P2PSocket<TransportLayerNodeHandle<MultiInetSocketAddress>> result) {
-                c.receiveResult(new SocketAdapter<TransportLayerNodeHandle<MultiInetSocketAddress>>(result, environment));
+                c.receiveResult(new SocketAdapter<>(result, environment));
               }          
             }, options);
       }
@@ -295,8 +279,8 @@ public class AppSocketPastryNodeFactory extends SocketPastryNodeFactory {
       
       protected Cancellable getSocket(InetSocketAddress addr, final int appid, final Continuation<P2PSocket<TransportLayerNodeHandle<MultiInetSocketAddress>>, Exception> c, Map<String, Object> options) {
         TransportLayerNodeHandle<MultiInetSocketAddress> handle = getHandle(addr);
-        final SocketRequestHandleImpl<TransportLayerNodeHandle<MultiInetSocketAddress>> ret = 
-          new SocketRequestHandleImpl<TransportLayerNodeHandle<MultiInetSocketAddress>>(handle, options, logger);
+        final SocketRequestHandleImpl<TransportLayerNodeHandle<MultiInetSocketAddress>> ret =
+                new SocketRequestHandleImpl<>(handle, options, logger);
         
         options = OptionsFactory.addOption(options, IdentityImpl.DONT_VERIFY, true);
         // open the socket

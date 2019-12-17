@@ -36,30 +36,7 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.identity;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.mpisws.p2p.transport.ClosedChannelException;
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.exception.NodeIsFaultyException;
 import org.mpisws.p2p.transport.liveness.LivenessListener;
 import org.mpisws.p2p.transport.liveness.LivenessProvider;
@@ -67,22 +44,16 @@ import org.mpisws.p2p.transport.liveness.LivenessTypes;
 import org.mpisws.p2p.transport.liveness.OverrideLiveness;
 import org.mpisws.p2p.transport.proximity.ProximityListener;
 import org.mpisws.p2p.transport.proximity.ProximityProvider;
-import org.mpisws.p2p.transport.util.DefaultErrorHandler;
-import org.mpisws.p2p.transport.util.InsufficientBytesException;
-import org.mpisws.p2p.transport.util.MessageRequestHandleImpl;
-import org.mpisws.p2p.transport.util.OptionsFactory;
-import org.mpisws.p2p.transport.util.SocketInputBuffer;
-import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
-import org.mpisws.p2p.transport.util.SocketWrapperSocket;
-
+import org.mpisws.p2p.transport.util.*;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Cancellable;
-import rice.p2p.util.TimerWeakHashMap;
 import rice.p2p.util.rawserialization.SimpleInputBuffer;
 import rice.p2p.util.rawserialization.SimpleOutputBuffer;
-import rice.pastry.NodeHandleFactoryListener;
-import rice.pastry.socket.SocketNodeHandle;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 public class IdentityImpl<UpperIdentifier, MiddleIdentifier, UpperMsgType, LowerIdentifier> implements LivenessTypes {
   protected byte[] localIdentifier;
@@ -90,7 +61,7 @@ public class IdentityImpl<UpperIdentifier, MiddleIdentifier, UpperMsgType, Lower
   protected LowerIdentityImpl lower;
   protected UpperIdentityImpl upper;
   
-  protected Map<UpperIdentifier, Set<IdentityMessageHandle>> pendingMessages;
+  protected final Map<UpperIdentifier, Set<IdentityMessageHandle>> pendingMessages;
   protected Set<UpperIdentifier> deadForever;  // TODO: make TimerWeakHashSet
 
   protected Environment environment;
@@ -150,13 +121,13 @@ public class IdentityImpl<UpperIdentifier, MiddleIdentifier, UpperMsgType, Lower
     this.nodeChangeStrategy = nodeChangeStrategy;
     this.environment = environment;    
     
-    this.pendingMessages = new HashMap<UpperIdentifier, Set<IdentityMessageHandle>>();
-    this.deadForever = Collections.synchronizedSet(new HashSet<UpperIdentifier>());
+    this.pendingMessages = new HashMap<>();
+    this.deadForever = Collections.synchronizedSet(new HashSet<>());
     
 //    this.intendedDest = new HashMap<Integer, WeakReference<UpperIdentifier>>(); // this is a memory leak, but very slow, maybe we should make a periodic iterator to clean this out...
 //    this.reverseIntendedDest = new TimerWeakHashMap<UpperIdentifier, Integer>(environment.getSelectorManager(), 300000);
     
-    this.bindings = new HashMap<MiddleIdentifier, UpperIdentifier>();
+    this.bindings = new HashMap<>();
     
     serializer.addSerializerListener(new SerializerListener<UpperIdentifier>() {
       public void nodeHandleFound(final UpperIdentifier handle) {
@@ -179,7 +150,7 @@ public class IdentityImpl<UpperIdentifier, MiddleIdentifier, UpperMsgType, Lower
     synchronized(pendingMessages) {
       Set<IdentityMessageHandle> set = pendingMessages.get(i);
       if (set == null) {
-        set = new HashSet<IdentityMessageHandle>();
+        set = new HashSet<>();
         pendingMessages.put(i, set);
       }
       set.add(ret);
@@ -389,7 +360,7 @@ public class IdentityImpl<UpperIdentifier, MiddleIdentifier, UpperMsgType, Lower
       if (handler != null) {
         this.errorHandler = handler;        
       } else {
-        this.errorHandler = new DefaultErrorHandler<LowerIdentifier>(logger);        
+        this.errorHandler = new DefaultErrorHandler<>(logger);
       }
             
       tl.setCallback(this);
@@ -403,10 +374,10 @@ public class IdentityImpl<UpperIdentifier, MiddleIdentifier, UpperMsgType, Lower
 
       // what happens if they cancel after the socket has been received by a lower layer, but is still reading the header?  
       // May need to re-think this SRHI at all the layers
-      final SocketRequestHandleImpl<LowerIdentifier> ret = new SocketRequestHandleImpl<LowerIdentifier>(i, options, logger);
+      final SocketRequestHandleImpl<LowerIdentifier> ret = new SocketRequestHandleImpl<>(i, options, logger);
       SimpleOutputBuffer sob = new SimpleOutputBuffer();
       try {      
-        if ((options == null) || options.containsKey(DONT_VERIFY) && ((Boolean)options.get(DONT_VERIFY)).booleanValue()) {
+        if ((options == null) || options.containsKey(DONT_VERIFY) && (Boolean) options.get(DONT_VERIFY)) {
           // don't send TO
           sob.writeByte(0);          
         } else {      
@@ -688,8 +659,8 @@ public class IdentityImpl<UpperIdentifier, MiddleIdentifier, UpperMsgType, Lower
                       }
 
                       // done writing pass up socket with the newOptions
-                      final P2PSocket<LowerIdentifier> returnMe = new SocketWrapperSocket<LowerIdentifier, LowerIdentifier>(
-                          socket.getIdentifier(), socket, logger, errorHandler, newOptions);
+                      final P2PSocket<LowerIdentifier> returnMe = new SocketWrapperSocket<>(
+                              socket.getIdentifier(), socket, logger, errorHandler, newOptions);
                       callback.incomingSocket(returnMe);
                     }                    
                   }.receiveSelectResult(socket, false, true); // write SUCCESS
@@ -723,8 +694,8 @@ public class IdentityImpl<UpperIdentifier, MiddleIdentifier, UpperMsgType, Lower
 
       // what happens if they cancel after the socket has been received by a lower layer, but is still reading the header?  
       // May need to re-think this SRHI at all the layers
-      final MessageRequestHandleImpl<LowerIdentifier, ByteBuffer> ret = 
-        new MessageRequestHandleImpl<LowerIdentifier, ByteBuffer>(i, m, options);
+      final MessageRequestHandleImpl<LowerIdentifier, ByteBuffer> ret =
+              new MessageRequestHandleImpl<>(i, m, options);
    
 //      Integer index = null;
 //      if (options != null) {
@@ -963,8 +934,8 @@ public class IdentityImpl<UpperIdentifier, MiddleIdentifier, UpperMsgType, Lower
         final Map<String, Object> options) {
       if (logger.level <= Logger.FINE) logger.log("openSocket("+i+","+deliverSocketToMe+","+options+")");
       
-      final SocketRequestHandleImpl<UpperIdentifier> handle = 
-        new SocketRequestHandleImpl<UpperIdentifier>(i, options, logger);
+      final SocketRequestHandleImpl<UpperIdentifier> handle =
+              new SocketRequestHandleImpl<>(i, options, logger);
 
       MiddleIdentifier middle = serializer.translateDown(i);
       
@@ -991,7 +962,7 @@ public class IdentityImpl<UpperIdentifier, MiddleIdentifier, UpperMsgType, Lower
           deliverSocketToMe.receiveException(handle, ex);
         }
         public void receiveResult(SocketRequestHandle<MiddleIdentifier> cancellable, P2PSocket<MiddleIdentifier> sock) {
-          deliverSocketToMe.receiveResult(handle, new SocketWrapperSocket<UpperIdentifier, MiddleIdentifier>(i,sock,logger,errorHandler,options));
+          deliverSocketToMe.receiveResult(handle, new SocketWrapperSocket<>(i, sock, logger, errorHandler, options));
         }      
       }, newOptions));
       return handle;
@@ -1012,8 +983,8 @@ public class IdentityImpl<UpperIdentifier, MiddleIdentifier, UpperMsgType, Lower
       // how to synchronized this properly?  It's too bad that we have to hold the lock for the calls into the lower levels.
       // an alternative would be to re-synchronized and check again, and immeadiately cancel the message
       if (deadForever.contains(i)) {
-        MessageRequestHandle<UpperIdentifier, UpperMsgType> mrh =             
-          new MessageRequestHandleImpl<UpperIdentifier, UpperMsgType>(i, m, options);
+        MessageRequestHandle<UpperIdentifier, UpperMsgType> mrh =
+                new MessageRequestHandleImpl<>(i, m, options);
         deliverAckToMe.sendFailed(mrh, new NodeIsFaultyException(i, m));
         return mrh;
       }
@@ -1024,8 +995,8 @@ public class IdentityImpl<UpperIdentifier, MiddleIdentifier, UpperMsgType, Lower
       if (addBinding(i, null, options)) {
         // no problem, sending message
       } else {
-        MessageRequestHandle<UpperIdentifier, UpperMsgType> mrh =             
-          new MessageRequestHandleImpl<UpperIdentifier, UpperMsgType>(i, m, options);
+        MessageRequestHandle<UpperIdentifier, UpperMsgType> mrh =
+                new MessageRequestHandleImpl<>(i, m, options);
         deliverAckToMe.sendFailed(mrh, new NodeIsFaultyException(i, m));
         return mrh;
       }
@@ -1064,7 +1035,7 @@ public class IdentityImpl<UpperIdentifier, MiddleIdentifier, UpperMsgType, Lower
 
       
       if (sanityChecker.isSane(from, s.getIdentifier())) {
-        callback.incomingSocket(new SocketWrapperSocket<UpperIdentifier, MiddleIdentifier>(from, s, logger, errorHandler, s.getOptions()));
+        callback.incomingSocket(new SocketWrapperSocket<>(from, s, logger, errorHandler, s.getOptions()));
       } else {
         if (logger.level <= Logger.WARNING) logger.logException(
             "incomingSocket() Sanity checker did not match "+from+" to "+s.getIdentifier()+" options:"+s.getOptions(), 
@@ -1102,7 +1073,7 @@ public class IdentityImpl<UpperIdentifier, MiddleIdentifier, UpperMsgType, Lower
       return livenessProvider.checkLiveness(serializer.translateDown(i), options);
     }
 
-    List<LivenessListener<UpperIdentifier>> livenessListeners = new ArrayList<LivenessListener<UpperIdentifier>>();
+    final List<LivenessListener<UpperIdentifier>> livenessListeners = new ArrayList<>();
     public void addLivenessListener(LivenessListener<UpperIdentifier> name) {
       synchronized(livenessListeners) {
         livenessListeners.add(name);
@@ -1173,21 +1144,21 @@ public class IdentityImpl<UpperIdentifier, MiddleIdentifier, UpperMsgType, Lower
     }
 
     // todo, make this a timer weak hash map
-    protected Map<UpperIdentifier, Integer> liveness = new HashMap<UpperIdentifier, Integer>();
+    protected Map<UpperIdentifier, Integer> liveness = new HashMap<>();
     
     protected void notifyLivenessListeners(UpperIdentifier i, int liveness, Map<String, Object> options) {
       if (logger.level <= Logger.FINER) logger.log("notifyLivenessListeners("+i+","+liveness+")");
       List<LivenessListener<UpperIdentifier>> temp;
       synchronized(livenessListeners) {
-        temp = new ArrayList<LivenessListener<UpperIdentifier>>(livenessListeners);
+        temp = new ArrayList<>(livenessListeners);
       }
       for (LivenessListener<UpperIdentifier> listener : temp) {
         listener.livenessChanged(i, liveness, options);
       }
     }
     
-    Collection<ProximityListener<UpperIdentifier>> proxListeners = 
-      new ArrayList<ProximityListener<UpperIdentifier>>();
+    final Collection<ProximityListener<UpperIdentifier>> proxListeners =
+            new ArrayList<>();
     public void addProximityListener(ProximityListener<UpperIdentifier> name) {
       synchronized(proxListeners) {
         proxListeners.add(name);
@@ -1221,7 +1192,7 @@ public class IdentityImpl<UpperIdentifier, MiddleIdentifier, UpperMsgType, Lower
       if (logger.level <= Logger.FINER) logger.log("notifyProximityListeners("+i+","+newProx+")");
       List<ProximityListener<UpperIdentifier>> temp;
       synchronized(proxListeners) {
-        temp = new ArrayList<ProximityListener<UpperIdentifier>>(proxListeners);
+        temp = new ArrayList<>(proxListeners);
       }
       for (ProximityListener<UpperIdentifier> listener : temp) {
         listener.proximityChanged(i, newProx, options);

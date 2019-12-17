@@ -36,14 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.audit;
 
-import java.io.IOException;
-import java.util.Arrays;
-
-import org.mpisws.p2p.transport.peerreview.history.logentry.HistoryEvent;
-
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.p2p.util.MathUtils;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 /**
  *   

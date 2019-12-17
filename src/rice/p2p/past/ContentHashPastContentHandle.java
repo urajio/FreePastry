@@ -37,12 +37,14 @@ advised of the possibility of such damage.
 
 package rice.p2p.past;
 
-import java.io.*;
-
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.p2p.past.rawserialization.RawPastContentHandle;
+
+import java.io.IOException;
 
 /**
  * @(#) ContentHashPastContentHandle.java

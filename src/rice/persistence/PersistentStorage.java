@@ -45,18 +45,23 @@ package rice.persistence;
  *
  * @version $Id$
  */
-import java.io.*;
-import java.util.*;
-import java.util.zip.*;
 
-import rice.*;
-import rice.Continuation.*;
+import rice.Continuation;
+import rice.Continuation.ListenerContinuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.environment.processing.WorkRequest;
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.commonapi.IdRange;
+import rice.p2p.commonapi.IdSet;
 import rice.p2p.util.*;
 import rice.p2p.util.rawserialization.JavaSerializationException;
+
+import java.io.*;
+import java.util.*;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * This class is an implementation of Storage which provides
@@ -101,7 +106,7 @@ public class PersistentStorage implements Storage {
   /**
    * Fields for logging based on the requests we are writing.
    */  
-  private Object statLock = new Object();
+  private final Object statLock = new Object();
   private long statsLastWritten;
   private long statsWriteInterval = 60 * 1000;
   private long numWrites = 0;
@@ -252,7 +257,7 @@ public class PersistentStorage implements Storage {
         public void run() {
           environment.getProcessor().processBlockingIO(new WorkRequest(new ListenerContinuation("Enqueue of writeMetadataFile", environment), environment.getSelectorManager()) {
             public String toString() { return "persistence dirty purge"; }
-            public Object doWork() throws Exception {
+            public Object doWork() {
               writeDirty();
               return Boolean.TRUE;
             }
@@ -323,7 +328,7 @@ public class PersistentStorage implements Storage {
    */
   public void store(final Id id, final Serializable metadata, final Serializable obj, Continuation c) {
     if (id == null || obj == null) {
-      c.receiveResult(new Boolean(false));
+      c.receiveResult(Boolean.FALSE);
       return;
     }
     
@@ -480,7 +485,7 @@ public class PersistentStorage implements Storage {
     printStats();
     
     if (! exists(id)) {
-      c.receiveResult(new Boolean(false));
+      c.receiveResult(Boolean.FALSE);
     } else {    
       environment.getProcessor().processBlockingIO(new WorkRequest(c, environment.getSelectorManager()) { 
         public String toString() { return "setMetadata " + id; }
@@ -763,9 +768,8 @@ public class PersistentStorage implements Storage {
   private void initDirectoryMap(File dir) {
     File[] files = dir.listFiles(new DirectoryFilter());
     directories.put(dir, files);
-    
-    for (int i=0; i<files.length; i++)
-      initDirectoryMap(files[i]);
+
+      for (File file : files) initDirectoryMap(file);
   }
   
   /**
@@ -780,23 +784,23 @@ public class PersistentStorage implements Storage {
     String[] files = dir.list(new FileFilter());
     
     /* first, init any files, and relocate any files if there are dirs */
-    for (int i=0; i<files.length; i++) {
-      try {
-        if (! initTemporaryFile(dir, files[i])) {
-          
-          /* if there are directories in the dir, then move the file */
-          if (dirs.length > 0)
-            moveFileToCorrectDirectory(dir, files[i]);
-        }
-      } catch (Exception e) {
-        if (logger.level <= Logger.WARNING) logger.logException("Got exception " + e + " initting file " + files[i] + " - moving to lost+found.",e);
-        moveToLost(new File(dir, files[i]));
-      }      
-    }
+      for (String file : files) {
+          try {
+              if (!initTemporaryFile(dir, file)) {
+
+                  /* if there are directories in the dir, then move the file */
+                  if (dirs.length > 0)
+                      moveFileToCorrectDirectory(dir, file);
+              }
+          } catch (Exception e) {
+              if (logger.level <= Logger.WARNING)
+                  logger.logException("Got exception " + e + " initting file " + file + " - moving to lost+found.", e);
+              moveToLost(new File(dir, file));
+          }
+      }
       
     /* next, recurse into any dirs */
-    for (int i=0; i<dirs.length; i++) 
-      initFiles(new File(dir, dirs[i]));
+      for (String s : dirs) initFiles(new File(dir, s));
     
     /* and delete the old metadata file, if it exists */
     if (dirs.length > 0)
@@ -856,44 +860,44 @@ public class PersistentStorage implements Storage {
     
     /* next, start processing by listing the number of files and going from there */
     File[] files = dir.listFiles(new FileFilter());
-    File[] dirs = dir.listFiles(new DirectoryFilter());    
-    
-    for (int i=0; i<files.length; i++) {
-      try {
-        Id id = readKey(files[i]);
-        long len = getFileLength(files[i]);
-        
-        if (id == null)
-          if (logger.level <= Logger.INFO) logger.log( "READING " + files[i] + " RETURNED NULL!");
-        
-        if (len > 0) {
-          increaseUsedSpace(len);
-          
-          /* if the file is newer than the metadata file, update the metadata 
+    File[] dirs = dir.listFiles(new DirectoryFilter());
+
+      for (File value : files) {
+          try {
+              Id id = readKey(value);
+              long len = getFileLength(value);
+
+              if (id == null)
+                  if (logger.level <= Logger.INFO) logger.log("READING " + value + " RETURNED NULL!");
+
+              if (len > 0) {
+                  increaseUsedSpace(len);
+
+          /* if the file is newer than the metadata file, update the metadata
           if we don't have the metadata for this file, update it */
-          if (index && ((! metadata.containsKey(id)) || (files[i].lastModified() > modified))) {
-            if (logger.level <= Logger.FINER) logger.log("Reading newer metadata out of file " + files[i] + " id " + id.toStringFull() + " " + files[i].lastModified() + " " + modified + " " + metadata.containsKey(id));
-            metadata.put(id, readMetadata(files[i]));
-            dirty.add(dir);
+                  if (index && ((!metadata.containsKey(id)) || (value.lastModified() > modified))) {
+                      if (logger.level <= Logger.FINER)
+                          logger.log("Reading newer metadata out of file " + value + " id " + id.toStringFull() + " " + value.lastModified() + " " + modified + " " + metadata.containsKey(id));
+                      metadata.put(id, readMetadata(value));
+                      dirty.add(dir);
+                  }
+              } else {
+                  moveToLost(value);
+
+                  if (index && metadata.containsKey(id)) {
+                      metadata.remove(id);
+                      dirty.add(dir);
+                  }
+              }
+          } catch (Exception e) {
+              if (logger.level <= Logger.WARNING) logger.logException(
+                      "ERROR: Received Exception " + e + " while initing file " + value + " - moving to lost+found.", e);
+              moveToLost(value);
           }
-        } else {
-          moveToLost(files[i]);
-          
-          if (index && metadata.containsKey(id)) {
-            metadata.remove(id);
-            dirty.add(dir);
-          }
-        }
-      } catch (Exception e) {
-        if (logger.level <= Logger.WARNING) logger.logException(
-            "ERROR: Received Exception " + e + " while initing file " + files[i] + " - moving to lost+found.",e);
-        moveToLost(files[i]);
       }
-    }
     
     /* now recurse and check all of the children */
-    for (int i=0; i<dirs.length; i++) 
-      initFileMap(dirs[i]);
+      for (File file : dirs) initFileMap(file);
       
     /* and finally see if this directory needs to be pruned or expanded */
     checkDirectory(dir);
@@ -1058,10 +1062,10 @@ public class PersistentStorage implements Storage {
    */
   private String[] getMatchingDirectories(String prefix, String[] dirNames) {
     Vector result = new Vector();
-    
-    for (int i=0; i<dirNames.length; i++) 
-      if (dirNames[i].startsWith(prefix))
-        result.add(dirNames[i]);
+
+      for (String dirName : dirNames)
+          if (dirName.startsWith(prefix))
+              result.add(dirName);
     
     return (String[]) result.toArray(new String[0]);
   }
@@ -1104,15 +1108,16 @@ public class PersistentStorage implements Storage {
     
     /* last, move the files into the correct directory */
     File[] files = dir.listFiles(new FileFilter());
-    for (int i = 0; i < files.length; i++) {
-      for (int j = 0; j < dirs.length; j++) {
-        if (files[i].getName().startsWith(dirs[j].getName())) {
-          if (logger.level <= Logger.FINEST) logger.log("Renaming file " + files[i] + " to " + new File(dirs[j], files[i].getName().substring(dirs[j].getName().length())));
-          renameFile(files[i], new File(dirs[j], files[i].getName().substring(dirs[j].getName().length())));
-          break;
-        }
+      for (File value : files) {
+          for (File file : dirs) {
+              if (value.getName().startsWith(file.getName())) {
+                  if (logger.level <= Logger.FINEST)
+                      logger.log("Renaming file " + value + " to " + new File(file, value.getName().substring(file.getName().length())));
+                  renameFile(value, new File(file, value.getName().substring(file.getName().length())));
+                  break;
+              }
+          }
       }
-    }
     
     /* and remove the metadata file */
     deleteFile(new File(dir, METADATA_FILENAME));
@@ -1132,11 +1137,11 @@ public class PersistentStorage implements Storage {
     int length = getPrefixLength(names);
     String prefix = names[0].substring(0, length);
     CharacterHashSet set = new CharacterHashSet();
-    
-    for (int i=0; i<names.length; i++) {
-      if (names[i].length() > length)
-        set.put(names[i].charAt(length));
-    }
+
+      for (String s : names) {
+          if (s.length() > length)
+              set.put(s.charAt(length));
+      }
     
     char[] splits = set.get();
     String[] result = new String[splits.length];
@@ -1156,9 +1161,8 @@ public class PersistentStorage implements Storage {
    */
   private int getPrefixLength(String[] names) {
     int length = names[0].length()-1;
-    
-    for (int i=0; i<names.length; i++)
-      length = getPrefixLength(names[0], names[i], length);
+
+      for (String s : names) length = getPrefixLength(names[0], s, length);
       
     return length;
   }
@@ -1227,16 +1231,16 @@ public class PersistentStorage implements Storage {
       File[] dirs = dir.listFiles();
       
       /* remove all subdirectories */
-      for (int i=0; i<dirs.length; i++) {
-        flushDirectory(dirs[i]);
+        for (File file : dirs) {
+            flushDirectory(file);
 
-        /* update the metadata */
-        directories.remove(dirs[i]);
-        prefixes.remove(dirs[i]);      
+            /* update the metadata */
+            directories.remove(file);
+            prefixes.remove(file);
 
-        /* delete the dir */
-        deleteFile(dirs[i]);
-      }      
+            /* delete the dir */
+            deleteFile(file);
+        }
     }
   }
    
@@ -1314,7 +1318,7 @@ public class PersistentStorage implements Storage {
    * @return Whether or not it is temporary
    */ 
   private boolean isTemporaryFile(String name) {    
-    return (name.indexOf(".") >= 0);
+    return (name.contains("."));
   }
 
   /**
@@ -1406,11 +1410,11 @@ public class PersistentStorage implements Storage {
     if (subDirs.length == 0) {
       return dir;
     } else {
-      for (int i=0; i<subDirs.length; i++) 
-        if (name.startsWith(subDirs[i].getName()))
-          return getDirectoryForName(name.substring(subDirs[i].getName().length()), subDirs[i]);
-        else if ((name.length() == 0) && subDirs[i].getName().equals(ZERO_LENGTH_NAME))
-          return getDirectoryForName(name, subDirs[i]);
+        for (File subDir : subDirs)
+            if (name.startsWith(subDir.getName()))
+                return getDirectoryForName(name.substring(subDir.getName().length()), subDir);
+            else if ((name.length() == 0) && subDir.getName().equals(ZERO_LENGTH_NAME))
+                return getDirectoryForName(name, subDir);
 
       /* here, we must create the appropriate directory */
       if ((name.length() >= subDirs[0].getName().length()) || ((name.length() == 0) && (subDirs[0].getName().length() == 1))) {
@@ -1467,7 +1471,7 @@ public class PersistentStorage implements Storage {
     if (prefixes.get(file) != null)
       return (String) prefixes.get(file);
     
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     while (! file.equals(appDirectory)) {
       buffer.insert(0, file.getName().replaceAll(ZERO_LENGTH_NAME, ""));
       file = file.getParentFile();
@@ -1486,9 +1490,8 @@ public class PersistentStorage implements Storage {
    */
   private File[] append(File[] files, File file) {
     File[] result = new File[files.length + 1];
-    
-    for (int i=0; i<files.length; i++) 
-      result[i] = files[i];
+
+    System.arraycopy(files, 0, result, 0, files.length);
     
     result[files.length] = file;
     return result;
@@ -1558,47 +1561,50 @@ public class PersistentStorage implements Storage {
    */
   protected void writeDirty() {
     File[] files = (File[]) dirty.toArray(new File[0]);
-    
-    for (int i=0; i<files.length; i++) {
-      HashMap map = new HashMap();
-      IdRange range = getRangeForDirectory(files[i]);
-      Iterator keys = null;
-      
-      if (range.getCCWId().compareTo(range.getCWId()) <= 0)
-        keys = metadata.keySubMap(range.getCCWId(), range.getCWId()).keySet().iterator();
-      else
-        keys = metadata.keyTailMap(range.getCCWId()).keySet().iterator();
-      
-      while (keys.hasNext()) {
-        Id next = (Id) keys.next();
-        map.put(next, metadata.get(next));
-      }
-      
-      try {
-        writeMetadataFile(files[i], map);
-        
-        synchronized (metadata) {
-          dirty.remove(files[i]);
-        }
-      } catch (FileNotFoundException f) {
-        try {
-          synchronized (metadata) {
-            dirty.remove(files[i]);
+
+      for (File file : files) {
+          HashMap map = new HashMap();
+          IdRange range = getRangeForDirectory(file);
+          Iterator keys = null;
+
+          if (range.getCCWId().compareTo(range.getCWId()) <= 0)
+              keys = metadata.keySubMap(range.getCCWId(), range.getCWId()).keySet().iterator();
+          else
+              keys = metadata.keyTailMap(range.getCCWId()).keySet().iterator();
+
+          while (keys.hasNext()) {
+              Id next = (Id) keys.next();
+              map.put(next, metadata.get(next));
           }
-          
-          if (logger.level <= Logger.WARNING) logger.logException( "ERROR: Could not find directory while writing out metadata in '" + files[i].getCanonicalPath() + "' - removing from dirty list and continuing!",f);
-        } catch (IOException g) {
-          if (logger.level <= Logger.SEVERE) logger.logException( "PANIC: Got IOException " + g + " trying to detail FNF exception " + f + " while writing out file " + files[i], g);
-        }
-      } catch (IOException e) {
-        try {
-          if (logger.level <= Logger.WARNING) logger.logException(
-              "ERROR: Got error " + e + " while writing out metadata in '" + files[i].getCanonicalPath() + "' - aborting!",e);
-        } catch (IOException f) {
-          if (logger.level <= Logger.SEVERE) logger.logException("PANIC: Got IOException " + f+ " trying to detail exception " + e + " while writing out file " + files[i], f);
-        }
+
+          try {
+              writeMetadataFile(file, map);
+
+              synchronized (metadata) {
+                  dirty.remove(file);
+              }
+          } catch (FileNotFoundException f) {
+              try {
+                  synchronized (metadata) {
+                      dirty.remove(file);
+                  }
+
+                  if (logger.level <= Logger.WARNING)
+                      logger.logException("ERROR: Could not find directory while writing out metadata in '" + file.getCanonicalPath() + "' - removing from dirty list and continuing!", f);
+              } catch (IOException g) {
+                  if (logger.level <= Logger.SEVERE)
+                      logger.logException("PANIC: Got IOException " + g + " trying to detail FNF exception " + f + " while writing out file " + file, g);
+              }
+          } catch (IOException e) {
+              try {
+                  if (logger.level <= Logger.WARNING) logger.logException(
+                          "ERROR: Got error " + e + " while writing out metadata in '" + file.getCanonicalPath() + "' - aborting!", e);
+              } catch (IOException f) {
+                  if (logger.level <= Logger.SEVERE)
+                      logger.logException("PANIC: Got IOException " + f + " trying to detail exception " + e + " while writing out file " + file, f);
+              }
+          }
       }
-    }
   }
 
   /**
@@ -1613,39 +1619,35 @@ public class PersistentStorage implements Storage {
     if (! metadata.exists())
       return -1L;
 
-    FileInputStream fin = null;
-    
-    try {
-      fin = new FileInputStream(metadata);
+    try (FileInputStream fin = new FileInputStream(metadata)) {
       ObjectInputStream objin = new ObjectInputStream(new BufferedInputStream(fin));
-      
+
       IdRange range = getRangeForDirectory(file);
-      
+
       try {
         HashMap map = (HashMap) objin.readObject();
-        Iterator keys = map.keySet().iterator();
-        
-        while (keys.hasNext()) {
-          Id id = (Id) keys.next();
-          
+
+        for (Object o : map.keySet()) {
+          Id id = (Id) o;
+
           if ((range.containsId(id)) && (new File(file, id.toStringFull().substring(getPrefix(file).length())).exists()))
             this.metadata.put(id, map.get(id));
           else
             dirty.add(file);
         }
-        
+
         return metadata.lastModified();
       } catch (ClassNotFoundException e) {
-        if (logger.level <= Logger.WARNING) logger.logException( "ERROR: Got exception " + e + " while reading metadata file " + metadata + " - rebuilding file",e);
+        if (logger.level <= Logger.WARNING)
+          logger.logException("ERROR: Got exception " + e + " while reading metadata file " + metadata + " - rebuilding file", e);
         deleteFile(metadata);
         return 0L;
       } catch (IOException e) {
-        if (logger.level <= Logger.WARNING) logger.logException( "ERROR: Got exception " + e + " while reading metadata file " + metadata + " - rebuilding file",e);
+        if (logger.level <= Logger.WARNING)
+          logger.logException("ERROR: Got exception " + e + " while reading metadata file " + metadata + " - rebuilding file", e);
         deleteFile(metadata);
         return 0L;
       }
-    } finally {
-      fin.close();
     }
   }
   
@@ -1655,19 +1657,14 @@ public class PersistentStorage implements Storage {
    * @param file The directory to write the file to
    * @param map The data to write
    */
-  private static void writeMetadataFile(File file, HashMap map) throws IOException {    
-    FileOutputStream fout = null;
-    
-    try {
-      fout = new FileOutputStream(new File(file, METADATA_FILENAME));
+  private static void writeMetadataFile(File file, HashMap map) throws IOException {
+
+    try (FileOutputStream fout = new FileOutputStream(new File(file, METADATA_FILENAME))) {
       ObjectOutputStream objout = new ObjectOutputStream(new BufferedOutputStream(fout));
       objout.writeObject(map);
       objout.close();
     } catch (IOException ioe) {
       throw new JavaSerializationException(map, ioe);
-    } finally {
-      if (fout != null)
-        fout.close();
     }
   }
   
@@ -1742,30 +1739,24 @@ public class PersistentStorage implements Storage {
   private Serializable readMetadata(File file) throws IOException {  
     if (file.length() < 32) 
       return null;
-        
-    RandomAccessFile ras = null;
-    
-    try {
-      ras = new RandomAccessFile(file, "r");
+
+    try (RandomAccessFile ras = new RandomAccessFile(file, "r")) {
       ras.seek(file.length() - 32);
 
       if (ras.readLong() != PERSISTENCE_MAGIC_NUMBER) {
         return null;
       } else if (ras.readLong() != PERSISTENCE_VERSION_2) {
-        if (logger.level <= Logger.WARNING) logger.log( "Persistence version did not match - exiting!");
+        if (logger.level <= Logger.WARNING) logger.log("Persistence version did not match - exiting!");
         return null;
       } else if (ras.readLong() > PERSISTENCE_REVISION_2_1) {
-        if (logger.level <= Logger.WARNING) logger.log( "Persistence revision did not match - exiting!");
+        if (logger.level <= Logger.WARNING) logger.log("Persistence revision did not match - exiting!");
         return null;
       }
-      
+
       long length = ras.readLong();
       ras.seek(file.length() - 32 - length);
-      
-      FileInputStream fis = null;
-      
-      try {
-        fis = new FileInputStream(ras.getFD());
+
+      try (FileInputStream fis = new FileInputStream(ras.getFD())) {
         ObjectInputStream objin = new XMLObjectInputStream(new BufferedInputStream(new GZIPInputStream(fis)));
 
         try {
@@ -1773,11 +1764,7 @@ public class PersistentStorage implements Storage {
         } catch (ClassNotFoundException e) {
           throw new IOException(e.getMessage());
         }
-      } finally {
-        fis.close();
       }
-    } finally {
-      ras.close();
     }
   }
   
@@ -1791,7 +1778,7 @@ public class PersistentStorage implements Storage {
   private Id readKey(File file) {
     String s = getPrefix(file.getParentFile()) + file.getName().replaceAll(ZERO_LENGTH_NAME, "");
     
-    if (s.indexOf(".") >= 0) {
+    if (s.contains(".")) {
       return factory.buildIdFromToString(s.toCharArray(), 0, s.indexOf("."));
     } else {
       return factory.buildIdFromToString(s.toCharArray(), 0, s.length());
@@ -1819,7 +1806,7 @@ public class PersistentStorage implements Storage {
   private static long readVersion(File file) throws IOException {
     Long temp = (Long) readObject(file, 2);
     
-    return (temp == null ? 0 : temp.longValue());
+    return (temp == null ? 0 : temp);
   } 
 
   /**
@@ -1838,7 +1825,7 @@ public class PersistentStorage implements Storage {
       ObjectOutputStream objout = new XMLObjectOutputStream(new BufferedOutputStream(new GZIPOutputStream(fout)));
       objout.writeObject(key);
       objout.writeObject(obj);
-      objout.writeObject(new Long(version));
+      objout.writeObject(version);
       objout.close();
     } finally {
       if (fout != null)
@@ -2107,10 +2094,10 @@ public class PersistentStorage implements Storage {
     
     private int count() {
       int total = 0;
-      
-      for (int i=0; i<bitMap.length; i++)
-        if (bitMap[i])
-          total++;
+
+        for (boolean b : bitMap)
+            if (b)
+                total++;
       
       return total;
     }

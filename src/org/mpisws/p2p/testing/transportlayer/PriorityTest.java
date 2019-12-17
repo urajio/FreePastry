@@ -36,13 +36,6 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.testing.transportlayer;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mpisws.p2p.transport.MessageCallback;
@@ -58,9 +51,15 @@ import org.mpisws.p2p.transport.priority.QueueOverflowException;
 import org.mpisws.p2p.transport.proximity.MinRTTProximityProvider;
 import org.mpisws.p2p.transport.proximity.ProximityProvider;
 import org.mpisws.p2p.transport.wire.WireTransportLayerImpl;
-
 import rice.environment.Environment;
 import rice.environment.logging.CloneableLogManager;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class PriorityTest extends TLTest<InetSocketAddress> {
   @BeforeClass
@@ -87,17 +86,17 @@ public class PriorityTest extends TLTest<InetSocketAddress> {
     env.addDestructable(env_a);    
     InetSocketAddress addr_a = new InetSocketAddress(addr,port);
     
-    LivenessTransportLayerImpl<MultiInetSocketAddress> ltli = new LivenessTransportLayerImpl<MultiInetSocketAddress>(
-        new MultiInetAddressTransportLayerImpl(new MultiInetSocketAddress(addr_a),
-          new WireTransportLayerImpl(addr_a,env_a, null), 
-        env_a, null, null),
-      env_a, null, 5000);
+    LivenessTransportLayerImpl<MultiInetSocketAddress> ltli = new LivenessTransportLayerImpl<>(
+            new MultiInetAddressTransportLayerImpl(new MultiInetSocketAddress(addr_a),
+                    new WireTransportLayerImpl(addr_a, env_a, null),
+                    env_a, null, null),
+            env_a, null, 5000);
     
-    ProximityProvider<MultiInetSocketAddress> prox = new MinRTTProximityProvider<MultiInetSocketAddress>(ltli, env_a);
+    ProximityProvider<MultiInetSocketAddress> prox = new MinRTTProximityProvider<>(ltli, env_a);
 
     
-    return new PriorityTransportLayerImpl<MultiInetSocketAddress>(ltli, ltli, prox,
-           env_a, 1024, 30, null);
+    return new PriorityTransportLayerImpl<>(ltli, ltli, prox,
+            env_a, 1024, 30, null);
   }
 
   @Test
@@ -107,10 +106,10 @@ public class PriorityTest extends TLTest<InetSocketAddress> {
   public void queueOverflow() throws IOException {
     MultiInetSocketAddress bogus = new MultiInetSocketAddress(getBogusIdentifier(null));
     
-    final ArrayList<MessageRequestHandle> dropped = new ArrayList<MessageRequestHandle>(10);
+    final ArrayList<MessageRequestHandle> dropped = new ArrayList<>(10);
     
     for (int ctr = 0; ctr < 40; ctr++) {
-      HashMap<String, Integer> options = new HashMap<String, Integer>();
+      HashMap<String, Integer> options = new HashMap<>();
       options.put(PriorityTransportLayer.OPTION_PRIORITY, -ctr); // keep adding higher priority messages, to verify 
       // the early, low priority messages are dropped
       

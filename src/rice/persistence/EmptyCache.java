@@ -45,14 +45,16 @@ package rice.persistence;
  *
  * @version $Id$
  */
-import java.io.*;
-import java.util.*;
-import java.util.zip.*;
 
-import rice.*;
-import rice.Continuation.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.util.*;
+import rice.Continuation;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.commonapi.IdRange;
+import rice.p2p.commonapi.IdSet;
+import rice.p2p.util.RedBlackMap;
+
+import java.io.Serializable;
+import java.util.SortedMap;
 
 /**
  * This class is a cahcce which doesn't store anything.
@@ -101,7 +103,7 @@ public class EmptyCache implements Cache {
    * @param c The command to run once the operation is complete
    */
   public void cache(Id id, Serializable metadata, Serializable obj, Continuation c) {
-    c.receiveResult(new Boolean(true));
+    c.receiveResult(Boolean.TRUE);
   }
 
   /**
@@ -116,7 +118,7 @@ public class EmptyCache implements Cache {
    * @param c The command to run once the operation is complete
    */
   public void uncache(Id id, Continuation c) {
-    c.receiveResult(new Boolean(true));
+    c.receiveResult(Boolean.TRUE);
   }
 
   /**
@@ -163,7 +165,7 @@ public class EmptyCache implements Cache {
    * @param c The command to run once the operation is complete
    */
   public void setMetadata(Id id, Serializable metadata, Continuation c) {
-    c.receiveResult(new Boolean(true));
+    c.receiveResult(Boolean.TRUE);
   }
 
   /**

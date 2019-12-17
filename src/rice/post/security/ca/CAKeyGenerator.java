@@ -36,19 +36,19 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.security.ca;
 
-import java.awt.*;
-import java.awt.event.*;
+import rice.p2p.util.SecurityUtils;
+import rice.p2p.util.XMLObjectOutputStream;
+
 import javax.swing.*;
-
-import java.io.*;
-import java.net.*;
-import java.security.*;
-import java.util.*;
-import java.util.zip.*;
-
-import rice.post.*;
-import rice.post.security.*;
-import rice.p2p.util.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.security.KeyPair;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * This class starts generates a new keypair for the certificate authority, asks
@@ -101,7 +101,7 @@ public class CAKeyGenerator {
    * @return DESCRIBE THE RETURN VALUE
    * @exception IOException DESCRIBE THE EXCEPTION
    */
-  public static String fetchPassword(final String prompt) throws IOException {
+  public static String fetchPassword(final String prompt) {
  /*   System.out.print(prompt + ": ");
 //    return password.getPassword();
     BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));

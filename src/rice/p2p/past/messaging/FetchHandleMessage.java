@@ -37,14 +37,15 @@ advised of the possibility of such damage.
 
 package rice.p2p.past.messaging;
 
-import java.io.IOException;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.past.rawserialization.PastContentHandleDeserializer;
+import rice.p2p.past.rawserialization.RawPastContentHandle;
 
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.past.*;
-import rice.p2p.past.gc.GCId;
-import rice.p2p.past.rawserialization.*;
+import java.io.IOException;
 
 /**
  * @(#) FetchHandleMessage.java
@@ -120,13 +121,11 @@ public class FetchHandleMessage extends ContinuationMessage {
   
   public static FetchHandleMessage build(InputBuffer buf, Endpoint endpoint, PastContentHandleDeserializer pchd) throws IOException {
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        return new FetchHandleMessage(buf, endpoint, pchd);
-      default:
-        throw new IOException("Unknown Version: "+version);        
-    }
-  }  
+      if (version == 0) {
+          return new FetchHandleMessage(buf, endpoint, pchd);
+      }
+      throw new IOException("Unknown Version: " + version);
+  }
   
   private FetchHandleMessage(InputBuffer buf, Endpoint endpoint, PastContentHandleDeserializer pchd) throws IOException {
     super(buf, endpoint);

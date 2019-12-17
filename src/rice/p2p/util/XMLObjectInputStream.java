@@ -37,11 +37,14 @@ advised of the possibility of such damage.
 
 package rice.p2p.util;
 
+import sun.reflect.ReflectionFactory;
+
 import java.io.*;
 import java.lang.reflect.*;
-import java.security.*;
-import java.util.*;
-import sun.reflect.*;
+import java.security.AccessController;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Stack;
 
 /**
  * XMLObjectInputStreamm is an extension of ObjectInputStreamm which provides
@@ -70,12 +73,12 @@ public class XMLObjectInputStream extends ObjectInputStream {
   /**
    * The hashmap of readResolve methods, mapping Class->Method
    */
-  protected static SoftHashMap READ_RESOLVES = new SoftHashMap();
+  protected static final SoftHashMap READ_RESOLVES = new SoftHashMap();
   
   /**
    * The hashmap of readObject methods, mapping Class->Method
    */
-  protected static SoftHashMap READ_OBJECTS = new SoftHashMap();
+  protected static final SoftHashMap READ_OBJECTS = new SoftHashMap();
   
   /**
    * A cache of constructors, mapping classes to serialization constructors
@@ -167,9 +170,8 @@ public class XMLObjectInputStream extends ObjectInputStream {
    * Method which resets the input stream, which removes the binding of all previously
    * stored references.
    *
-   * @throws IOException If an error occurs
    */
-  public void reset() throws IOException {
+  public void reset() {
     references = new Hashtable(); 
     vlist.clear();
   }
@@ -467,7 +469,7 @@ public class XMLObjectInputStream extends ObjectInputStream {
       Class defCl = cl;
       while (defCl != null) {
         try {
-          meth = defCl.getDeclaredMethod("readResolve", new Class[0]);
+          meth = defCl.getDeclaredMethod("readResolve");
           break;
         } catch (NoSuchMethodException ex) {
           defCl = defCl.getSuperclass();
@@ -516,7 +518,7 @@ public class XMLObjectInputStream extends ObjectInputStream {
         return (Method) READ_OBJECTS.get(cl);
       
       try {
-        Method method = cl.getDeclaredMethod("readObject", new Class[] {ObjectInputStream.class});
+        Method method = cl.getDeclaredMethod("readObject", ObjectInputStream.class);
         method.setAccessible(true);
       
         READ_OBJECTS.put(cl, method);
@@ -536,17 +538,16 @@ public class XMLObjectInputStream extends ObjectInputStream {
    * protection.
    *
    * @param c The class to fetch the constructor for
-   * @throws IOException If an error occurs
-   * @throws NoSuchMethodException If the first non-Serializable class does not have a no-arg 
+   * @throws NoSuchMethodException If the first non-Serializable class does not have a no-arg
    *   Constructor
    */
-  protected Constructor getSerializableConstructor(Class c) throws IOException, NoSuchMethodException {
+  protected Constructor getSerializableConstructor(Class c) throws NoSuchMethodException {
     Class initCl = c;
     
     while (Serializable.class.isAssignableFrom(initCl))
       initCl = initCl.getSuperclass();
 
-    Constructor cons = initCl.getDeclaredConstructor(new Class[0]);
+    Constructor cons = initCl.getDeclaredConstructor();
     cons = reflFactory.newConstructorForSerialization(c, cons);
     cons.setAccessible(true);
     return cons;
@@ -567,7 +568,7 @@ public class XMLObjectInputStream extends ObjectInputStream {
     
       if (cons == null) {
         if (Externalizable.class.isAssignableFrom(c)) {
-          cons = c.getDeclaredConstructor(new Class[0]);
+          cons = c.getDeclaredConstructor();
         } else {
           cons = getSerializableConstructor(c);
         }
@@ -576,7 +577,7 @@ public class XMLObjectInputStream extends ObjectInputStream {
         CONSTRUCTORS.put(c, cons);
       }
 
-      return cons.newInstance(new Object[0]);
+      return cons.newInstance();
     } catch (InstantiationException e) {
       throw new IOException("Could not instanciate new class " + c);
     } catch (IllegalAccessException e) {
@@ -597,24 +598,26 @@ public class XMLObjectInputStream extends ObjectInputStream {
    * @throws ClassNotFoundException If the class cannot be found
    */
   protected Class getClass(String name) throws ClassNotFoundException {
-    if (name.equals("int"))
-      return Integer.TYPE;
-    else if (name.equals("boolean"))
-      return Boolean.TYPE;
-    else if (name.equals("byte"))
-      return Byte.TYPE;
-    else if (name.equals("char"))
-      return Character.TYPE;
-    else if (name.equals("double"))
-      return Double.TYPE;
-    else if (name.equals("float"))
-      return Float.TYPE;
-    else if (name.equals("long"))
-      return Long.TYPE;
-    else if (name.equals("short"))
-      return Short.TYPE;
-    else
-      return Class.forName(name);
+    switch (name) {
+      case "int":
+        return Integer.TYPE;
+      case "boolean":
+        return Boolean.TYPE;
+      case "byte":
+        return Byte.TYPE;
+      case "char":
+        return Character.TYPE;
+      case "double":
+        return Double.TYPE;
+      case "float":
+        return Float.TYPE;
+      case "long":
+        return Long.TYPE;
+      case "short":
+        return Short.TYPE;
+      default:
+        return Class.forName(name);
+    }
   }
   
   
@@ -810,15 +813,16 @@ public class XMLObjectInputStream extends ObjectInputStream {
    */
   protected Object readUnsharedHelper(boolean shared) throws IOException, ClassNotFoundException {
     reader.assertStartTag();
-    
-    if (reader.getStartTag().equals("string")) {
-      return readString(shared);
-    } else if (reader.getStartTag().equals("array")) {
-      return readArray(shared);
-    } else if (reader.getStartTag().equals("object")) {
-      return readOrdinaryObject(shared);
-    } else {
-      throw new IOException("Unknown element name " + reader.getStartTag());
+
+    switch (reader.getStartTag()) {
+      case "string":
+        return readString(shared);
+      case "array":
+        return readArray(shared);
+      case "object":
+        return readOrdinaryObject(shared);
+      default:
+        throw new IOException("Unknown element name " + reader.getStartTag());
     }
   }  
   
@@ -829,9 +833,8 @@ public class XMLObjectInputStream extends ObjectInputStream {
    * it does consume the end reference tag.
    *
    * @throws IOException If an error occurs or if a reference is not found
-   * @throws ClassNotFoundException If the class cannot be found
    */  
-  protected Object readReference() throws IOException, ClassNotFoundException {
+  protected Object readReference() throws IOException {
     reader.assertStartTag("reference");
     
     Object result = getReference(reader.getAttribute("idref"));
@@ -849,9 +852,8 @@ public class XMLObjectInputStream extends ObjectInputStream {
    * null tag has just been read, and it does consume the end null tag.
    *
    * @throws IOException If an error occurs
-   * @throws ClassNotFoundException If the class cannot be found
    */  
-  protected Object readNull() throws IOException, ClassNotFoundException {
+  protected Object readNull() throws IOException {
     reader.assertStartTag("null");
     reader.readEndTag("null");
     
@@ -865,9 +867,8 @@ public class XMLObjectInputStream extends ObjectInputStream {
    *
    * @param shared Whether or not to add this string to the references table
    * @throws IOException If an error occurs
-   * @throws ClassNotFoundException If the class cannot be found
    */  
-  protected Object readString(boolean shared) throws IOException, ClassNotFoundException {
+  protected Object readString(boolean shared) throws IOException {
     reader.assertStartTag("string");
     
     String result = new String(reader.getAttribute("value"));
@@ -929,7 +930,7 @@ public class XMLObjectInputStream extends ObjectInputStream {
       
     try {
       if (method != null) {
-        o = method.invoke(o, new Object[0]);
+        o = method.invoke(o);
       
         if (shared && (id != null)) 
           putReference(id, o);
@@ -967,7 +968,7 @@ public class XMLObjectInputStream extends ObjectInputStream {
       try {
         currentObjects.push(o);
         currentClasses.push(c);
-        method.invoke(o, new Object[] {this});
+        method.invoke(o, this);
         currentObjects.pop();
         currentClasses.pop();
         readUnreadOptionalData();
@@ -1219,8 +1220,8 @@ public class XMLObjectInputStream extends ObjectInputStream {
     
     Class c = getClass(reader.getAttribute("base"));
     
-    int length = Integer.valueOf(reader.getAttribute("length")).intValue();
-    int dim = Integer.valueOf(reader.getAttribute("dim")).intValue();
+    int length = Integer.valueOf(reader.getAttribute("length"));
+    int dim = Integer.valueOf(reader.getAttribute("dim"));
     Object result = Array.newInstance(c, length);
     
     if (shared && (reader.getAttribute("id") != null)) 
@@ -1274,56 +1275,56 @@ public class XMLObjectInputStream extends ObjectInputStream {
       if (primitives.get(name) == null)
         return value;
           
-      return ((Boolean) primitives.get(name)).booleanValue();
+      return (Boolean) primitives.get(name);
     }
     
     public byte get(String name, byte value) {
       if (primitives.get(name) == null)
         return value;
       
-      return ((Byte) primitives.get(name)).byteValue();
+      return (Byte) primitives.get(name);
     }
     
     public char get(String name, char value) {
       if (primitives.get(name) == null)
         return value;
       
-      return ((Character) primitives.get(name)).charValue();
+      return (Character) primitives.get(name);
     }
     
     public double get(String name, double value) {
       if (primitives.get(name) == null)
         return value;
       
-      return ((Double) primitives.get(name)).doubleValue();
+      return (Double) primitives.get(name);
     }
     
     public float get(String name, float value) {
       if (primitives.get(name) == null)
         return value;
       
-      return ((Float) primitives.get(name)).floatValue();
+      return (Float) primitives.get(name);
     }
     
     public int get(String name, int value) {
       if (primitives.get(name) == null)
         return value;
       
-      return ((Integer) primitives.get(name)).intValue();
+      return (Integer) primitives.get(name);
     }
     
     public long get(String name, long value) {
       if (primitives.get(name) == null)
         return value;
       
-      return ((Long) primitives.get(name)).longValue();
+      return (Long) primitives.get(name);
     }
     
     public short get(String name, short value) {
       if (primitives.get(name) == null)
         return value;
       
-      return ((Short) primitives.get(name)).shortValue();
+      return (Short) primitives.get(name);
     }
     
     public Object get(String name, Object value) {
@@ -1334,35 +1335,35 @@ public class XMLObjectInputStream extends ObjectInputStream {
     }
     
     protected void put(String name, boolean value) {
-      primitives.put(name, new Boolean(value));
+      primitives.put(name, value);
     }
     
     protected void put(String name, byte value) {
-      primitives.put(name, new Byte(value));
+      primitives.put(name, value);
     }
     
     protected void put(String name, char value) {
-      primitives.put(name, new Character(value));
+      primitives.put(name, value);
     }
     
     protected void put(String name, double value) {
-      primitives.put(name, new Double(value));
+      primitives.put(name, value);
     }
     
     protected void put(String name, float value) {
-      primitives.put(name, new Float(value));
+      primitives.put(name, value);
     }
     
     protected void put(String name, int value) {
-      primitives.put(name, new Integer(value));
+      primitives.put(name, value);
     }
     
     protected void put(String name, long value) {
-      primitives.put(name, new Long(value));
+      primitives.put(name, value);
     }
     
     protected void put(String name, short value) {
-      primitives.put(name, new Short(value));
+      primitives.put(name, value);
     }
     
     protected void put(String name, Object value) {

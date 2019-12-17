@@ -56,7 +56,7 @@ public interface NATHandler {
    * @return
    * @throws IOException
    */
-  public InetAddress findFireWall(InetAddress bindAddress) throws IOException;
+  InetAddress findFireWall(InetAddress bindAddress) throws IOException;
   
   /**
    * The neame of the firewall's external address.  null if there is no firewall.
@@ -74,7 +74,7 @@ public interface NATHandler {
    * @return
    * @throws IOException
    */
-  public int findAvailableFireWallPort(int internal, int external, int tries, String appName) throws IOException;
-  public void openFireWallPort(int local, int external, String appName) throws IOException;
+  int findAvailableFireWallPort(int internal, int external, int tries, String appName) throws IOException;
+  void openFireWallPort(int local, int external, String appName) throws IOException;
 
 }

@@ -36,17 +36,16 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.direct.proximitygenerators;
 
+import rice.environment.Environment;
+import rice.environment.random.RandomSource;
+import rice.pastry.direct.NodeRecord;
+import rice.pastry.direct.ProximityGenerator;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Hashtable;
-
-import rice.environment.Environment;
-import rice.environment.random.RandomSource;
-import rice.pastry.direct.NodeRecord;
-import rice.pastry.direct.ProximityGenerator;
 
 public class GenericProximityGenerator implements ProximityGenerator {
   protected RandomSource random;
@@ -54,7 +53,7 @@ public class GenericProximityGenerator implements ProximityGenerator {
   float MIN_DIST = 2.0f;
   
   // This stores the matrix stored in millis
-  private float distance[][];
+  private float[][] distance;
 
   /**
    * The number of stubs.
@@ -63,7 +62,7 @@ public class GenericProximityGenerator implements ProximityGenerator {
 
   // This keeps track of the indices that have already been assigned
   // index -> ctr
-  public HashMap<Integer, Integer> assignedIndices = new HashMap<Integer, Integer>();
+  public HashMap<Integer, Integer> assignedIndices = new HashMap<>();
 
   public File inFile_Matrix;// = "GNPINPUT";
 

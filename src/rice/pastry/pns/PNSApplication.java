@@ -36,29 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.pns;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
-
 import org.mpisws.p2p.transport.proximity.ProximityListener;
 import org.mpisws.p2p.transport.proximity.ProximityProvider;
-
 import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Cancellable;
-import rice.p2p.commonapi.CancellableTask;
 import rice.p2p.commonapi.exception.TimeoutException;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.MessageDeserializer;
@@ -81,6 +64,9 @@ import rice.pastry.transport.PMessageNotification;
 import rice.pastry.transport.PMessageReceipt;
 import rice.selector.Timer;
 import rice.selector.TimerTask;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Can request LeafSet, RouteRow, Proximity of nodes, implements the PNS algorithm.
@@ -105,7 +91,7 @@ public class PNSApplication extends PastryAppl implements ProximityNeighborSelec
    * Hashtable which keeps track of temporary ping values, which are
    * only used during the getNearest() method
    */
-  protected Map<NodeHandle,Integer> pingCache = new HashMap<NodeHandle,Integer>();
+  protected final Map<NodeHandle,Integer> pingCache = new HashMap<>();
   
   protected final byte rtBase;
   
@@ -176,7 +162,7 @@ public class PNSApplication extends PastryAppl implements ProximityNeighborSelec
         Collection<Tuple<Continuation<RouteSet[], Exception>, Cancellable>>[] waiters = waitingForRouteRow.get(response.getSender());
         if (waiters != null) {
           if (waiters[response.index] != null) {
-            for (Tuple<Continuation<RouteSet[], Exception>, Cancellable> w : new ArrayList<Tuple<Continuation<RouteSet[], Exception>, Cancellable>>(waiters[response.index])) {
+            for (Tuple<Continuation<RouteSet[], Exception>, Cancellable> w : new ArrayList<>(waiters[response.index])) {
               w.b().cancel();
               w.a().receiveResult(response.row);            
             }
@@ -212,12 +198,12 @@ public class PNSApplication extends PastryAppl implements ProximityNeighborSelec
     final AttachableCancellable ret = new AttachableCancellable();
     
     // when this goes empty, return what we have
-    final Collection<NodeHandle> remaining = new HashSet<NodeHandle>(bootHandles);
+    final Collection<NodeHandle> remaining = new HashSet<>(bootHandles);
     
     thePastryNode.addProximityListener(this);
     
     // our best candidate so far, initiall null
-    final MutableTuple<NodeHandle, Cancellable> best = new MutableTuple<NodeHandle, Cancellable>();
+    final MutableTuple<NodeHandle, Cancellable> best = new MutableTuple<>();
     
     // get the proximity of everyone in the list
     for (NodeHandle nh : bootHandles) {
@@ -227,7 +213,7 @@ public class PNSApplication extends PastryAppl implements ProximityNeighborSelec
         public void receiveResult(Integer result) {
           if (logger.level <= Logger.FINE) logger.log("got proximity for "+handle+" in getNearHandles()");
           if ((best.a() != null) && 
-              (pingCache.get(best.a()).intValue() < result.intValue())) {
+              (pingCache.get(best.a()) < result)) {
             // we're not the best, just return
             return;
           }
@@ -332,17 +318,17 @@ public class PNSApplication extends PastryAppl implements ProximityNeighborSelec
     return cancellable;
   }
 
-  Map<NodeHandle, Collection<Tuple<Continuation<LeafSet, Exception>, Cancellable>>> waitingForLeafSet = 
-    new HashMap<NodeHandle, Collection<Tuple<Continuation<LeafSet, Exception>, Cancellable>>>();
+  final Map<NodeHandle, Collection<Tuple<Continuation<LeafSet, Exception>, Cancellable>>> waitingForLeafSet =
+          new HashMap<>();
   
   protected void addToWaitingForLeafSet(NodeHandle handle, Continuation<LeafSet, Exception> c, Cancellable cancelMeWhenSuccess) {
     synchronized (waitingForLeafSet) {
       Collection<Tuple<Continuation<LeafSet, Exception>, Cancellable>> waiters = waitingForLeafSet.get(handle);
       if (waiters == null) {
-        waiters = new ArrayList<Tuple<Continuation<LeafSet,Exception>,Cancellable>>();
+        waiters = new ArrayList<>();
         waitingForLeafSet.put(handle, waiters);
       }
-      waiters.add(new Tuple<Continuation<LeafSet, Exception>, Cancellable>(c,cancelMeWhenSuccess));
+      waiters.add(new Tuple<>(c, cancelMeWhenSuccess));
     }    
   }
   
@@ -412,8 +398,8 @@ public class PNSApplication extends PastryAppl implements ProximityNeighborSelec
     return cancellable;
   }
 
-  Map<NodeHandle, Collection<Tuple<Continuation<RouteSet[], Exception>, Cancellable>>[]> waitingForRouteRow = 
-    new HashMap<NodeHandle, Collection<Tuple<Continuation<RouteSet[], Exception>, Cancellable>>[]>();
+  final Map<NodeHandle, Collection<Tuple<Continuation<RouteSet[], Exception>, Cancellable>>[]> waitingForRouteRow =
+          new HashMap<>();
   
   protected void addToWaitingForRouteRow(NodeHandle handle, int row, Continuation<RouteSet[], Exception> c, Cancellable cancelMeWhenSuccess) {
     synchronized (waitingForRouteRow) {
@@ -423,9 +409,9 @@ public class PNSApplication extends PastryAppl implements ProximityNeighborSelec
         waitingForRouteRow.put(handle, waiters);
       }
       if (waiters[row] == null) {
-        waiters[row] = new ArrayList<Tuple<Continuation<RouteSet[], Exception>, Cancellable>>();        
+        waiters[row] = new ArrayList<>();
       }
-      waiters[row].add(new Tuple<Continuation<RouteSet[], Exception>, Cancellable>(c, cancelMeWhenSuccess));
+      waiters[row].add(new Tuple<>(c, cancelMeWhenSuccess));
     }    
   }
   
@@ -528,7 +514,7 @@ public class PNSApplication extends PastryAppl implements ProximityNeighborSelec
         // need to find it
         Collection<Continuation<Integer, IOException>> waiters = waitingForPing.get(handle);
         if (waiters == null) {          
-          waiters = new ArrayList<Continuation<Integer,IOException>>();
+          waiters = new ArrayList<>();
           waitingForPing.put(handle, waiters);
         }
         waiters.add(c);
@@ -577,8 +563,8 @@ public class PNSApplication extends PastryAppl implements ProximityNeighborSelec
   }
 
 
-  Map<NodeHandle, Collection<Continuation<Integer, IOException>>> waitingForPing = 
-    new HashMap<NodeHandle, Collection<Continuation<Integer, IOException>>>();
+  final Map<NodeHandle, Collection<Continuation<Integer, IOException>>> waitingForPing =
+          new HashMap<>();
   public void proximityChanged(NodeHandle i, int newProximity, Map<String, Object> options) {
     if (logger.level <= Logger.FINE) logger.log("proximityChanged("+i+","+newProximity+")");
     synchronized(pingCache) {
@@ -623,12 +609,12 @@ public class PNSApplication extends PastryAppl implements ProximityNeighborSelec
   }
   
   public List<NodeHandle> sortedProximityCache() {
-    ArrayList<NodeHandle> handles = new ArrayList<NodeHandle>(pingCache.keySet());
-    Collections.sort(handles,new Comparator<NodeHandle>() {
-    
+    ArrayList<NodeHandle> handles = new ArrayList<>(pingCache.keySet());
+    handles.sort(new Comparator<NodeHandle>() {
+
       public int compare(NodeHandle a, NodeHandle b) {
-        return pingCache.get(a).intValue()-pingCache.get(b).intValue();
-      }    
+        return pingCache.get(a) - pingCache.get(b);
+      }
     });
     
 //    Iterator<NodeHandle> i = handles.iterator();
@@ -812,7 +798,7 @@ public class PNSApplication extends PastryAppl implements ProximityNeighborSelec
       c.receiveResult(handle);
       return null;
     }
-    HashSet<NodeHandle> handles = new HashSet<NodeHandle>();
+    HashSet<NodeHandle> handles = new HashSet<>();
 
     for (int i = 1; i <= leafSet.cwSize() ; i++)
       handles.add(leafSet.get(i));
@@ -833,13 +819,11 @@ public class PNSApplication extends PastryAppl implements ProximityNeighborSelec
    * @return The closest node out of handle union routeset
    */
   private Cancellable closestToMe(NodeHandle handle, RouteSet[] routeSets, Continuation<NodeHandle, Exception> c) {
-    ArrayList<NodeHandle> handles = new ArrayList<NodeHandle>();
+    ArrayList<NodeHandle> handles = new ArrayList<>();
 
-    for (int i=0 ; i<routeSets.length ; i++) {
-      RouteSet set = routeSets[i];
-
+    for (RouteSet set : routeSets) {
       if (set != null) {
-        for (int j=0; j<set.size(); j++)
+        for (int j = 0; j < set.size(); j++)
           handles.add(set.get(j));
       }
     }
@@ -861,22 +845,22 @@ public class PNSApplication extends PastryAppl implements ProximityNeighborSelec
     final AttachableCancellable ret = new AttachableCancellable();
     final NodeHandle[] closestNode = {handle};
 
-    final Collection<NodeHandle> remaining = new HashSet<NodeHandle>(handles);
+    final Collection<NodeHandle> remaining = new HashSet<>(handles);
     if (!remaining.contains(handle)) remaining.add(handle);
     
     // shortest distance found till now    
     final int[] nearestdist = {Integer.MAX_VALUE}; //proximity(closestNode);  
 
-    ArrayList<NodeHandle> temp = new ArrayList<NodeHandle>(remaining); // need to include handle when looping
+    ArrayList<NodeHandle> temp = new ArrayList<>(remaining); // need to include handle when looping
     for (NodeHandle nh : temp) {
       final NodeHandle tempNode = nh;
       if (logger.level <= Logger.FINER) logger.log("closestToMe checking prox on "+tempNode+"("+handle+","+handles+")");      
       ret.attach(getProximity(handle, new Continuation<Integer, IOException>(){
       
         public void receiveResult(Integer result) {
-          if (logger.level <= Logger.FINEST) logger.log("closestToMe got prox("+result.intValue()+") on "+tempNode+"("+handle+","+handles+")");      
+          if (logger.level <= Logger.FINEST) logger.log("closestToMe got prox("+ result +") on "+tempNode+"("+handle+","+handles+")");
           remaining.remove(tempNode);
-          int prox = result.intValue();
+          int prox = result;
           if ((prox >= 0) && (prox < nearestdist[0]) && tempNode.isAlive()) {
             nearestdist[0] = prox;
             closestNode[0] = tempNode;

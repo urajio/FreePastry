@@ -36,17 +36,16 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.sourceroute.factory;
 
+import org.mpisws.p2p.transport.sourceroute.SourceRoute;
+import org.mpisws.p2p.transport.sourceroute.SourceRouteFactory;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.mpisws.p2p.transport.sourceroute.SourceRoute;
-import org.mpisws.p2p.transport.sourceroute.SourceRouteFactory;
-
-import rice.p2p.commonapi.rawserialization.InputBuffer;
 
 /**
  * TODO: may be a good idea to special case the single hop, as is done in multi-inet.
@@ -57,7 +56,7 @@ public class WireSourceRouteFactory implements SourceRouteFactory<InetSocketAddr
 
   public SourceRoute<InetSocketAddress> build(InputBuffer buf, InetSocketAddress localAddr, InetSocketAddress lastHop) throws IOException {
     byte numInPath = buf.readByte();
-    ArrayList<InetSocketAddress> path = new ArrayList<InetSocketAddress>(numInPath);
+    ArrayList<InetSocketAddress> path = new ArrayList<>(numInPath);
     for (int i = 0; i < numInPath; i++) {
       byte[] addrBytes = new byte[4];
       buf.read(addrBytes);
@@ -75,7 +74,7 @@ public class WireSourceRouteFactory implements SourceRouteFactory<InetSocketAddr
 
   public SourceRoute<InetSocketAddress> reverse(SourceRoute<InetSocketAddress> route) {
     WireSourceRoute temp = (WireSourceRoute)route;
-    ArrayList<InetSocketAddress> result = new ArrayList<InetSocketAddress>(temp.getPath());
+    ArrayList<InetSocketAddress> result = new ArrayList<>(temp.getPath());
     
     Collections.reverse(result);
     

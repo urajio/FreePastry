@@ -36,13 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.security.ca;
 
-import java.io.*;
-import java.security.*;
+import rice.Continuation;
+import rice.p2p.util.SecurityUtils;
+import rice.post.PostUserAddress;
+import rice.post.security.PostCertificate;
+import rice.post.security.SecurityModule;
 
-import rice.*;
-import rice.post.*;
-import rice.post.security.*;
-import rice.p2p.util.*;
+import java.io.IOException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
  * This class is the security module which implements the PKI (CA) based
@@ -138,7 +140,7 @@ public class CASecurityModule implements SecurityModule {
       System.arraycopy(addressByte, 0, all, 0, addressByte.length);
       System.arraycopy(keyByte, 0, all, addressByte.length, keyByte.length);
 
-      command.receiveResult(new Boolean(SecurityUtils.verify(all, cert.getSignature(), caKey)));
+      command.receiveResult(SecurityUtils.verify(all, cert.getSignature(), caKey));
     } catch (IOException e) {
       throw new SecurityException("InvalidKeyException verifying object: " + e);
     }

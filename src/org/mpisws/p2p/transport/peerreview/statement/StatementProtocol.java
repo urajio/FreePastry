@@ -36,11 +36,10 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.statement;
 
-import java.util.Map;
-
 import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
-
 import rice.p2p.commonapi.rawserialization.RawSerializable;
+
+import java.util.Map;
 
 /**
  * The purpose of this protocol is to make sure that we have all the nodeID
@@ -50,11 +49,11 @@ import rice.p2p.commonapi.rawserialization.RawSerializable;
  * from the sender.
  */
 public interface StatementProtocol<Handle, Identifier extends RawSerializable> extends PeerReviewConstants {
-  static final int MAX_INCOMPLETE_STATEMENTS = 250;
-  static final int PROGRESS_INTERVAL_MICROS = 1000000;
-  static final int STATEMENT_COMPLETION_TIMEOUT_MILLIS = 1000;
-  static final int TI_MAKE_PROGRESS = 5;
+  int MAX_INCOMPLETE_STATEMENTS = 250;
+  int PROGRESS_INTERVAL_MICROS = 1000000;
+  int STATEMENT_COMPLETION_TIMEOUT_MILLIS = 1000;
+  int TI_MAKE_PROGRESS = 5;
 
-  public void handleIncomingStatement(Handle source, Statement<Identifier> statement, Map<String, Object> options);
+  void handleIncomingStatement(Handle source, Statement<Identifier> statement, Map<String, Object> options);
 
 }

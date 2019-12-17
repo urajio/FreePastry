@@ -36,14 +36,13 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.commitment;
 
-import java.util.LinkedList;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.peerreview.message.OutgoingUserDataMessage;
 import org.mpisws.p2p.transport.peerreview.message.UserDataMessage;
-
 import rice.p2p.commonapi.rawserialization.RawSerializable;
 import rice.p2p.util.tuples.Tuple;
+
+import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * We need to keep some state for each peer, including separate transmit and
@@ -73,8 +72,8 @@ public class PeerInfo<Handle extends RawSerializable> {
   public PeerInfo(Handle handle) {
     this.handle = handle;
     lastTransmit = 0;
-    xmitQueue = new LinkedList<OutgoingUserDataMessage<Handle>>();
-    recvQueue = new LinkedList<Tuple<UserDataMessage<Handle>,Map<String,Object>>>();
+    xmitQueue = new LinkedList<>();
+    recvQueue = new LinkedList<>();
     currentTimeout = 0;
     retransmitsSoFar = 0;
     lastChallenge = -1;

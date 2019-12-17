@@ -36,11 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.standard;
 
-import java.util.Collection;
-
 import rice.Continuation;
 import rice.p2p.commonapi.Cancellable;
 import rice.pastry.NodeHandle;
+
+import java.util.Collection;
 
 /**
  * Finds a near neighbor (usually for bootstrapping)
@@ -50,6 +50,6 @@ import rice.pastry.NodeHandle;
  */
 public interface ProximityNeighborSelector {
 
-  public Cancellable getNearHandles(Collection<NodeHandle> bootHandles, Continuation<Collection<NodeHandle>, Exception> deliverResultToMe);
+  Cancellable getNearHandles(Collection<NodeHandle> bootHandles, Continuation<Collection<NodeHandle>, Exception> deliverResultToMe);
 
 }

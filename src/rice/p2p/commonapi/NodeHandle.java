@@ -37,10 +37,11 @@ advised of the possibility of such damage.
 
 package rice.p2p.commonapi;
 
-import java.io.*;
-import java.util.*;
-
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Observable;
 
 /**
  * @(#) NodeHandle.java
@@ -59,9 +60,9 @@ import rice.p2p.commonapi.rawserialization.OutputBuffer;
 public abstract class NodeHandle extends Observable implements Serializable  {
 
   // constants defining types of observable events
-  public static final Integer PROXIMITY_CHANGED = new Integer(1);
-  public static final Integer DECLARED_DEAD = new Integer(2);
-  public static final Integer DECLARED_LIVE = new Integer(3);
+  public static final Integer PROXIMITY_CHANGED = 1;
+  public static final Integer DECLARED_DEAD = 2;
+  public static final Integer DECLARED_LIVE = 3;
   
   // serialver
   private static final long serialVersionUID = 4761193998848368227L;

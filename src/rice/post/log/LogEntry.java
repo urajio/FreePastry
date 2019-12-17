@@ -36,15 +36,18 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.log;
 
-import java.lang.ref.*;
-import java.security.*;
-import java.util.Arrays;
-
-import rice.*;
+import rice.Continuation;
 import rice.environment.logging.Logger;
-import rice.p2p.commonapi.*;
-import rice.post.*;
-import rice.post.storage.*;
+import rice.p2p.commonapi.Id;
+import rice.post.Post;
+import rice.post.PostEntityAddress;
+import rice.post.storage.ContentHashReference;
+import rice.post.storage.PostData;
+import rice.post.storage.SecureReference;
+import rice.post.storage.SignedReference;
+
+import java.lang.ref.SoftReference;
+import java.util.Arrays;
 
 /**
  * Abstract class for all entries in the log. Each application using post should
@@ -67,7 +70,7 @@ public abstract class LogEntry implements PostData {
   protected LogEntryReference previousEntryReference;
   
   // a reference to the previous N_LOG_ENTRIES references in the log
-  protected LogEntryReference previousEntryReferences[];
+  protected LogEntryReference[] previousEntryReferences;
 
   // the previous entry in the log
   private transient SoftReference previousEntry;

@@ -39,31 +39,20 @@ advised of the possibility of such damage.
  */
 package rice.pastry.direct;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.TransportLayer;
 import org.mpisws.p2p.transport.direct.Delivery;
 import org.mpisws.p2p.transport.direct.DirectTransportLayer;
 import org.mpisws.p2p.transport.direct.EventSimulator;
 import org.mpisws.p2p.transport.direct.GenericNetworkSimulator;
 import org.mpisws.p2p.transport.liveness.LivenessListener;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
 import rice.environment.random.RandomSource;
-import rice.environment.time.TimeSource;
-import rice.environment.time.simulated.DirectTimeSource;
 import rice.p2p.commonapi.Cancellable;
 import rice.p2p.commonapi.CancellableTask;
-import rice.pastry.transport.NodeHandleAdapter;
-import rice.selector.SelectorManager;
 import rice.selector.TimerTask;
+
+import java.util.*;
 
 public class BasicNetworkSimulator<Identifier, MessageType> extends EventSimulator implements 
     GenericNetworkSimulator<Identifier, MessageType> {
@@ -156,7 +145,7 @@ public class BasicNetworkSimulator<Identifier, MessageType> extends EventSimulat
     DirectTimerTask dtt = null;
     
     if (from == null || isAlive(from)) {
-      MessageDelivery<Identifier, MessageType> md = new MessageDelivery<Identifier, MessageType>(msg, node, from, null, this);
+      MessageDelivery<Identifier, MessageType> md = new MessageDelivery<>(msg, node, from, null, this);
       dtt = new DirectTimerTask(md, timeSource.currentTimeMillis()+ delay,period);
       addTask(dtt);
     }
@@ -285,7 +274,7 @@ public class BasicNetworkSimulator<Identifier, MessageType> extends EventSimulat
     return t.record;
   }
 
-  List<LivenessListener<Identifier>> livenessListeners = new ArrayList<LivenessListener<Identifier>>();
+  final List<LivenessListener<Identifier>> livenessListeners = new ArrayList<>();
   public void addLivenessListener(LivenessListener<Identifier> name) {
     synchronized(livenessListeners) {
       livenessListeners.add(name);
@@ -302,7 +291,7 @@ public class BasicNetworkSimulator<Identifier, MessageType> extends EventSimulat
     if (logger.level <= Logger.FINER) logger.log("notifyLivenessListeners("+i+","+liveness+"):"+livenessListeners.get(0));
     List<LivenessListener<Identifier>> temp;
     synchronized(livenessListeners) {
-      temp = new ArrayList<LivenessListener<Identifier>>(livenessListeners);
+      temp = new ArrayList<>(livenessListeners);
     }
     for (LivenessListener<Identifier> listener : temp) {
       listener.livenessChanged(i, liveness, options);

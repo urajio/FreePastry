@@ -37,20 +37,12 @@ advised of the possibility of such damage.
 
 package rice.pastry.dist;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.nio.channels.UnresolvedAddressException;
-import java.util.*;
-
-import rice.Continuation;
 import rice.environment.Environment;
-import rice.environment.logging.Logger;
-import rice.p2p.commonapi.Cancellable;
-import rice.p2p.commonapi.CancellableTask;
-import rice.pastry.*;
+import rice.pastry.NodeIdFactory;
 import rice.pastry.socket.SocketPastryNodeFactory;
 import rice.pastry.socket.nat.rendezvous.RendezvousSocketPastryNodeFactory;
+
+import java.io.IOException;
 
 /**
  * An abstraction of the nodeId factory for distributed nodes. In order to

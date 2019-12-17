@@ -42,5 +42,5 @@ package org.mpisws.p2p.transport.rendezvous;
  * @author Jeff Hoye
  */
 public interface ContactDirectStrategy<HighIdentifier> {
-  public boolean canContactDirect(HighIdentifier remoteNode);
+  boolean canContactDirect(HighIdentifier remoteNode);
 }

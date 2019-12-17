@@ -36,18 +36,13 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.priority;
 
-import java.io.IOException;
+import org.mpisws.p2p.transport.TransportLayer;
+import org.mpisws.p2p.transport.TransportLayerListener;
+
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
-import org.mpisws.p2p.transport.TransportLayerListener;
-
-import rice.Continuation;
-import rice.p2p.util.tuples.Tuple3;
 
 /**
  * Does 3 things:
@@ -58,27 +53,27 @@ import rice.p2p.util.tuples.Tuple3;
  * @author Jeff Hoye
  */
 public interface PriorityTransportLayer<Identifier> extends TransportLayer<Identifier, ByteBuffer> {
-  public static final String OPTION_PRIORITY = "OPTION_PRIORITY";
+  String OPTION_PRIORITY = "OPTION_PRIORITY";
   
   // different priority levels
-  public static final byte MAX_PRIORITY = -15;
-  public static final byte HIGH_PRIORITY = -10;
-  public static final byte MEDIUM_HIGH_PRIORITY = -5;
-  public static final byte MEDIUM_PRIORITY = 0;
-  public static final byte MEDIUM_LOW_PRIORITY = 5;
-  public static final byte LOW_PRIORITY = 10;
-  public static final byte LOWEST_PRIORITY = 15;
-  public static final byte DEFAULT_PRIORITY = MEDIUM_PRIORITY;
+  byte MAX_PRIORITY = -15;
+  byte HIGH_PRIORITY = -10;
+  byte MEDIUM_HIGH_PRIORITY = -5;
+  byte MEDIUM_PRIORITY = 0;
+  byte MEDIUM_LOW_PRIORITY = 5;
+  byte LOW_PRIORITY = 10;
+  byte LOWEST_PRIORITY = 15;
+  byte DEFAULT_PRIORITY = MEDIUM_PRIORITY;
 
-  public static final int STATUS_NOT_CONNECTED = 0;
-  public static final int STATUS_CONNECTING = 1;
-  public static final int STATUS_CONNECTED = 2;
+  int STATUS_NOT_CONNECTED = 0;
+  int STATUS_CONNECTING = 1;
+  int STATUS_CONNECTED = 2;
   
   
-  public void addTransportLayerListener(TransportLayerListener<Identifier> listener);
-  public void removeTransportLayerListener(TransportLayerListener<Identifier> listener);
-  public void addPriorityTransportLayerListener(PriorityTransportLayerListener<Identifier> listener);
-  public void removePriorityTransportLayerListener(PriorityTransportLayerListener<Identifier> listener);
+  void addTransportLayerListener(TransportLayerListener<Identifier> listener);
+  void removeTransportLayerListener(TransportLayerListener<Identifier> listener);
+  void addPriorityTransportLayerListener(PriorityTransportLayerListener<Identifier> listener);
+  void removePriorityTransportLayerListener(PriorityTransportLayerListener<Identifier> listener);
 
   /**
    * Returns if there is a primary connection to the identifier
@@ -86,50 +81,50 @@ public interface PriorityTransportLayer<Identifier> extends TransportLayer<Ident
    * @param i
    * @return STATUS_NOT_CONNECTED, STATUS_CONNECTING, STATUS_CONNECTED
    */
-  public int connectionStatus(Identifier i);
+  int connectionStatus(Identifier i);
   
   /**
    * Returns the options on the primary connection
    * @param i
    * @return
    */
-  public Map<String, Object> connectionOptions(Identifier i);
+  Map<String, Object> connectionOptions(Identifier i);
   
   /**
    * usually used with bytesPending() or queueLength()
    * @return any Identifier with messages to be sent
    */
-  public Collection<Identifier> nodesWithPendingMessages(); 
+  Collection<Identifier> nodesWithPendingMessages();
   
   /**
    * Returns the number of messages pending to be sent
    * @param i
    * @return
    */
-  public int queueLength(Identifier i);
+  int queueLength(Identifier i);
   
   /**
    * The number of bytes to be sent to the identifier
    * @param i
    * @return
    */
-  public long bytesPending(Identifier i);
+  long bytesPending(Identifier i);
   
   /**
    * The number of bytes to be sent to the identifier
    * @param i
    * @return
    */
-  public List<MessageInfo> getPendingMessages(Identifier i);
+  List<MessageInfo> getPendingMessages(Identifier i);
   
   /**
    * open a primary connection
    * @param i
    * @param notifyMe when it is open
    */
-  public void openPrimaryConnection(Identifier i, Map<String, Object> options);
+  void openPrimaryConnection(Identifier i, Map<String, Object> options);
   
-  public void addPrimarySocketListener(PrimarySocketListener<Identifier> listener); 
-  public void removePrimarySocketListener(PrimarySocketListener<Identifier> listener); 
+  void addPrimarySocketListener(PrimarySocketListener<Identifier> listener);
+  void removePrimarySocketListener(PrimarySocketListener<Identifier> listener);
 
 }

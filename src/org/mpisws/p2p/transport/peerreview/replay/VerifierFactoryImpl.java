@@ -36,16 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.replay;
 
-import java.io.IOException;
-
 import org.mpisws.p2p.transport.peerreview.PeerReview;
 import org.mpisws.p2p.transport.peerreview.history.SecureHistory;
 import org.mpisws.p2p.transport.peerreview.replay.playback.ReplayLayer;
 import org.mpisws.p2p.transport.peerreview.replay.playback.ReplaySM;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.rawserialization.RawSerializable;
+
+import java.io.IOException;
 
 public class VerifierFactoryImpl<Handle extends RawSerializable, Identifier extends RawSerializable> implements VerifierFactory<Handle, Identifier>{
 
@@ -62,7 +61,7 @@ public class VerifierFactoryImpl<Handle extends RawSerializable, Identifier exte
       Object extInfo) throws IOException {
 //    logger.log("getVerifier("+localHandle+","+initialTime+")");
     Environment env = ReplayLayer.generateEnvironment(localHandle.toString(), 0, 0,peerreview.getEnvironment().getLogManager());
-    VerifierImpl<Handle, Identifier> ret = new VerifierImpl<Handle, Identifier>(peerreview,env,history,localHandle,firstEntryToReplay,extInfo);
+    VerifierImpl<Handle, Identifier> ret = new VerifierImpl<>(peerreview, env, history, localHandle, firstEntryToReplay, extInfo);
     ((ReplaySM)env.getSelectorManager()).setVerifier(ret);
     return ret;
   }

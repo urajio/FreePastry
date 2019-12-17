@@ -36,31 +36,23 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.commonapi;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.exception.NodeIsFaultyException;
 import org.mpisws.p2p.transport.priority.QueueOverflowException;
 import org.mpisws.p2p.transport.util.DefaultCallback;
 import org.mpisws.p2p.transport.util.DefaultErrorHandler;
 import org.mpisws.p2p.transport.util.MessageRequestHandleImpl;
 import org.mpisws.p2p.transport.util.OptionsFactory;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.NodeHandle;
 import rice.p2p.commonapi.rawserialization.RawMessage;
 import rice.p2p.util.rawserialization.SimpleInputBuffer;
 import rice.p2p.util.rawserialization.SimpleOutputBuffer;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 public class CommonAPITransportLayerImpl<Identifier extends NodeHandle> implements 
     CommonAPITransportLayer<Identifier>, 
@@ -126,10 +118,10 @@ public class CommonAPITransportLayerImpl<Identifier extends NodeHandle> implemen
     this.errorHandler = errorHandler;
     
     if (this.callback == null) {
-      this.callback = new DefaultCallback<Identifier, RawMessage>(env);
+      this.callback = new DefaultCallback<>(env);
     }
     if (this.errorHandler == null) {
-      this.errorHandler = new DefaultErrorHandler<Identifier>(logger); 
+      this.errorHandler = new DefaultErrorHandler<>(logger);
     }
       
     
@@ -165,7 +157,7 @@ public class CommonAPITransportLayerImpl<Identifier extends NodeHandle> implemen
     if (logger.level <= Logger.FINE) logger.log("sendMessage("+i+","+m+")");
 
     final MessageRequestHandleImpl<Identifier, RawMessage> handle 
-      = new MessageRequestHandleImpl<Identifier, RawMessage>(i, m, options);
+      = new MessageRequestHandleImpl<>(i, m, options);
     final ByteBuffer buf;
     
     // we only serialize the Id, we assume the underlieing layer got the address of the NodeHandle correct

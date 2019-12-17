@@ -39,10 +39,9 @@ package rice.pastry.standard;
 
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.pastry.*;
-import rice.pastry.messaging.*;
 
-import java.security.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Constructs an address for a specific class and instance name.
@@ -100,9 +99,8 @@ public class StandardAddress {
   @SuppressWarnings("unchecked")
   public static short getAddress(Class c, Environment env) {
     int myCode = getAddress(c, null, env);
-    
-    short code = (short)unshift(myCode, 16);
-    return code;
+
+    return (short)unshift(myCode, 16);
   }
   
   private static int shift(int n, int s) {

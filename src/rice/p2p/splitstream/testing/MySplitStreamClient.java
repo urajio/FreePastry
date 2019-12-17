@@ -39,7 +39,9 @@ advised of the possibility of such damage.
  */
 package rice.p2p.splitstream.testing;
 
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdRange;
+import rice.p2p.commonapi.RangeCannotBeDeterminedException;
 import rice.p2p.splitstream.*;
 import rice.p2p.util.MathUtils;
 import rice.pastry.PastryNode;
@@ -103,9 +105,9 @@ public class MySplitStreamClient implements SplitStreamClient {
   }
 
   public void subscribeToAllChannels() {
-    for (int i = 0; i < stripes.length; i++) {
-      stripes[i].subscribe(this);
-    } 
+      for (Stripe stripe : stripes) {
+          stripe.subscribe(this);
+      }
   }
   
   public Stripe[] getStripes() {
@@ -142,9 +144,9 @@ public class MySplitStreamClient implements SplitStreamClient {
   }
   
   public void publishAll(byte[] b) {
-    for (int i = 0; i < stripes.length; i++) {
-      publish(b, stripes[i]);
-    }
+      for (Stripe stripe : stripes) {
+          publish(b, stripe);
+      }
   }
 
   public void publish(byte[] b, Stripe s) {

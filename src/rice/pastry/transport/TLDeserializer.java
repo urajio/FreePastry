@@ -36,13 +36,7 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.transport;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.commonapi.RawMessageDeserializer;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Message;
@@ -51,9 +45,12 @@ import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.MessageDeserializer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.p2p.commonapi.rawserialization.RawMessage;
-import rice.p2p.util.rawserialization.SimpleInputBuffer;
 import rice.pastry.NodeHandleFactory;
 import rice.pastry.messaging.PRawMessage;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TLDeserializer implements RawMessageDeserializer, Deserializer {
   Map<Integer, MessageDeserializer> deserializers;
@@ -65,7 +62,7 @@ public class TLDeserializer implements RawMessageDeserializer, Deserializer {
   public TLDeserializer(NodeHandleFactory nodeHandleFactory, Environment env) {
     this.environment = env;
     this.nodeHandleFactory = nodeHandleFactory;
-    this.deserializers = new HashMap<Integer, MessageDeserializer>();
+    this.deserializers = new HashMap<>();
     this.logger = environment.getLogManager().getLogger(TLDeserializer.class, null);
   }
   

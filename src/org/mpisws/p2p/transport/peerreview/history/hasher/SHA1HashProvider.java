@@ -36,15 +36,13 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.history.hasher;
 
+import org.mpisws.p2p.transport.peerreview.history.HashProvider;
+import rice.p2p.util.rawserialization.SimpleOutputBuffer;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import org.mpisws.p2p.transport.peerreview.history.HashProvider;
-
-import rice.p2p.util.MathUtils;
-import rice.p2p.util.rawserialization.SimpleOutputBuffer;
 
 public class SHA1HashProvider implements HashProvider {
   private MessageDigest md;
@@ -91,9 +89,8 @@ public class SHA1HashProvider implements HashProvider {
       md.update(bb);
       bb.position(pos);
     }
-    byte[] ret = md.digest();
-//    System.out.println("hash: "+MathUtils.toBase64(ret));
-    return ret;
+    //    System.out.println("hash: "+MathUtils.toBase64(ret));
+    return md.digest();
   }
   
 }

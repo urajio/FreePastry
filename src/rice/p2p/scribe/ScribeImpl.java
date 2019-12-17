@@ -37,21 +37,23 @@ advised of the possibility of such damage.
 
 package rice.p2p.scribe;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.util.*;
-
-import rice.*;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
 import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.MessageDeserializer;
 import rice.p2p.scribe.javaserialized.JavaScribeContentDeserializer;
 import rice.p2p.scribe.maintenance.MaintainableScribe;
 import rice.p2p.scribe.maintenance.ScribeMaintenancePolicy;
 import rice.p2p.scribe.messaging.*;
-import rice.p2p.scribe.rawserialization.*;
+import rice.p2p.scribe.rawserialization.JavaSerializedScribeContent;
+import rice.p2p.scribe.rawserialization.RawScribeContent;
+import rice.p2p.scribe.rawserialization.ScribeContentDeserializer;
+
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.*;
 
 /**
  * @(#) ScribeImpl.java Thie provided implementation of Scribe.
@@ -76,7 +78,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
   /**
    * the hashtable of topic -> TopicManager
    */
-  public Hashtable<Topic, TopicManager> topicManagers;
+  public final Hashtable<Topic, TopicManager> topicManagers;
 
   /**
    * this scribe's policy
@@ -131,13 +133,13 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
   /**
    * Topics that we are the root.
    */
-  public Set<Topic> roots = new HashSet<Topic>();
+  public Set<Topic> roots = new HashSet<>();
   
   /**
    * Topics that (should) have an outsanding subscription.
    * Topics that are in this set have no parent, and we are not the root.
    */
-  public Set<Topic> pending = new HashSet<Topic>();
+  public Set<Topic> pending = new HashSet<>();
   
   ScribeContentDeserializer contentDeserializer;
 
@@ -177,8 +179,8 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
     Parameters p = environment.getParameters();
     MAINTENANCE_INTERVAL = p.getInt("p2p_scribe_maintenance_interval");
     MESSAGE_TIMEOUT = p.getInt("p2p_scribe_message_timeout");
-    this.allChildren = new HashMap<NodeHandle, Collection<Topic>>();
-    this.allParents = new HashMap<NodeHandle, Collection<Topic>>();
+    this.allChildren = new HashMap<>();
+    this.allParents = new HashMap<>();
     this.instance = instance;
     this.endpoint = node.buildEndpoint(this, instance);
     this.contentDeserializer = new JavaScribeContentDeserializer();
@@ -216,8 +218,8 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
       }
     
     });
-    this.topicManagers = new Hashtable<Topic, TopicManager>();
-    this.subscribeLostMessages = new HashMap<Integer, SubscribeLostMessage>();
+    this.topicManagers = new Hashtable<>();
+    this.subscribeLostMessages = new HashMap<>();
     this.policy = policy;
     this.maintenancePolicy = maintenancePolicy;
     this.localHandle = endpoint.getLocalNodeHandle();
@@ -274,11 +276,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
    * parent/children/client exists)
    */
   public boolean containsTopic(Topic topic) {
-    if (topicManagers.get(topic) != null) {
-      return true;
-    } else {
-      return false;
-    }
+    return topicManagers.get(topic) != null;
   }
 
   /**
@@ -296,7 +294,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
     if (manager != null) {
       return getSimpleClients(manager.getClients()); 
     }
-    return new ArrayList<ScribeClient>();
+    return new ArrayList<>();
   }
   
   public Collection<ScribeMultiClient> getClientsByTopic(Topic topic) { 
@@ -304,7 +302,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
     if (manager != null) {
       return manager.getClients(); 
     }
-    return new ArrayList<ScribeMultiClient>();
+    return new ArrayList<>();
   }
   
   
@@ -317,7 +315,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
     WeakReference<ScribeClient> client;
     
     public ScribeClientConverter(ScribeClient client) {
-      this.client = new WeakReference<ScribeClient>(client);
+      this.client = new WeakReference<>(client);
     }
 
     public void subscribeFailed(Collection<Topic> topics) {
@@ -365,7 +363,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
   }  
   
   protected Collection<ScribeClient> getSimpleClients(Collection<ScribeMultiClient> multi) {
-    ArrayList<ScribeClient> ret = new ArrayList<ScribeClient>(multi.size());
+    ArrayList<ScribeClient> ret = new ArrayList<>(multi.size());
     for(ScribeMultiClient client : multi) {
       if (client instanceof ScribeClientConverter) {
         ScribeClient theClient = ((ScribeClientConverter)client).client.get();
@@ -380,7 +378,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
   }
   
   
-  private Map<ScribeClient,ScribeClientConverter> clientConverters = new WeakHashMap<ScribeClient,ScribeClientConverter>();
+  private final Map<ScribeClient,ScribeClientConverter> clientConverters = new WeakHashMap<>();
   
   protected ScribeMultiClient getMultiClient(ScribeClient client) {
     if (client instanceof ScribeMultiClient) {
@@ -420,7 +418,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
       return manager.getChildren();
     }
 
-    return new ArrayList<NodeHandle>(0);
+    return new ArrayList<>(0);
   }
   
   
@@ -538,7 +536,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
    * @return 
    */
   private HashMap<NodeHandle, List<Topic>> buildManifests(List<Topic> topics) {
-    HashMap<NodeHandle, List<Topic>> manifest = new HashMap<NodeHandle, List<Topic>>();
+    HashMap<NodeHandle, List<Topic>> manifest = new HashMap<>();
     
     for (Topic topic : topics) {
       NodeHandleSet handleSet = endpoint.replicaSet(topic.getId(), 1);
@@ -565,7 +563,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
       
       List<Topic> theTopics = manifest.get(handle);
       if (theTopics == null) {
-        theTopics = new ArrayList<Topic>();
+        theTopics = new ArrayList<>();
         manifest.put(handle, theTopics);
       }
       theTopics.add(topic);
@@ -653,7 +651,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
     
     if (logger.level <= Logger.FINER) logger.log("Telling client " + client + " about LOSS for outstanding ack " + message.getId());
     
-    ArrayList<Topic> failedTopics = new ArrayList<Topic>();
+    ArrayList<Topic> failedTopics = new ArrayList<>();
     for (Topic topic : message.getTopics()) {
       NodeHandle parent = getParent(topic);
       if (!isRoot(topic) && (parent == null))
@@ -755,8 +753,8 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
     if (logger.level <= Logger.FINER) logger.log(
         "Subscribing client " + client + " to " + theTopics +".");
 
-    List<Topic> toSubscribe = new ArrayList<Topic>();
-    List<Topic> alreadySubscribed = new ArrayList<Topic>();
+    List<Topic> toSubscribe = new ArrayList<>();
+    List<Topic> alreadySubscribed = new ArrayList<>();
 
     synchronized(topicManagers) {
       for (Topic topic : theTopics) {
@@ -812,7 +810,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
    */
   public void unsubscribe(Collection<Topic> topicsToUnsubscribe, ScribeMultiClient client) {
     if (logger.level <= Logger.FINER) logger.log("Unsubscribing client " + client + " from topic " + topicManagers);
-    HashMap<NodeHandle, List<Topic>> needToUnsubscribe = new HashMap<NodeHandle, List<Topic>>();
+    HashMap<NodeHandle, List<Topic>> needToUnsubscribe = new HashMap<>();
 
     synchronized(topicManagers) {
       for (Topic topic : topicsToUnsubscribe) {
@@ -835,7 +833,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
             if (parent != null) {
               List<Topic> theTopics = needToUnsubscribe.get(parent);
               if (theTopics == null) {
-                theTopics = new ArrayList<Topic>();
+                theTopics = new ArrayList<>();
                 needToUnsubscribe.put(parent, theTopics);
               }
               theTopics.add(topic);
@@ -990,7 +988,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
       
       // need to be holding topicManagers for the call to addToAllChildren
       manager.addChild(child);
-      clientList = new ArrayList<ScribeMultiClient>(manager.getClients());
+      clientList = new ArrayList<>(manager.getClients());
     }
     
 
@@ -1071,7 +1069,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
             
       List<ScribeMultiClient> clientList;
       synchronized(topicManagers) {
-        clientList = new ArrayList<ScribeMultiClient>(manager.getClients());
+        clientList = new ArrayList<>(manager.getClients());
       }
       for (ScribeMultiClient client : clientList) { 
         client.childRemoved(topic, child);
@@ -1089,7 +1087,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
    * @return The list of topics
    */
   public Collection<Topic> getTopicsByClient(ScribeClient client) {    
-    ArrayList<Topic> result = new ArrayList<Topic>();
+    ArrayList<Topic> result = new ArrayList<>();
     
     for (TopicManager topicManager : topicManagers.values()) {
       if (topicManager.containsClient(getMultiClient(client)))
@@ -1100,7 +1098,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
   }
 
   public Collection<Topic> getTopicsByClient(ScribeMultiClient client) {    
-    ArrayList<Topic> result = new ArrayList<Topic>();
+    ArrayList<Topic> result = new ArrayList<>();
     
     for (TopicManager topicManager : topicManagers.values()) {
       if (topicManager.containsClient(client))
@@ -1144,7 +1142,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
       } else {    
         if (logger.level <= Logger.WARNING) logger.logException("addToAllChildren("+t+","+child+") child.isAlive() == false", new Exception("Stack Trace"));         
       }
-      topics = new ArrayList<Topic>();
+      topics = new ArrayList<>();
       allChildren.put(child, topics);
     }
     if (!topics.contains(t)) {
@@ -1199,7 +1197,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
       } else {
         if (logger.level <= Logger.WARNING) logger.logException("addToAllParents("+t+","+parent+") parent.isAlive() == false", new Exception("Stack Trace"));         
       }
-      topics = new ArrayList<Topic>();
+      topics = new ArrayList<>();
       allParents.put(parent, topics);
     }
     
@@ -1240,11 +1238,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
     }
     if (allParents.containsKey(parent)) {
       Vector topics = (Vector) allParents.get(parent);
-      if (topics.contains(t)) {
-        return true;
-      } else {
-        return false;
-      }
+      return topics.contains(t);
     } else {
       return false;
     }
@@ -1254,11 +1248,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
     if (parent == null) {
       return false;
     }
-    if (allParents.containsKey(parent)) {
-      return true;
-    } else {
-      return false;
-    }
+    return allParents.containsKey(parent);
   }
 
   public void printAllParentsDataStructure() {
@@ -1493,10 +1483,10 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
     // askPolicy: everyone else (after the policy is asked, these will be placed into forward/dontForward appropriately)
     
     // this is the list of topics that aren't a loop or already a child
-    ArrayList<Topic> forward = new ArrayList<Topic>(); // leave these in the message
-    ArrayList<Topic> dontForward = new ArrayList<Topic>(); // take these out, and maybe send a response message for these, the old policy just drops these, We should probably send a response as long as sMessage.getId() != NO_ACK_REQUIRED
+    ArrayList<Topic> forward = new ArrayList<>(); // leave these in the message
+    ArrayList<Topic> dontForward = new ArrayList<>(); // take these out, and maybe send a response message for these, the old policy just drops these, We should probably send a response as long as sMessage.getId() != NO_ACK_REQUIRED
 //    ArrayList<Topic> isRoot = new ArrayList<Topic>(); // we are the root of a new topic, we must accept the child, and create the new topic
-    ArrayList<Topic> askPolicy = new ArrayList<Topic>(); // ask the policy, and take these out if the policy accepts them
+    ArrayList<Topic> askPolicy = new ArrayList<>(); // ask the policy, and take these out if the policy accepts them
     
     for (Topic topic : sMessage.getTopics()) {
       TopicManager tmanager = topicManagers.get(topic);
@@ -1553,7 +1543,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
     if (!askPolicy.isEmpty()) {
       
       // see if the policy will allow us to take on this child
-      accepted = policy.allowSubscribe(this, sMessage.getSubscriber(), new ArrayList<Topic>(askPolicy), sMessage.getContent()); 
+      accepted = policy.allowSubscribe(this, sMessage.getSubscriber(), new ArrayList<>(askPolicy), sMessage.getContent());
       
       // askPolicy is now the rejected
       askPolicy.removeAll(accepted);        
@@ -1568,7 +1558,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
       // Why is this the right policy?  Maybe we are incorrect about the liveness of the node, but 
       // we don't want anycasts to bounce all over the ring until they hit every node,
       // thus, if we were going to accept the node, then we drop that topic here, and forward the rest
-      List<Topic> newTopics = new ArrayList<Topic>();
+      List<Topic> newTopics = new ArrayList<>();
       if (sMessage.getSubscriber().isAlive()) {
         for (Topic topic : accepted) {
         
@@ -1625,7 +1615,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
       // we send a confirmation back to the child
       
       // build all of the pathToRoot[]
-      List<List<Id>> paths = new ArrayList<List<Id>>(toReturn.size());
+      List<List<Id>> paths = new ArrayList<>(toReturn.size());
       for (Topic topic : toReturn) {
         TopicManager tmanager = topicManagers.get(topic);
         paths.add(tmanager.getPathToRoot());
@@ -1655,8 +1645,8 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
     // a) for each that we have a manager, call directAnycast, this is the old way to have good management of trees
     // b) for topics that we don't have a manager, split them up based on the underlieing overlay's router and route them that way, this is the new version for multi-subscription
     
-    List<Topic> noManager = new ArrayList<Topic>(); // these are the topics we don't have a manager for
-    List<Topic> failed = new ArrayList<Topic>(); // these are the topics that have exhausted the tree (they visited everyone and were rejected)
+    List<Topic> noManager = new ArrayList<>(); // these are the topics we don't have a manager for
+    List<Topic> failed = new ArrayList<>(); // these are the topics that have exhausted the tree (they visited everyone and were rejected)
     
     Iterator<Topic> topicIterator = sMessage.getTopics().iterator();
     while (topicIterator.hasNext()) {
@@ -1717,10 +1707,8 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
       // we are the root, but the policy would let us accept him
       List<Topic> theTopics = manifest.remove(localHandle);
       sMessage.removeTopics(theTopics);
-      for (Topic topic : theTopics) {
-        failed.add(topic); 
-//        if (logger.level <= Logger.WARNING) logger.log("No next hop for topic "+topic+" isRoot = "+isRoot(topic));
-      }
+      //        if (logger.level <= Logger.WARNING) logger.log("No next hop for topic "+topic+" isRoot = "+isRoot(topic));
+      failed.addAll(theTopics);
     }
     if (logger.level <= Logger.FINEST) logger.log("handleForwardSubscribeMessage() here 6 "+sMessage);
 
@@ -1823,7 +1811,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
       }
     } else if (message instanceof SubscribeAckMessage) { 
       // store the former parents/topics here so we can send Unsubscribe messages
-      HashMap<NodeHandle, List<Topic>> needToUnsubscribe = new HashMap<NodeHandle, List<Topic>>();
+      HashMap<NodeHandle, List<Topic>> needToUnsubscribe = new HashMap<>();
       SubscribeAckMessage saMessage = (SubscribeAckMessage) message;
 
       if (! saMessage.getSource().isAlive()) {
@@ -1845,7 +1833,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
           if (logger.level <= Logger.FINE) logger.log("Received unexpected subscribe ack message (we are the root) from " +
                    saMessage.getSource() + " for topic " + topic);
           List<Topic> topics = needToUnsubscribe.get(saMessage.getSource());
-          if (topics == null) topics = new ArrayList<Topic>();
+          if (topics == null) topics = new ArrayList<>();
           topics.add(topic);
         } else {
           // if we don't know about this topic, then we unsubscribe
@@ -1855,7 +1843,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
             if (logger.level <= Logger.WARNING) logger.log("Received unexpected subscribe ack message from " +
                 saMessage.getSource() + " for unknown topic " + topic);
             List<Topic> topics = needToUnsubscribe.get(saMessage.getSource());
-            if (topics == null) topics = new ArrayList<Topic>();
+            if (topics == null) topics = new ArrayList<>();
             topics.add(topic);
           } else {
             if (manager.getParent() == null) {
@@ -1872,7 +1860,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
   
               List<Topic> topics = needToUnsubscribe.get(parent);
               if (topics == null) {
-                topics = new ArrayList<Topic>();
+                topics = new ArrayList<>();
                 needToUnsubscribe.put(parent, topics);
               }
               topics.add(topic);
@@ -1942,7 +1930,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
           client.deliver(pMessage.getTopic(), pMessage.getContent());
         }
 
-        Collection<NodeHandle> handles = new ArrayList<NodeHandle>(manager.getChildren());
+        Collection<NodeHandle> handles = new ArrayList<>(manager.getChildren());
 
         for (NodeHandle handle : handles) {
           if (logger.level <= Logger.FINER) logger.log("Forwarding publish message with data " + pMessage.getContent() + " for topic " +
@@ -2024,12 +2012,12 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
     if (arg.equals(NodeHandle.DECLARED_DEAD)) {
       NodeHandle handle = (NodeHandle)o;      
       
-      ArrayList<Topic> wasChildOfTopics = new ArrayList<Topic>(getTopicsByChild(handle));
+      ArrayList<Topic> wasChildOfTopics = new ArrayList<>(getTopicsByChild(handle));
       for (Topic topic : wasChildOfTopics) {
         removeChild(topic,handle); // TODO: see what messages this dispatches
         if (logger.level <= Logger.FINE) logger.log("Child " + o + " for topic " + topic + " has died - removing.");
       }
-      ArrayList<Topic> wasParentOfTopics = new ArrayList<Topic>(getTopicsByParent(handle));
+      ArrayList<Topic> wasParentOfTopics = new ArrayList<>(getTopicsByParent(handle));
       for (Topic topic : wasParentOfTopics) {
         if (logger.level <= Logger.FINE) logger.log("Parent " + handle + " for topic " + topic + " has died - removing.");
         setParent(topic, null, null);
@@ -2055,8 +2043,8 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
         
     if (joined) {
       // NOTE: we could clean this up to use roots/pending, but this impl seems pretty safe
-      List<Topic> notRoot = new ArrayList<Topic>();
-      for(TopicManager manager : (new ArrayList<TopicManager>(topicManagers.values()))) {
+      List<Topic> notRoot = new ArrayList<>();
+      for(TopicManager manager : (new ArrayList<>(topicManagers.values()))) {
 //      TopicManager manager = (TopicManager) topics.get(topic);
         Topic topic = manager.topic;      
         // check if new guy is root, we were old root, then subscribe
@@ -2146,8 +2134,8 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
      */
     private TopicManager(Topic topic) {
       this.topic = topic;
-      this.clients = new ArrayList<ScribeMultiClient>();
-      this.children = new ArrayList<NodeHandle>();
+      this.clients = new ArrayList<>();
+      this.children = new ArrayList<>();
 
       // this is a bit ugly: normally we can't be holding the topicManagers lock when calling setPathToRoot()
       // because it sends messages, but it is ok in this case because we have no children
@@ -2232,15 +2220,15 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
       
       // build the path to the root for the new node
       if (pathToRoot == null) {
-        this.pathToRoot = new ArrayList<Id>();
+        this.pathToRoot = new ArrayList<>();
       } else {
-        this.pathToRoot = new ArrayList<Id>(pathToRoot);
+        this.pathToRoot = new ArrayList<>(pathToRoot);
       }
       this.pathToRoot.add(endpoint.getId());
 
       if (!children.isEmpty()) {
-        List<NodeHandle> sendDrop = new ArrayList<NodeHandle>();
-        List<NodeHandle> sendUpdate = new ArrayList<NodeHandle>();
+        List<NodeHandle> sendDrop = new ArrayList<>();
+        List<NodeHandle> sendUpdate = new ArrayList<>();
         
         // now send the information out to our children, prevent routing loops
         synchronized(topicManagers) {
@@ -2377,8 +2365,6 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
     public boolean removeClient(ScribeMultiClient client) {
       clients.remove(client);
 
-      boolean unsub = ((clients.size() == 0) && (children.size() == 0));
-
       // if we're going to unsubscribe, then we remove ourself as
       // as observer to keep from having memory problems
       // TODO: make this part of the destructable pattern
@@ -2387,15 +2373,11 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
 //        parent.deleteObserver(this);
 //      }
 
-      return unsub;
+      return ((clients.size() == 0) && (children.size() == 0));
     }
 
     public boolean containsChild(NodeHandle child) {
-      if (children.contains(child)) {
-        return true;
-      } else {
-        return false;
-      }
+      return children.contains(child);
     }
     
     /**
@@ -2465,7 +2447,7 @@ public class ScribeImpl implements Scribe, MaintainableScribe, Application, Obse
   public void destroy() {
     if (environment.getSelectorManager().isSelectorThread()) {
       if (logger.level <= Logger.INFO) logger.log("Destroying "+this);
-      ArrayList<TopicManager> managers = new ArrayList<TopicManager>(topicManagers.values());
+      ArrayList<TopicManager> managers = new ArrayList<>(topicManagers.values());
       topicManagers.clear();
       
       for (NodeHandle handle : allChildren.keySet()) {

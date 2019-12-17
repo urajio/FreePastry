@@ -39,8 +39,6 @@ advised of the possibility of such damage.
  */
 package rice.selector;
 
-import java.util.Queue;
-
 import rice.environment.time.TimeSource;
 import rice.p2p.commonapi.CancellableTask;
 
@@ -108,17 +106,19 @@ public abstract class TimerTask implements Comparable<TimerTask>, CancellableTas
   }
 
   public int compareTo(TimerTask arg0) {
-    TimerTask tt = (TimerTask)arg0;
-    if (tt == this) return 0;
+    if (arg0 == this) return 0;
 //    return (int)(tt.nextExecutionTime-nextExecutionTime);
-    int diff = (int)(nextExecutionTime-tt.nextExecutionTime);
+    int diff = (int)(nextExecutionTime- arg0.nextExecutionTime);
     if (diff == 0) {
       // compare the sequence numbers
-      diff = seq-tt.seq;
+      diff = seq- arg0.seq;
       
       // if still same, try the hashcode
-      if (diff == 0) {      
-        return System.identityHashCode(this) < System.identityHashCode(tt) ? 1 : -1;
+      if (diff == 0) {
+        if (System.identityHashCode(this) < System.identityHashCode(arg0)) {
+          return 1;
+        }
+        return -1;
       }
     }
     return diff;

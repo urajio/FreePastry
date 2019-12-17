@@ -36,13 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.splitstream;
 
-import java.io.*;
-
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.scribe.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.p2p.scribe.rawserialization.RawScribeContent;
+
+import java.io.IOException;
 
 /**
  * This represents data sent through scribe for splitstream during a
@@ -99,13 +97,11 @@ public class SplitStreamSubscribeContent implements RawScribeContent {
   
   public SplitStreamSubscribeContent(InputBuffer buf) throws IOException {
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        stage = buf.readInt();
-        break;
-      default:
-        throw new IOException("Unknown Version: "+version);
-    }
+      if (version == 0) {
+          stage = buf.readInt();
+      } else {
+          throw new IOException("Unknown Version: " + version);
+      }
   }
 }
 

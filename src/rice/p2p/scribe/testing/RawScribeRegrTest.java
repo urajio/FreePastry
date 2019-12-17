@@ -36,21 +36,18 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 
 package rice.p2p.scribe.testing;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.*;
 
 import rice.environment.Environment;
-import rice.environment.logging.Logger;
-import rice.environment.params.simple.SimpleParameters;
-import rice.environment.time.simulated.DirectTimeSource;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.commonapi.testing.CommonAPITest;
-import rice.p2p.scribe.*;
-import rice.p2p.scribe.messaging.SubscribeMessage;
-import rice.p2p.scribe.rawserialization.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Node;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.scribe.ScribeContent;
+import rice.p2p.scribe.Topic;
+import rice.p2p.scribe.rawserialization.RawScribeContent;
+import rice.p2p.scribe.rawserialization.ScribeContentDeserializer;
+
+import java.io.IOException;
 
 /**
  * @(#) DistScribeRegrTest.java Provides regression testing for the Scribe service using distributed
@@ -76,9 +73,8 @@ public class RawScribeRegrTest extends ScribeRegrTest {
       
       public ScribeContent deserializeScribeContent(InputBuffer buf, Endpoint endpoint,
           short contentType) throws IOException {
-        switch(contentType) {
-          case RawTestScribeContent.TYPE:
-            return new RawTestScribeContent(buf,endpoint);
+        if (contentType == RawTestScribeContent.TYPE) {
+          return new RawTestScribeContent(buf, endpoint);
         }
         throw new IllegalArgumentException("Unknown type: "+contentType);
       }
@@ -92,7 +88,7 @@ public class RawScribeRegrTest extends ScribeRegrTest {
    *
    * @param args DESCRIBE THE PARAMETER
    */
-  public static void main(String args[]) throws IOException {
+  public static void main(String[] args) throws IOException {
     Environment env = parseArgs(args);
     
     ScribeRegrTest scribeTest = new RawScribeRegrTest(env);

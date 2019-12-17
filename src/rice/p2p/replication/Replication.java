@@ -37,8 +37,6 @@ advised of the possibility of such damage.
 
 package rice.p2p.replication;
 
-import rice.p2p.commonapi.*;
-
 /**
  * @(#) Replication.java
  *
@@ -63,7 +61,7 @@ public interface Replication {
    * applications, as the Replication class itself periodicly invokes this process.  However,
    * applications are allowed to use this method to initiate a replication request.
    */
-  public void replicate();
+  void replicate();
   
 }
 

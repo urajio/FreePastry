@@ -36,13 +36,20 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.aggregation;
 
-import rice.p2p.past.gc.GCPastContent;
-import rice.p2p.past.*;
-import rice.p2p.past.gc.*;
 import rice.p2p.commonapi.Id;
-import rice.p2p.glacier.VersionKey;
-import java.security.*;
-import java.io.*;
+import rice.p2p.past.Past;
+import rice.p2p.past.PastContent;
+import rice.p2p.past.PastContentHandle;
+import rice.p2p.past.gc.GCPast;
+import rice.p2p.past.gc.GCPastContent;
+import rice.p2p.past.gc.GCPastContentHandle;
+import rice.p2p.past.gc.GCPastMetadata;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class Aggregate implements GCPastContent {
   protected GCPastContent[] components;
@@ -85,7 +92,7 @@ public class Aggregate implements GCPastContent {
     return false;
   }
   
-  public PastContent checkInsert(rice.p2p.commonapi.Id id, PastContent existingContent) throws PastException {
+  public PastContent checkInsert(rice.p2p.commonapi.Id id, PastContent existingContent) {
     if (existingContent == null) {
       return this;
     } else {
@@ -134,4 +141,4 @@ public class Aggregate implements GCPastContent {
   public GCPastMetadata getMetadata(long expiration) {
     return new GCPastMetadata(expiration);
   }
-};
+}

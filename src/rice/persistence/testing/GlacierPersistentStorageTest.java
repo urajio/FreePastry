@@ -45,17 +45,15 @@ package rice.persistence.testing;
  * 
  * @version $Id$
  */
-import java.io.*;
-import java.util.*;
-import java.util.zip.*;
 
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.glacier.*;
-import rice.p2p.glacier.v2.*;
-import rice.p2p.util.*;
-import rice.pastry.commonapi.*;
-import rice.persistence.*;
+import rice.p2p.glacier.v2.FragmentAndManifest;
+import rice.p2p.util.XMLObjectInputStream;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.util.zip.GZIPInputStream;
 
 /**
  * This class is a class which tests the PersistentStorage class
@@ -68,7 +66,7 @@ public class GlacierPersistentStorageTest {
   /**
    * Builds a MemoryStorageTest
    */
-  public GlacierPersistentStorageTest(String root) throws IOException {
+  public GlacierPersistentStorageTest(String root) {
     this.root = new File("FreePastry-Storage-Root/" + root);
   }
   
@@ -78,29 +76,29 @@ public class GlacierPersistentStorageTest {
   
   protected void process(File file) throws Exception {
     File[] files = file.listFiles();
-    
-    for (int i=0; i<files.length; i++) {
+
+    for (File value : files) {
       /* check each file and recurse into subdirectories */
-      if (files[i].isFile() && (files[i].getName().length() > 20)) {
-        ObjectInputStream objin = new XMLObjectInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(files[i]))));
-        objin.readObject(); 
-        
+      if (value.isFile() && (value.getName().length() > 20)) {
+        ObjectInputStream objin = new XMLObjectInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(value))));
+        objin.readObject();
+
         Object o = objin.readObject();
         if (o instanceof FragmentAndManifest) {
           FragmentAndManifest fm = (FragmentAndManifest) o;
-          
+
           int total = fm.fragment.payload.length + 24;
-          
+
           total += fm.manifest.getObjectHash().length + fm.manifest.getSignature().length;
           total += fm.manifest.getFragmentHashes().length * fm.manifest.getFragmentHashes()[0].length;
-          System.out.println(files[i].getName() + "\t" + total + "\t" + files[i].length());
+          System.out.println(value.getName() + "\t" + total + "\t" + value.length());
         } else {
           System.out.println("ERROR: Found class " + o.getClass().getName());
         }
         objin.close();
-        
-      } else if (files[i].isDirectory()) {
-        process(files[i]);
+
+      } else if (value.isDirectory()) {
+        process(value);
       }
     }
   }

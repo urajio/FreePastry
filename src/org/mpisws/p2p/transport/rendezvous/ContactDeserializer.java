@@ -36,13 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.rendezvous;
 
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
-
-import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.p2p.commonapi.rawserialization.OutputBuffer;
-import rice.pastry.socket.nat.rendezvous.RendezvousSocketNodeHandle;
 
 public interface ContactDeserializer<Identifier, HighIdentifier> {
 

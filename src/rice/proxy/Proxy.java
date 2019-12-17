@@ -37,18 +37,18 @@ advised of the possibility of such damage.
 
 package rice.proxy;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import java.awt.*;
-import javax.swing.*;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
 import rice.environment.params.simple.SimpleParameters;
-import rice.p2p.util.*;
+import rice.p2p.util.MathUtils;
+
+import javax.swing.*;
+import java.io.*;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashSet;
 
 /**
  * This class represents a generic Java process launching program (wrapper process) which reads in
@@ -161,11 +161,11 @@ public class Proxy {
   }
 
   protected String[] buildJavaEnvironment(Parameters parameters) {
-    HashSet<String> set = new HashSet<String>();
+    HashSet<String> set = new HashSet<>();
     
     if (parameters.getBoolean("java_profiling_enable") ||
         parameters.getBoolean("java_thread_debugger_enable"))  {
-      if (System.getProperty("os.name").toLowerCase().indexOf("windows") < 0) {
+      if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
         set.add("LD_LIBRARY_PATH=" + parameters.getString("java_profiling_native_library_directory"));
       } 
     }
@@ -174,7 +174,7 @@ public class Proxy {
   }   
   
   protected String buildJavaCommand(Parameters parameters) {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     
     if (! ("".equals(parameters.getString("java_wrapper_command")))) {
       result.append(parameters.getString("java_wrapper_command"));
@@ -195,7 +195,7 @@ public class Proxy {
 
     if (((parameters.getString("java_home") == null) ||
          (parameters.getString("java_home").equals(""))) && 
-        (System.getProperty("os.name").toLowerCase().indexOf("windows") < 0)) {
+        (!System.getProperty("os.name").toLowerCase().contains("windows"))) {
       parameters.setString("java_home", System.getProperty("java.home"));
       try {
         parameters.store();
@@ -218,10 +218,10 @@ public class Proxy {
     result.append(" -Xss");
     result.append(parameters.getString("java_stack_size"));
     if (System.getProperty("RECOVER") != null)
-      result.append(" -DRECOVER=\""+System.getProperty("RECOVER")+"\"");
+      result.append(" -DRECOVER=\"").append(System.getProperty("RECOVER")).append("\"");
     
     if (parameters.getBoolean("java_memory_free_enable")) {
-      result.append(" -Xmaxf" + parameters.getDouble("java_memory_free_maximum"));
+      result.append(" -Xmaxf").append(parameters.getDouble("java_memory_free_maximum"));
     }
     
     if (parameters.getBoolean("java_use_server_vm")) {
@@ -233,8 +233,8 @@ public class Proxy {
     }
     
     if (parameters.getBoolean("java_prefer_select") ||
-        (parameters.getBoolean("java_prefer_select_automatic_osx") && 
-         System.getProperty("os.name").toLowerCase().indexOf("mac os x") >= 0)) {
+        (parameters.getBoolean("java_prefer_select_automatic_osx") &&
+                System.getProperty("os.name").toLowerCase().contains("mac os x"))) {
 //      Moved from the FAQ to the source:
 //      For the curious, using the <tt>java.nio</tt> package on dual
 //      G5 machines with Java 1.4.2 is known to cause kernel panics.  However,
@@ -244,11 +244,11 @@ public class Proxy {
       result.append(" -Djava.nio.preferSelect=true");
     }
     
-    if (System.getProperty("os.name").toLowerCase().indexOf("mac os x") >= 0) {
+    if (System.getProperty("os.name").toLowerCase().contains("mac os x")) {
       if (parameters.contains("proxy_doc_image")) {
-        result.append(" -Xdock:name="+appString+" -Xdock:icon="+parameters.getString("proxy_doc_image"));
+        result.append(" -Xdock:name=").append(appString).append(" -Xdock:icon=").append(parameters.getString("proxy_doc_image"));
       } else {
-        result.append(" -Xdock:name="+appString);        
+        result.append(" -Xdock:name=").append(appString);
       }
     }
     
@@ -262,11 +262,11 @@ public class Proxy {
     }
     
     if (parameters.getString("java_other_options") != null) {
-      result.append(" " + parameters.getString("java_other_options"));
+      result.append(" ").append(parameters.getString("java_other_options"));
     }
     
     if (parameters.getBoolean("java_profiling_enable")) {
-      if (System.getProperty("os.name").toLowerCase().indexOf("windows") >= 0) {
+      if (System.getProperty("os.name").toLowerCase().contains("windows")) {
         result.append(" -Djava.library.path=");
         result.append(parameters.getString("java_profiling_native_library_directory"));
       }
@@ -513,8 +513,8 @@ public class Proxy {
               if (parameters.getBoolean("proxy_show_dialog") && parameters.getBoolean("proxy_automatic_update_ask_user")) {
                 String message = "A new version of the "+appString+" software has been detected.\n\n" +
                 "Would you like to automatically upgrade to '" + filename + "' and restart your proxy?";
-                int i = JOptionPane.showOptionDialog(null, message, "Updated Software Detected", 
-                                                     0, JOptionPane.INFORMATION_MESSAGE, null, 
+                int i = JOptionPane.showOptionDialog(null, message, "Updated Software Detected",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
                                                      new Object[] {"Disable Automatic Updating", "Later", "Yes"}, "Yes");
                 
                 if (i == 0) {
@@ -605,10 +605,8 @@ public class Proxy {
         public int compare(File a, File b) {
           long am = ((File) a).lastModified();
           long bm = ((File) b).lastModified();
-          
-          if (am < bm) return 1;
-          else if (am > bm) return -1;
-          else return 0;
+
+          return Long.compare(bm, am);
         }
         
         public boolean equals(Object o) {
@@ -619,7 +617,7 @@ public class Proxy {
     
     public String getClasspath() {
       String seperator = System.getProperty("path.separator");
-      StringBuffer buf = new StringBuffer();
+      StringBuilder buf = new StringBuilder();
       
       for (int i=0; i<files.length; i++) {
         buf.append(files[i].getName());

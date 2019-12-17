@@ -39,6 +39,6 @@ package org.mpisws.p2p.transport;
 import java.util.Map;
 
 public interface SocketCountListener<Identifier> {
-  public void socketOpened(Identifier i, Map<String, Object> options, boolean outgoing);
-  public void socketClosed(Identifier i, Map<String, Object> options);
+  void socketOpened(Identifier i, Map<String, Object> options, boolean outgoing);
+  void socketClosed(Identifier i, Map<String, Object> options);
 }

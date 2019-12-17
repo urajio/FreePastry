@@ -39,25 +39,24 @@ advised of the possibility of such damage.
  */
 package rice.pastry.leafset.testing;
 
-import java.io.IOException;
-import java.util.*;
-
-import org.mpisws.p2p.transport.MessageRequestHandle;
 import org.mpisws.p2p.transport.SocketRequestHandle;
 import org.mpisws.p2p.transport.liveness.LivenessListener;
 import org.mpisws.p2p.transport.proximity.ProximityListener;
-
 import rice.environment.Environment;
-import rice.pastry.*;
 import rice.p2p.commonapi.appsocket.AppSocketReceiver;
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.pastry.*;
 import rice.pastry.boot.Bootstrapper;
 import rice.pastry.client.PastryAppl;
 import rice.pastry.leafset.LeafSet;
 import rice.pastry.messaging.Message;
 import rice.pastry.routing.RoutingTable;
-import rice.pastry.transport.PMessageReceipt;
 import rice.pastry.transport.PMessageNotification;
+import rice.pastry.transport.PMessageReceipt;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 public class MergeTest {
 
@@ -69,9 +68,9 @@ public class MergeTest {
    * @return
    */
   public static LeafSet getLeafSet(String str) {
-    String a[] = str.split("\\[");
+    String[] a = str.split("\\[");
     assert(a.length == 2);
-    String b[] = a[1].split("]");
+    String[] b = a[1].split("]");
     assert(b.length == 2);
     
     String s_ccw = a[0]; // <0xD74D4F..><0xD7B075..><0xD98A9D..><0xDAC7F0..><0xDB39A6..><0xDD5A73..><0xE050B3..><0xE0B735..><0xE33A04..><0xE48D40..><0xE678CB..><0xE73F09..> 
@@ -82,10 +81,8 @@ public class MergeTest {
     flip(ccw);
     NodeHandle base = getHandles(s_base)[0];
     NodeHandle[] cw = getHandles(s_cw);
-    
-    LeafSet ls = new LeafSet(base,24,true,cw,ccw);
-    
-    return ls;
+
+      return new LeafSet(base,24,true,cw,ccw);
   }
 
   public static void flip(NodeHandle[] nds) {
@@ -104,8 +101,8 @@ public class MergeTest {
    * @return
    */
   public static NodeHandle[] getHandles(String str) {
-    ArrayList<NodeHandle> list = new ArrayList<NodeHandle>();
-    String a[] = str.split("[< ]");
+    ArrayList<NodeHandle> list = new ArrayList<>();
+    String[] a = str.split("[< ]");
     for (int ctr = 0; ctr < a.length; ctr++) {
       if (a[ctr].length() > 3) {
         assert(a[ctr].substring(0,2).equals("0x"));
@@ -141,7 +138,7 @@ public class MergeTest {
 //        super(id, env); 
 //      }
 //      
-      public NodeHandle readNodeHandle(InputBuffer buf) throws IOException {
+      public NodeHandle readNodeHandle(InputBuffer buf) {
         // TODO Auto-generated method stub
         return null;
       }
@@ -306,13 +303,13 @@ public class MergeTest {
      * @deprecated
      */
     public void receiveMessage(Message m) {
-    };
+    }
 
-    public String toString() {
+      public String toString() {
       return id.toString();
     }
 
-    public void serialize(OutputBuffer buf) throws IOException {
+    public void serialize(OutputBuffer buf) {
       throw new RuntimeException("not implemented.");        
     }
   }

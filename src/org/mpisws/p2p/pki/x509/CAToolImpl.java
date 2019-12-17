@@ -36,52 +36,27 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.pki.x509;
 
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateParsingException;
-import java.security.cert.X509Certificate;
-import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.Date;
-import java.util.Random;
-
-import javax.security.auth.x500.X500Principal;
-
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
-
 import rice.environment.Environment;
 import rice.p2p.util.rawserialization.SimpleInputBuffer;
 import rice.p2p.util.rawserialization.SimpleOutputBuffer;
 import rice.p2p.util.tuples.Tuple;
 import rice.pastry.Id;
 import rice.pastry.standard.RandomNodeIdFactory;
+
+import javax.security.auth.x500.X500Principal;
+import java.io.*;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.cert.Certificate;
+import java.security.cert.*;
+import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.Date;
 
 public class CAToolImpl implements CATool {
 
@@ -176,7 +151,7 @@ public class CAToolImpl implements CATool {
     
     X509Certificate cert = generateNewCA(CN,new Date(), expiryDate, 1, caPair, DEFAULT_SIGNATURE_ALGORITHM);
     
-    return new Tuple<X509Certificate, KeyPair>(cert,caPair);
+    return new Tuple<>(cert, caPair);
   }
   
   /**
@@ -207,8 +182,7 @@ public class CAToolImpl implements CATool {
     certGen.setPublicKey(keyPair.getPublic());
     certGen.setSignatureAlgorithm(signatureAlgorithm);
 
-    X509Certificate cert = certGen.generate(keyPair.getPrivate(), "BC");
-    return cert;
+    return certGen.generate(keyPair.getPrivate(), "BC");
   }  
   
   public X509Certificate sign(String CN, PublicKey key) throws CertificateParsingException, CertificateEncodingException, InvalidKeyException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException {
@@ -240,8 +214,7 @@ public class CAToolImpl implements CATool {
     certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false,
                             new SubjectKeyIdentifierStructure(publicKey));
 
-    X509Certificate cert = certGen.generate(privateKey, "BC");   // note: private key of CA
-    return cert;        
+    return certGen.generate(privateKey, "BC");
   }
   
   public X509Certificate sign(String CN, PublicKey publicKey, Date expiryDate, long serialNumber) throws CertificateParsingException, CertificateEncodingException, InvalidKeyException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException {

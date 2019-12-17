@@ -61,8 +61,8 @@ public class OptionsFactory {
   }
 
   public static Map<String, Object> copyOptions(Map<String, Object> existing) {
-    if (existing == null) return new HashMap<String, Object>();
-    return new HashMap<String, Object>(existing);
+    if (existing == null) return new HashMap<>();
+    return new HashMap<>(existing);
   }
   
   /**

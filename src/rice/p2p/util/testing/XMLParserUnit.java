@@ -36,9 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.util.testing;
 
-import rice.p2p.util.*;
-import java.io.*;
-import java.util.*;
+import rice.p2p.util.XMLParser;
+
+import java.io.StringReader;
 
 public class XMLParserUnit {
   

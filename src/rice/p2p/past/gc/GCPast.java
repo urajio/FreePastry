@@ -37,9 +37,10 @@ advised of the possibility of such damage.
 
 package rice.p2p.past.gc;
 
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.past.*;
+import rice.Continuation;
+import rice.p2p.commonapi.Id;
+import rice.p2p.past.Past;
+import rice.p2p.past.PastContent;
 
 /**
  * @(#) GCPast.java
@@ -67,7 +68,7 @@ public interface GCPast extends Past {
    * the year 292473178. If this is a problem, applications should
    * check for this value explicitly.
    */
-  public static final long INFINITY_EXPIRATION = Long.MAX_VALUE;
+  long INFINITY_EXPIRATION = Long.MAX_VALUE;
   
   /**
    * Inserts an object with the given ID into this instance of Past.
@@ -87,7 +88,7 @@ public interface GCPast extends Past {
    * @param obj the object to be inserted
    * @param command Command to be performed when the result is received
    */
-  public void insert(PastContent obj, Continuation command);
+  void insert(PastContent obj, Continuation command);
   
   /**
    * Inserts an object with the given ID into this instance of Past.
@@ -105,7 +106,7 @@ public interface GCPast extends Past {
    * @param expiration the time until which the object must be stored
    * @param command Command to be performed when the result is received
    */
-  public void insert(PastContent obj, long expiration, Continuation command);
+  void insert(PastContent obj, long expiration, Continuation command);
 
   /**
    * Updates the objects stored under the provided keys id to expire no
@@ -126,7 +127,7 @@ public interface GCPast extends Past {
    * @param expiration The time to extend the lifetime to
    * @param command Command to be performed when the result is received
    */
-  public void refresh(Id[] ids, long[] expiration, Continuation command);
+  void refresh(Id[] ids, long[] expiration, Continuation command);
 
   /**
    * Updates the objects stored under the provided keys id to expire no
@@ -147,7 +148,7 @@ public interface GCPast extends Past {
    * @param expiration The time to extend the lifetime to (applies to all keys)
    * @param command Command to be performed when the result is received
    */
-  public void refresh(Id[] ids, long expiration, Continuation command);
+  void refresh(Id[] ids, long expiration, Continuation command);
 
 }
 

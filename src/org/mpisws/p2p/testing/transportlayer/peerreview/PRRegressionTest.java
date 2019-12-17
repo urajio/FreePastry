@@ -36,77 +36,22 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.testing.transportlayer.peerreview;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.nio.ByteBuffer;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.SignatureException;
-import java.security.cert.X509Certificate;
-import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.Map.Entry;
-
 import org.mpisws.p2p.pki.x509.CATool;
 import org.mpisws.p2p.pki.x509.CAToolImpl;
 import org.mpisws.p2p.pki.x509.X509Serializer;
 import org.mpisws.p2p.pki.x509.X509SerializerImpl;
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
-import org.mpisws.p2p.transport.peerreview.IdentifierExtractor;
-import org.mpisws.p2p.transport.peerreview.PeerReview;
-import org.mpisws.p2p.transport.peerreview.PeerReviewCallback;
-import org.mpisws.p2p.transport.peerreview.PeerReviewImpl;
-import org.mpisws.p2p.transport.peerreview.WitnessListener;
-import org.mpisws.p2p.transport.peerreview.commitment.Authenticator;
-import org.mpisws.p2p.transport.peerreview.commitment.AuthenticatorSerializer;
-import org.mpisws.p2p.transport.peerreview.commitment.AuthenticatorSerializerImpl;
-import org.mpisws.p2p.transport.peerreview.commitment.AuthenticatorStore;
-import org.mpisws.p2p.transport.peerreview.commitment.CommitmentProtocol;
-import org.mpisws.p2p.transport.peerreview.commitment.CommitmentProtocolImpl;
-import org.mpisws.p2p.transport.peerreview.evidence.EvidenceSerializerImpl;
+import org.mpisws.p2p.transport.*;
+import org.mpisws.p2p.transport.peerreview.*;
 import org.mpisws.p2p.transport.peerreview.history.HashProvider;
-import org.mpisws.p2p.transport.peerreview.history.SecureHistory;
 import org.mpisws.p2p.transport.peerreview.history.SecureHistoryFactory;
 import org.mpisws.p2p.transport.peerreview.history.SecureHistoryFactoryImpl;
 import org.mpisws.p2p.transport.peerreview.history.hasher.SHA1HashProvider;
-import org.mpisws.p2p.transport.peerreview.history.stub.NullHashProvider;
-import org.mpisws.p2p.transport.peerreview.identity.IdentityTransport;
-import org.mpisws.p2p.transport.peerreview.identity.IdentityTransportCallback;
 import org.mpisws.p2p.transport.peerreview.identity.IdentityTransportLayerImpl;
-import org.mpisws.p2p.transport.peerreview.identity.UnknownCertificateException;
-import org.mpisws.p2p.transport.peerreview.infostore.Evidence;
 import org.mpisws.p2p.transport.peerreview.infostore.IdStrTranslator;
-import org.mpisws.p2p.transport.peerreview.infostore.PeerInfoStore;
 import org.mpisws.p2p.transport.peerreview.infostore.StatusChangeListener;
-import org.mpisws.p2p.transport.peerreview.message.PeerReviewMessage;
 import org.mpisws.p2p.transport.peerreview.replay.Verifier;
 import org.mpisws.p2p.transport.peerreview.replay.record.RecordLayer;
-import org.mpisws.p2p.transport.table.UnknownValueException;
-import org.mpisws.p2p.transport.util.MessageRequestHandleImpl;
 import org.mpisws.p2p.transport.util.Serializer;
-
 import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
@@ -117,6 +62,14 @@ import rice.p2p.commonapi.rawserialization.RawSerializable;
 import rice.p2p.util.MathUtils;
 import rice.p2p.util.rawserialization.SimpleOutputBuffer;
 import rice.selector.TimerTask;
+
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.security.*;
+import java.security.cert.X509Certificate;
+import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class PRRegressionTest {
   public static final byte[] EMPTY_ARRAY = new byte[0];
@@ -214,7 +167,7 @@ public class PRRegressionTest {
   
   
   static class BogusTransport implements TransportLayer<HandleImpl, ByteBuffer> {
-    public static Map<HandleImpl, BogusTransport> peerTable = new HashMap<HandleImpl, BogusTransport>();
+    public static Map<HandleImpl, BogusTransport> peerTable = new HashMap<>();
     
     HandleImpl localIdentifier;
     Environment env;
@@ -396,9 +349,7 @@ public class PRRegressionTest {
       try {
         rand = (Random)new ObjectInputStream(bais).readObject();
       } catch (ClassNotFoundException cnfe) {
-        IOException ioe = new IOException("Error reading random number from checkpoint");
-        ioe.initCause(cnfe);
-        throw ioe;
+        throw new IOException("Error reading random number from checkpoint", cnfe);
       }
       if (nextSendTime > 0) {
         scheduleMessageToBeSent(nextSendTime, true);
@@ -422,12 +373,12 @@ public class PRRegressionTest {
       throw new RuntimeException("implement");
     }
 
-    public void incomingSocket(P2PSocket<HandleImpl> s) throws IOException {
+    public void incomingSocket(P2PSocket<HandleImpl> s) {
       throw new RuntimeException("implement");
     }
 
     public void messageReceived(HandleImpl i, ByteBuffer m,
-        Map<String, Object> options) throws IOException {
+        Map<String, Object> options) {
       if (logger.level <= Logger.INFO) logger.log("Message received: "+MathUtils.toBase64(m.array()));
     }
 
@@ -452,22 +403,21 @@ public class PRRegressionTest {
     }
 
     public PeerReviewCallback<HandleImpl, IdImpl> getReplayInstance(Verifier<HandleImpl> v) {
-      BogusApp ret = new BogusApp(playerTable.get(v.getLocalIdentifier()),v,v.getEnvironment());
-      return ret;
+      return new BogusApp(playerTable.get(v.getLocalIdentifier()),v,v.getEnvironment());
     }
   }
 
-  static Map<HandleImpl, IdentityTransportLayerImpl<HandleImpl, IdImpl>> idTLTable = new HashMap<HandleImpl, IdentityTransportLayerImpl<HandleImpl,IdImpl>>();
+  static Map<HandleImpl, IdentityTransportLayerImpl<HandleImpl, IdImpl>> idTLTable = new HashMap<>();
 
   CATool caTool;
   KeyPairGenerator keyPairGen;
 
-  Map<HandleImpl,Player> playerTable = new HashMap<HandleImpl, Player>();
+  Map<HandleImpl,Player> playerTable = new HashMap<>();
 
   protected PeerReviewImpl<HandleImpl, IdImpl> getPeerReview(Player player, MyIdTL transport, Environment env) {
-    return new PeerReviewImpl<HandleImpl, IdImpl>(transport, env, new HandleSerializer(), new IdSerializer(), new IdExtractor(), getIdStrTranslator()
+    return new PeerReviewImpl<>(transport, env, new HandleSerializer(), new IdSerializer(), new IdExtractor(), getIdStrTranslator()
 //        ,new AuthenticatorSerializerImpl(20,96), new EvidenceSerializerImpl<HandleImpl, IdImpl>(new HandleSerializer(),new IdSerializer(),transport.getHashSizeBytes(),transport.getSignatureSizeBytes())
-        );
+    );
   }
   
   
@@ -477,7 +427,7 @@ public class PRRegressionTest {
     
     PeerReview<HandleImpl, IdImpl> pr;
     MyIdTL transport;
-    public Collection<HandleImpl> witnessed = new ArrayList<HandleImpl>();
+    public Collection<HandleImpl> witnessed = new ArrayList<>();
     KeyPair pair;    
     X509Certificate cert;
     BogusTransport t1;
@@ -501,15 +451,15 @@ public class PRRegressionTest {
         File f2 = new File(f,"peers");
         File[] foo = f2.listFiles();
         if (foo != null) {
-          for (int c = 0; c < foo.length; c++) {
-            foo[c].delete();
+          for (File file : foo) {
+            file.delete();
           }
         }
         
         foo = f.listFiles();
         if (foo != null) {
-          for (int c = 0; c < foo.length; c++) {
-            foo[c].delete();
+          for (File file : foo) {
+            file.delete();
           }
         }
         
@@ -561,7 +511,7 @@ public class PRRegressionTest {
       
     }
 
-    public BogusTransport getTL() throws Exception {
+    public BogusTransport getTL() {
       return new BogusTransport(localHandle, cert, env); 
     }
     
@@ -667,12 +617,12 @@ public class PRRegressionTest {
     carol.witnessed.add(bob.localHandle);    
   }
   
-  protected Map<HandleImpl, Map<IdImpl, Integer>> recordedStatus = new HashMap<HandleImpl, Map<IdImpl,Integer>>();
+  protected Map<HandleImpl, Map<IdImpl, Integer>> recordedStatus = new HashMap<>();
   protected void addStatusNotification(HandleImpl localHandle, IdImpl id,
       int newStatus) {
     Map<IdImpl, Integer> foo = recordedStatus.get(localHandle);
     if (foo == null) {
-      foo = new HashMap<IdImpl, Integer>();
+      foo = new HashMap<>();
       recordedStatus.put(localHandle,foo);
     }
     foo.put(id,newStatus);

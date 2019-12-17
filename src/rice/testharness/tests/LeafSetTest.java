@@ -37,17 +37,15 @@ advised of the possibility of such damage.
 
 package rice.testharness.tests;
 
-import rice.pastry.leafset.*;
-
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.NodeHandle;
 import rice.pastry.PastryNode;
-import rice.p2p.commonapi.*;
-import rice.p2p.scribe.*;
-import rice.testharness.*;
-import rice.testharness.messaging.*;
+import rice.pastry.leafset.LeafSet;
+import rice.testharness.Test;
+import rice.testharness.TestHarness;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import java.io.PrintStream;
+import java.util.TreeMap;
 
 
 /**
@@ -92,8 +90,8 @@ public class LeafSetTest extends Test {
 
     System.out.println("startTest, #nodes=" + nodes.length);
 
-    for (int i=0; i<nodes.length; i++) {
-      pastryNodesSorted.put(nodes[i].getId(), nodes[i].getId());
+    for (NodeHandle node : nodes) {
+      pastryNodesSorted.put(node.getId(), node.getId());
     }
 
     // check size

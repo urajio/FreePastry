@@ -36,18 +36,17 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.authpush;
 
+import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
+import org.mpisws.p2p.transport.peerreview.message.AuthPushMessage;
+import rice.p2p.commonapi.rawserialization.RawSerializable;
+
 import java.util.Collection;
 import java.util.Map;
 
-import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
-import org.mpisws.p2p.transport.peerreview.message.AuthPushMessage;
-
-import rice.p2p.commonapi.rawserialization.RawSerializable;
-
 public interface AuthenticatorPushProtocol<Handle, Identifier extends RawSerializable> extends PeerReviewConstants {
-  public void continuePush(Map<Identifier, Collection<Handle>> subjects);
-  public void handleIncomingAuthenticators(Handle source, AuthPushMessage<Identifier> msg);
-  public void notifyCertificateAvailable(Identifier id);
-  public void push();
+  void continuePush(Map<Identifier, Collection<Handle>> subjects);
+  void handleIncomingAuthenticators(Handle source, AuthPushMessage<Identifier> msg);
+  void notifyCertificateAvailable(Identifier id);
+  void push();
 
 }

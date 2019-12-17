@@ -36,24 +36,21 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.socket;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Observable;
-
 import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
 import org.mpisws.p2p.transport.priority.PriorityTransportLayer;
-
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.pastry.Id;
-import rice.pastry.NodeHandle;
 import rice.pastry.PastryNode;
 import rice.pastry.dist.DistNodeHandle;
 import rice.pastry.messaging.Message;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Observable;
 
 public class SocketNodeHandle extends DistNodeHandle<MultiInetSocketAddress> {
 //  public class SocketNodeHandle extends DistNodeHandle implements TransportLayerNodeHandle<MultiInetSocketAddress> {
@@ -167,7 +164,7 @@ public class SocketNodeHandle extends DistNodeHandle<MultiInetSocketAddress> {
    */
   public void receiveMessage(Message msg) {
     assertLocalNode();
-    Map<String, Object> options = new HashMap<String, Object>(1);
+    Map<String, Object> options = new HashMap<>(1);
     options.put(PriorityTransportLayer.OPTION_PRIORITY, msg.getPriority());
     getLocalNode().send(this, msg,null, options);
   }
@@ -217,16 +214,14 @@ public class SocketNodeHandle extends DistNodeHandle<MultiInetSocketAddress> {
       return false;
 
     SocketNodeHandle other = (SocketNodeHandle) obj;
-    
-    
-    boolean ret = (epoch == other.epoch && other.getNodeId().equals(getNodeId()) && other.eaddress.equals(eaddress));
+
 
     // delme:
 //    if (epoch == other.epoch && !ret) {
 //      System.out.println(this+".equals("+other+") == false! nid:"+(other.getNodeId().equals(getNodeId()))+" eaddr:"+(other.eaddress.equals(eaddress)));
 //    }
 //    System.out.println(this+".equals("+other+"):"+ret);    
-    return ret;
+    return (epoch == other.epoch && other.getNodeId().equals(getNodeId()) && other.eaddress.equals(eaddress));
   }
 
   /**
@@ -236,9 +231,8 @@ public class SocketNodeHandle extends DistNodeHandle<MultiInetSocketAddress> {
    * @return a hash code.
    */
   public int hashCode() {
-    int hash = ((int)epoch) ^ getNodeId().hashCode() ^ eaddress.hashCode();
-//    System.out.println(this+" hash:"+hash);
-    return hash;
+    //    System.out.println(this+" hash:"+hash);
+    return ((int)epoch) ^ getNodeId().hashCode() ^ eaddress.hashCode();
   }
 
   /**

@@ -52,7 +52,7 @@ public interface SplitStreamClient {
    *
    * @param s The stripe which the join failed on
    */
-  public void joinFailed(Stripe s);
+  void joinFailed(Stripe s);
 
   /**
    * Is called when data is received on a stripe which this client has registered interest
@@ -60,7 +60,7 @@ public interface SplitStreamClient {
    * @param data The data that was received
    * @param s The stripe the data as received on
    */
-  public void deliver(Stripe s, byte[] data);
+  void deliver(Stripe s, byte[] data);
 
 }
 

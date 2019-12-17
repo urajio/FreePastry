@@ -37,24 +37,26 @@ advised of the possibility of such damage.
 
 package rice.p2p.multiring.testing;
 
-import java.io.IOException;
-import java.net.*;
-import java.util.*;
-
 import rice.environment.Environment;
-import rice.environment.params.simple.SimpleParameters;
 import rice.environment.random.RandomSource;
-import rice.environment.time.simulated.DirectTimeSource;
 import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.Id;
-import rice.p2p.commonapi.NodeHandle;
 import rice.p2p.multiring.MultiringNode;
-import rice.pastry.*;
+import rice.pastry.PastryNode;
+import rice.pastry.PastryNodeFactory;
 import rice.pastry.commonapi.PastryIdFactory;
-import rice.pastry.direct.*;
-import rice.pastry.dist.*;
-import rice.pastry.socket.*;
+import rice.pastry.direct.DirectPastryNodeFactory;
+import rice.pastry.direct.EuclideanNetwork;
+import rice.pastry.direct.NetworkSimulator;
+import rice.pastry.direct.SphereNetwork;
+import rice.pastry.dist.DistPastryNodeFactory;
+import rice.pastry.socket.SocketNodeHandle;
+import rice.pastry.socket.SocketPastryNodeFactory;
 import rice.pastry.standard.RandomNodeIdFactory;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
 
 /**
  * Provides regression testing setup for applications written on top of the
@@ -522,7 +524,7 @@ public class MultiringRegrTest {
    * @param start The string
    * @return The result.
    */
-  private final String pad(String start) {
+  private String pad(String start) {
     if (start.length() >= PAD_SIZE) {
       return start.substring(0, PAD_SIZE);
     } else {
@@ -562,11 +564,11 @@ public class MultiringRegrTest {
   /**
    * process command line args
    */
-  protected static void parseArgs(String args[]) {
+  protected static void parseArgs(String[] args) {
     // process command line arguments
 
-    for (int i = 0; i < args.length; i++) {
-      if (args[i].equals("-help")) {
+    for (String arg : args) {
+      if (arg.equals("-help")) {
         System.out.println("Usage: DistCommonAPITest [-port p] [-protocol (rmi|wire)] [-bootstrap host[:port]] [-help]");
         System.exit(1);
       }

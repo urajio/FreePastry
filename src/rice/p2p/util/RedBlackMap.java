@@ -190,9 +190,8 @@ public class RedBlackMap extends AbstractMap implements SortedMap, Cloneable, ja
      * @since 1.2
      */
     public synchronized boolean containsValue(Object value) {
-        return (root==null ? false :
-                (value==null ? valueSearchNull(root)
-                             : valueSearchNonNull(root, value)));
+        return (root != null && (value == null ? valueSearchNull(root)
+                : valueSearchNonNull(root, value)));
     }
 
     private boolean valueSearchNull(Entry n) {
@@ -286,7 +285,7 @@ public class RedBlackMap extends AbstractMap implements SortedMap, Cloneable, ja
         int mapSize = map.size();
         if (size==0 && mapSize!=0 && map instanceof SortedMap) {
             Comparator c = ((SortedMap)map).comparator();
-            if (c == comparator || (c != null && c.equals(comparator))) {
+            if (Objects.equals(c, comparator)) {
               ++modCount;
               try {
                   buildFromSorted(mapSize, map.entrySet().iterator(),
@@ -910,10 +909,8 @@ public class RedBlackMap extends AbstractMap implements SortedMap, Cloneable, ja
             public int size() {
                 if (size == -1 || sizeModCount != RedBlackMap.this.modCount) {
                     size = 0;  sizeModCount = RedBlackMap.this.modCount;
-                    Iterator i = iterator();
-                    while (i.hasNext()) {
+                    for (Object o : this) {
                         size++;
-                        i.next();
                     }
                 }
                 return size;
@@ -1065,11 +1062,9 @@ public class RedBlackMap extends AbstractMap implements SortedMap, Cloneable, ja
           public int size() {
             if (size == -1 || sizeModCount != RedBlackMap.this.modCount) {
               size = 0;  sizeModCount = RedBlackMap.this.modCount;
-              Iterator i = iterator();
-              while (i.hasNext()) {
-                size++;
-                i.next();
-              }
+                for (Object o : this) {
+                    size++;
+                }
             }
             return size;
           }
@@ -1283,7 +1278,7 @@ public class RedBlackMap extends AbstractMap implements SortedMap, Cloneable, ja
      * that it copes with with <tt>null</tt> o1 properly.
      */
     private static boolean valEquals(Object o1, Object o2) {
-        return (o1==null ? o2==null : o1.equals(o2));
+        return (Objects.equals(o1, o2));
     }
 
     private static final boolean RED   = false;
@@ -1657,8 +1652,8 @@ public class RedBlackMap extends AbstractMap implements SortedMap, Cloneable, ja
         s.writeInt(size);
 
         // Write out keys and values (alternating)
-        for (Iterator i = entrySet().iterator(); i.hasNext(); ) {
-            Entry e = (Entry)i.next();
+        for (Object o : entrySet()) {
+            Entry e = (Entry) o;
             s.writeObject(e.key);
             s.writeObject(e.value);
         }

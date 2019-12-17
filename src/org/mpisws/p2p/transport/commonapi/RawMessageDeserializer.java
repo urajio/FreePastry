@@ -36,16 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.commonapi;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import rice.p2p.commonapi.NodeHandle;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.p2p.commonapi.rawserialization.RawMessage;
 
-public interface RawMessageDeserializer {
-  public RawMessage deserialize(InputBuffer b, NodeHandle sender) throws IOException;
+import java.io.IOException;
 
-  public void serialize(RawMessage m, OutputBuffer b) throws IOException;
+public interface RawMessageDeserializer {
+  RawMessage deserialize(InputBuffer b, NodeHandle sender) throws IOException;
+
+  void serialize(RawMessage m, OutputBuffer b) throws IOException;
 }

@@ -36,17 +36,22 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.testing;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
 import rice.environment.Environment;
-import rice.environment.logging.Logger;
-import rice.pastry.*;
-import rice.pastry.routing.*;
-import rice.pastry.leafset.*;
-import rice.pastry.dist.*;
-import rice.pastry.socket.*;
+import rice.pastry.NodeHandle;
+import rice.pastry.NodeSet;
+import rice.pastry.leafset.LeafSet;
+import rice.pastry.routing.RouteSet;
+import rice.pastry.routing.RoutingTable;
+import rice.pastry.socket.SocketNodeHandle;
+import rice.pastry.socket.SocketPastryNodeFactory;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 
 /** 
  * Utility class for checking the consistency of an existing pastry
@@ -167,44 +172,41 @@ public class PastryNetworkTest {
   protected void testLeafSets() throws Exception {
     HashMap leafsets = fetchLeafSets();
 
-    Iterator sets = leafsets.values().iterator();
-    
-    while (sets.hasNext()) {
-      Iterator nodes = leafsets.keySet().iterator();
-      LeafSet set = (LeafSet) sets.next();
-      
-      if (set != null) {
-        while (nodes.hasNext()) {
-          NodeHandle node = (NodeHandle) nodes.next();
-          
-          if (dead.contains(node) && set.member(node)) {
-            System.out.println("LEAFSET ERROR: Leafset for " + set.get(0) + " contains dead node " + node);
-          } else if ((! dead.contains(node)) && set.isComplete() && set.test(node)) {
-            System.out.println("LEAFSET ERROR: Leafset for " + set.get(0) + " is missing " + node);
+      for (Object o : leafsets.values()) {
+          Iterator nodes = leafsets.keySet().iterator();
+          LeafSet set = (LeafSet) o;
+
+          if (set != null) {
+              while (nodes.hasNext()) {
+                  NodeHandle node = (NodeHandle) nodes.next();
+
+                  if (dead.contains(node) && set.member(node)) {
+                      System.out.println("LEAFSET ERROR: Leafset for " + set.get(0) + " contains dead node " + node);
+                  } else if ((!dead.contains(node)) && set.isComplete() && set.test(node)) {
+                      System.out.println("LEAFSET ERROR: Leafset for " + set.get(0) + " is missing " + node);
+                  }
+              }
           }
-        }
       }
-    }
     
     // check leafset sfor unknowns...
     
     System.out.println("Done testing...");
   }  
   
-  protected HashMap fetchRouteRow(int row) throws IOException {
+  protected HashMap fetchRouteRow(int row) {
     HashMap routerows = new HashMap();
-    Iterator i = nodes.iterator();
-    
-    while (i.hasNext()) {
-      NodeHandle handle = (NodeHandle) i.next(); 
-      
-      System.out.println("Fetching route row " + row + " of " + handle);
-      
-      RouteSet[] set = null; // TODO: fix this, old code: factory.getRouteRow(handle, row);
-      
-      if (set != null)
-        routerows.put(handle, set);        
-    }
+
+      for (Object node : nodes) {
+          NodeHandle handle = (NodeHandle) node;
+
+          System.out.println("Fetching route row " + row + " of " + handle);
+
+          RouteSet[] set = null; // TODO: fix this, old code: factory.getRouteRow(handle, row);
+
+          if (set != null)
+              routerows.put(handle, set);
+      }
     
     System.out.println("Fetched all route rows - return...");
     
@@ -213,29 +215,24 @@ public class PastryNetworkTest {
   
   protected void testRouteRow(int row) throws IOException {
     HashMap routerows = fetchRouteRow(row);
-    
-    Iterator i = nodes.iterator();
-    
-    while (i.hasNext()) {
-      NodeHandle node = (NodeHandle) i.next();
-      RoutingTable rt = new RoutingTable(node, 1, (byte)environment.getParameters().getInt("pastry_rtBaseBitLength"), ((SocketNodeHandle)node).getLocalNode());
-      
-      Iterator j = nodes.iterator();
 
-      while (j.hasNext())
-        rt.put((NodeHandle) j.next());
+      for (Object value : nodes) {
+          NodeHandle node = (NodeHandle) value;
+          RoutingTable rt = new RoutingTable(node, 1, (byte) environment.getParameters().getInt("pastry_rtBaseBitLength"), ((SocketNodeHandle) node).getLocalNode());
 
-      RouteSet[] ideal = (RouteSet[]) rt.getRow(row);
-      RouteSet[] actual = (RouteSet[]) routerows.get(node);
-      
-      for (int k=0; k<ideal.length; k++) {
-        if (((actual[k] == null) || (actual[k].size() == 0)) && ((ideal[k] != null) && (ideal[k].size() > 0)))
-          System.out.println("ROUTING TABLE ERROR: " + node + " has no entry in row " + row + " column " + k + " but " + ideal[k].get(0) + " exists");
+          for (Object o : nodes) rt.put((NodeHandle) o);
 
-        if (((actual[k] != null) && (actual[k].size() > 0)) && ((ideal[k] == null) || (ideal[k].size() == 0)))
-          System.out.println("ROUTING TABLE ERROR: " + node + " has no non-existent entry in row " + row + " column " + k + " entry " + actual[k].get(0) + " exists");
+          RouteSet[] ideal = (RouteSet[]) rt.getRow(row);
+          RouteSet[] actual = (RouteSet[]) routerows.get(node);
+
+          for (int k = 0; k < ideal.length; k++) {
+              if (((actual[k] == null) || (actual[k].size() == 0)) && ((ideal[k] != null) && (ideal[k].size() > 0)))
+                  System.out.println("ROUTING TABLE ERROR: " + node + " has no entry in row " + row + " column " + k + " but " + ideal[k].get(0) + " exists");
+
+              if (((actual[k] != null) && (actual[k].size() > 0)) && ((ideal[k] == null) || (ideal[k].size() == 0)))
+                  System.out.println("ROUTING TABLE ERROR: " + node + " has no non-existent entry in row " + row + " column " + k + " entry " + actual[k].get(0) + " exists");
+          }
       }
-    }
     
     System.out.println("Done testing...");
   }  

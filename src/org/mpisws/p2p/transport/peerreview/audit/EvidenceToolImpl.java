@@ -36,35 +36,27 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.audit;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.peerreview.PeerReview;
 import org.mpisws.p2p.transport.peerreview.commitment.Authenticator;
 import org.mpisws.p2p.transport.peerreview.commitment.AuthenticatorStore;
 import org.mpisws.p2p.transport.peerreview.commitment.CommitmentProtocol;
 import org.mpisws.p2p.transport.peerreview.history.IndexEntry;
 import org.mpisws.p2p.transport.peerreview.history.SecureHistory;
-import org.mpisws.p2p.transport.peerreview.history.logentry.EvtAck;
-import org.mpisws.p2p.transport.peerreview.history.logentry.EvtInit;
-import org.mpisws.p2p.transport.peerreview.history.logentry.EvtRecv;
-import org.mpisws.p2p.transport.peerreview.history.logentry.EvtSend;
-import org.mpisws.p2p.transport.peerreview.history.logentry.EvtSendSign;
-import org.mpisws.p2p.transport.peerreview.history.logentry.EvtSign;
+import org.mpisws.p2p.transport.peerreview.history.logentry.*;
 import org.mpisws.p2p.transport.peerreview.message.UserDataMessage;
 import org.mpisws.p2p.transport.util.Serializer;
-
-import rice.environment.logging.LogManager;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.rawserialization.RawSerializable;
-import rice.p2p.util.MathUtils;
 import rice.p2p.util.rawserialization.SimpleInputBuffer;
 import rice.p2p.util.rawserialization.SimpleOutputBuffer;
 import rice.p2p.util.tuples.Tuple;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 public class EvidenceToolImpl<Handle extends RawSerializable, Identifier extends RawSerializable> implements EvidenceTool<Handle, Identifier> {
 
@@ -96,7 +88,7 @@ public class EvidenceToolImpl<Handle extends RawSerializable, Identifier extends
     for (SnippetEntry entry : snippet.entries) {
       if (entry.isHash && entry.type != EVT_CHECKPOINT && entry.type != EVT_SENDSIGN && entry.type != EVT_SEND) {
         if (logger.level <= Logger.WARNING) logger.log("Malformed statement: Entry of type #"+entry.type+" is hashed");
-        return new Tuple<Integer, Identifier>(INVALID,null);
+        return new Tuple<>(INVALID, null);
       }
       
       /* Further processing depends on the entry type */
@@ -107,15 +99,15 @@ public class EvidenceToolImpl<Handle extends RawSerializable, Identifier extends
         switch (entry.type) {
           case EVT_SEND : /* No certificates needed; just do syntax checking */
             if (!entry.isHash) {
-              new EvtSend<Identifier>(sib, idSerializer, hashSize);
+                new EvtSend<>(sib, idSerializer, hashSize);
             }
             break;
           case EVT_RECV : {/* We may need the certificate for the sender */          
-            EvtRecv<Handle> recv = new EvtRecv<Handle>(sib,handleSerializer,hashSize);
+            EvtRecv<Handle> recv = new EvtRecv<>(sib, handleSerializer, hashSize);
             Identifier id = peerreview.getIdentifierExtractor().extractIdentifier(recv.getSenderHandle());
             if (!peerreview.hasCertificate(id)) {
               if (logger.level <= Logger.FINE) logger.log("AUDIT RESPONSE contains RECV from "+id+"; certificate needed");
-              return new Tuple<Integer, Identifier>(CERT_MISSING, id);
+              return new Tuple<>(CERT_MISSING, id);
             }
             break;
           }
@@ -123,11 +115,11 @@ public class EvidenceToolImpl<Handle extends RawSerializable, Identifier extends
             new EvtSign(sib, signatureSize, hashSize);
             break;
           case EVT_ACK : /* We may need the certificate for the sender */
-            EvtAck<Identifier> evtAck = new EvtAck<Identifier>(sib,idSerializer,hashSize,signatureSize);
+            EvtAck<Identifier> evtAck = new EvtAck<>(sib, idSerializer, hashSize, signatureSize);
             Identifier id = evtAck.getRemoteId();
             if (!peerreview.hasCertificate(id)) {
               if (logger.level <= Logger.FINE) logger.log("AUDIT RESPONSE contains RECV from "+id+"; certificate needed");
-              return new Tuple<Integer, Identifier>(CERT_MISSING, id);
+              return new Tuple<>(CERT_MISSING, id);
             }
             break;
           case EVT_CHECKPOINT : /* No certificates needed */
@@ -135,8 +127,8 @@ public class EvidenceToolImpl<Handle extends RawSerializable, Identifier extends
           case EVT_CHOOSE_Q :
           case EVT_CHOOSE_RAND :
             break;
-          case EVT_INIT: {/* No certificates needed */          
-            new EvtInit<Handle>(sib,handleSerializer);
+          case EVT_INIT: {/* No certificates needed */
+              new EvtInit<>(sib, handleSerializer);
             break;
           }
           case EVT_SENDSIGN : /* No certificates needed */
@@ -147,11 +139,11 @@ public class EvidenceToolImpl<Handle extends RawSerializable, Identifier extends
         }
       } catch (IOException ioe) {
         if (logger.level <= Logger.WARNING) logger.logException("Malformed entry:"+entry,ioe);
-        return new Tuple<Integer, Identifier>(INVALID,null);
+        return new Tuple<>(INVALID, null);
       }
     }
     
-    return new Tuple<Integer, Identifier>(VALID,null);
+    return new Tuple<>(VALID, null);
   }
 
   static class SendEntryRecord {
@@ -222,7 +214,7 @@ public class EvidenceToolImpl<Handle extends RawSerializable, Identifier extends
     /* If FLAG_FULL_MESSAGES_SENDER is set, we must get a list of all the messages we have received
        from this node, so we can later check whether it has sent any other ones */
 
-    HashSet<Long> seqBuf = new HashSet<Long>();
+    HashSet<Long> seqBuf = new HashSet<>();
     int numSeqs = 0;
     try {
       if ((commitmentProtocol != null) && (flags & FLAG_FULL_MESSAGES_SENDER) == FLAG_FULL_MESSAGES_SENDER) {
@@ -238,7 +230,7 @@ public class EvidenceToolImpl<Handle extends RawSerializable, Identifier extends
   //          unsigned int pos = 0;
   
             byte[] evtBytes = history.getEntry(entry,entry.getSizeInFile());
-            EvtRecv<Handle> evtRecv = new EvtRecv<Handle>(new SimpleInputBuffer(evtBytes),handleSerializer,hashSize);
+            EvtRecv<Handle> evtRecv = new EvtRecv<>(new SimpleInputBuffer(evtBytes), handleSerializer, hashSize);
             Handle thisSender = evtRecv.getSenderHandle(); // = transport.readNodeHandle(buf, &pos, sizeof(buf));
             if (thisSender.equals(subjectHandle)) {
               seqBuf.add(evtRecv.getSenderSeq()); //*(long long*)&buf[pos];
@@ -260,7 +252,7 @@ public class EvidenceToolImpl<Handle extends RawSerializable, Identifier extends
 //      int hashedPlusPayloadLen;
 //    } secache[maxSendEntries];
 
-    Map<Long, SendEntryRecord> secache = new HashMap<Long, SendEntryRecord>();
+    Map<Long, SendEntryRecord> secache = new HashMap<>();
     
     
 //    int numSendEntries = 0;
@@ -321,8 +313,8 @@ public class EvidenceToolImpl<Handle extends RawSerializable, Identifier extends
 
       /* Update the current node hash */
 
-      byte[] contentHash;;
-      if (entry.isHash) {
+      byte[] contentHash;
+        if (entry.isHash) {
         contentHash = entry.content; //memcpy(contentHash, entry, hashSizeBytes);
       } else {
         contentHash = peerreview.hash(ByteBuffer.wrap(entry.content));
@@ -397,7 +389,7 @@ public class EvidenceToolImpl<Handle extends RawSerializable, Identifier extends
 
               if (commitmentProtocol != null && (flags & FLAG_FULL_MESSAGES_SENDER) == FLAG_FULL_MESSAGES_SENDER) {
                 assert(!sendWasHashed);
-                EvtSend<Identifier> evtSend = new EvtSend<Identifier>(new SimpleInputBuffer(lastEntry.content),idSerializer,hashSize);
+                EvtSend<Identifier> evtSend = new EvtSend<>(new SimpleInputBuffer(lastEntry.content), idSerializer, hashSize);
 //                unsigned int pos = 0;
                 Identifier dest = evtSend.receiverId; //transport.readIdentifier(&snippet[lastEntryPos], &pos, snippetLen);
                 if (dest.equals(peerreview.getLocalId())) {
@@ -416,7 +408,7 @@ public class EvidenceToolImpl<Handle extends RawSerializable, Identifier extends
                     SimpleOutputBuffer msg = new SimpleOutputBuffer();
                     msg.write(evtSend.payload.array(),evtSend.payload.position(),evtSend.payload.remaining());
                     msg.write(evtSendSign.restOfMessage);
-                    UserDataMessage<Handle> message = new UserDataMessage<Handle>(lastEntry.seq,subjectHandle,prevPrevNodeHash,evtSendSign.signature,msg.getByteBuffer(),evtSend.payload.remaining());
+                    UserDataMessage<Handle> message = new UserDataMessage<>(lastEntry.seq, subjectHandle, prevPrevNodeHash, evtSendSign.signature, msg.getByteBuffer(), evtSend.payload.remaining());
                     
 //                    int relevantBytes = lastEntrySize-(identifierSizeBytes+1+(sendWasHashed ? hashSizeBytes : 0));
 //                    int irrelevantBytes = entrySize - signatureSizeBytes;
@@ -457,7 +449,7 @@ public class EvidenceToolImpl<Handle extends RawSerializable, Identifier extends
 
             EvtSign evtSign = new EvtSign(sib,hashSize,signatureSize);
 //            unsigned int pos = lastEntryPos;    
-            EvtRecv<Handle> evtRecv = new EvtRecv<Handle>(new SimpleInputBuffer(lastEntry.content),handleSerializer,hashSize);
+            EvtRecv<Handle> evtRecv = new EvtRecv<>(new SimpleInputBuffer(lastEntry.content), handleSerializer, hashSize);
             
             Handle senderHandle = evtRecv.getSenderHandle(); //transport.readNodeHandle(snippet, &pos, snippetLen);
             long senderSeq = evtRecv.getSenderSeq(); //readLongLong(snippet, &pos);
@@ -507,7 +499,7 @@ public class EvidenceToolImpl<Handle extends RawSerializable, Identifier extends
         {
           /* Decode all the values */
 
-          EvtAck<Identifier> evtAck = new EvtAck<Identifier>(sib,idSerializer,hashSize,signatureSize);
+          EvtAck<Identifier> evtAck = new EvtAck<>(sib, idSerializer, hashSize, signatureSize);
 //          assert(entrySize == (identifierSizeBytes + 2*sizeof(long long) + hashSizeBytes + signatureSizeBytes));
 //          unsigned int pos = 0;
 //          Identifier *receiverID = transport.readIdentifier(entry, &pos, entrySize);

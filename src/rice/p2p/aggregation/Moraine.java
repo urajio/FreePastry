@@ -36,20 +36,19 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.aggregation;
 
-import java.util.Arrays;
-
 import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Id;
 import rice.p2p.commonapi.NodeHandle;
 import rice.p2p.glacier.VersioningPast;
-import rice.p2p.past.Past;
 import rice.p2p.past.PastContent;
 import rice.p2p.past.PastContentHandle;
 import rice.p2p.past.gc.GCPast;
 import rice.p2p.past.rawserialization.PastContentDeserializer;
 import rice.p2p.past.rawserialization.PastContentHandleDeserializer;
+
+import java.util.Arrays;
 
 /**
  * This Past takes 2 pasts, an old Past and a new

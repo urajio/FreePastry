@@ -43,10 +43,11 @@ package rice.persistence;
  * @author Alan Mislove
  * @version $Id$
  */
-import java.io.*;
 
-import rice.*;
-import rice.p2p.commonapi.*;
+import rice.Continuation;
+import rice.p2p.commonapi.Id;
+
+import java.io.Serializable;
 
 /**
  * This interface is the abstraction of something which provides a
@@ -77,7 +78,7 @@ public interface Cache extends Catalog {
    * @param obj The object to cache.
    * @param c The command to run once the operation is complete
    */
-  public void cache(Id id, Serializable metadata, Serializable obj, Continuation c);
+  void cache(Id id, Serializable metadata, Serializable obj, Continuation c);
 
   /**
    * Removes the object from the list of cached objects. This method is
@@ -90,7 +91,7 @@ public interface Cache extends Catalog {
    * @param pid The object's id
    * @param c The command to run once the operation is complete
    */
-  public void uncache(Id id, Continuation c);
+  void uncache(Id id, Continuation c);
 
   /**
    * Returns the maximum size of the cache, in bytes. The result
@@ -99,7 +100,7 @@ public interface Cache extends Catalog {
    *
    * @param c The command to run once the operation is complete
    */
-  public long getMaximumSize();
+  long getMaximumSize();
 
   /**
    * Sets the maximum size of the cache, in bytes. Setting this
@@ -112,5 +113,5 @@ public interface Cache extends Catalog {
    * @param size The new maximum size, in bytes, of the cache.
    * @param c The command to run once the operation is complete
    */
-  public void setMaximumSize(int size, Continuation c);  
+  void setMaximumSize(int size, Continuation c);
 }

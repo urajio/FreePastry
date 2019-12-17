@@ -37,13 +37,13 @@ advised of the possibility of such damage.
 
 package rice.pastry.messaging;
 
-import java.util.*;
-
 import rice.Destructable;
 import rice.environment.logging.Logger;
-import rice.pastry.*;
+import rice.pastry.PastryNode;
 import rice.pastry.client.PastryAppl;
 import rice.pastry.transport.Deserializer;
+
+import java.util.HashMap;
 
 /**
  * An object which remembers the mapping from names to MessageReceivers
@@ -84,7 +84,7 @@ public class MessageDispatch implements Destructable {
    */
   public MessageDispatch(PastryNode pn, Deserializer deserializer) {
     this.deserializer = deserializer;
-    addressBook = new HashMap<Integer, PastryAppl>();
+    addressBook = new HashMap<>();
     this.localNode = pn;
     this.logger = pn.getEnvironment().getLogManager().getLogger(getClass(), null);    
   }
@@ -104,14 +104,14 @@ public class MessageDispatch implements Destructable {
         "Registering "+receiver+" for address " + address);
     if (logger.level <= Logger.FINEST) logger.logException(
         "Registering receiver for address " + address, new Exception("stack trace"));
-    if (addressBook.get(Integer.valueOf(address)) != null) {
+    if (addressBook.get(address) != null) {
       throw new IllegalArgumentException("Registering receiver for already-registered address " + address);
 //      if (logger.level <= Logger.SEVERE) logger.logException(
 //          "ERROR - Registering receiver for already-registered address " + address, new Exception("stack trace"));
     }
 
     deserializer.setDeserializer(address, receiver.getDeserializer());
-    addressBook.put(Integer.valueOf(address), receiver);
+    addressBook.put(address, receiver);
   }
   
   public PastryAppl getDestination(Message msg) {
@@ -119,8 +119,7 @@ public class MessageDispatch implements Destructable {
   }
 
   public PastryAppl getDestinationByAddress(int addr) {
-    PastryAppl mr = (PastryAppl) addressBook.get(Integer.valueOf(addr));    
-    return mr;
+    return (PastryAppl) addressBook.get(addr);
   }
 
   /**
@@ -143,7 +142,7 @@ public class MessageDispatch implements Destructable {
     }
     // NOTE: There is no safety issue with calling localNode.isReady() because this is on the 
     // PastryThread, and the only way to set a node ready is also on the ready thread.
-    PastryAppl mr = (PastryAppl) addressBook.get(Integer.valueOf(msg.getDestination()));
+    PastryAppl mr = (PastryAppl) addressBook.get(msg.getDestination());
 
     if (mr == null) {
       if ((logger.level <= Logger.FINE) ||
@@ -180,11 +179,9 @@ public class MessageDispatch implements Destructable {
 //  }  
   
   public void destroy() {
-    Iterator<PastryAppl> i = addressBook.values().iterator();
-    while(i.hasNext()) {
-      PastryAppl mr = i.next();
-      if (logger.level <= Logger.INFO) logger.log("Destroying "+mr);
-      mr.destroy(); 
+    for (PastryAppl mr : addressBook.values()) {
+      if (logger.level <= Logger.INFO) logger.log("Destroying " + mr);
+      mr.destroy();
     }      
     addressBook.clear();
   }

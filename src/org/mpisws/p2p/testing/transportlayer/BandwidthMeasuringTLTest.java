@@ -36,21 +36,10 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.testing.transportlayer;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.TransportLayer;
 import org.mpisws.p2p.transport.bandwidthmeasure.BandwidthMeasuringTransportLayer;
-
 import rice.environment.Environment;
-import rice.p2p.commonapi.Application;
-import rice.p2p.commonapi.Endpoint;
-import rice.p2p.commonapi.Id;
-import rice.p2p.commonapi.Message;
-import rice.p2p.commonapi.NodeHandle;
-import rice.p2p.commonapi.RouteMessage;
+import rice.p2p.commonapi.*;
 import rice.p2p.util.tuples.Tuple3;
 import rice.pastry.NodeIdFactory;
 import rice.pastry.PastryNode;
@@ -58,6 +47,11 @@ import rice.pastry.commonapi.PastryEndpoint;
 import rice.pastry.socket.SocketPastryNodeFactory;
 import rice.pastry.standard.RandomNodeIdFactory;
 import rice.selector.TimerTask;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 public class BandwidthMeasuringTLTest implements Application {
 
@@ -103,9 +97,9 @@ public class BandwidthMeasuringTLTest implements Application {
           InetSocketAddress innermostAddress, PastryNode pn) throws IOException {
         TransportLayer<InetSocketAddress, ByteBuffer> wtl = super.getWireTransportLayer(innermostAddress, pn);
         
-        final BandwidthLimitingTransportLayer<InetSocketAddress> ret = new BandwidthLimitingTransportLayer<InetSocketAddress>(wtl,40000,1000,pn.getEnvironment());
+        final BandwidthLimitingTransportLayer<InetSocketAddress> ret = new BandwidthLimitingTransportLayer<>(wtl, 40000, 1000, pn.getEnvironment());
         
-        final BandwidthMeasuringTransportLayer<InetSocketAddress> ret2 = new BandwidthMeasuringTransportLayer<InetSocketAddress>(5000,ret,pn.getEnvironment());
+        final BandwidthMeasuringTransportLayer<InetSocketAddress> ret2 = new BandwidthMeasuringTransportLayer<>(5000, ret, pn.getEnvironment());
         
         pn.getEnvironment().getSelectorManager().schedule(new TimerTask() {
         

@@ -36,53 +36,37 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.testing.transportlayer.replay;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.net.*;
-import java.nio.ByteBuffer;
-import java.util.*;
-
 import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.direct.EventSimulator;
-import org.mpisws.p2p.transport.liveness.LivenessProvider;
-import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
-import org.mpisws.p2p.transport.peerreview.history.HashProvider;
-import org.mpisws.p2p.transport.peerreview.history.SecureHistory;
-import org.mpisws.p2p.transport.peerreview.history.SecureHistoryFactory;
-import org.mpisws.p2p.transport.peerreview.history.SecureHistoryFactoryImpl;
-import org.mpisws.p2p.transport.peerreview.history.stub.NullHashProvider;
 import org.mpisws.p2p.transport.peerreview.replay.BasicEntryDeserializer;
-import org.mpisws.p2p.transport.peerreview.replay.playback.ReplayLayer;
 import org.mpisws.p2p.transport.peerreview.replay.record.RecordLayer;
-import org.mpisws.p2p.transport.priority.PriorityTransportLayer;
-import org.mpisws.p2p.transport.proximity.ProximityProvider;
 import org.mpisws.p2p.transport.simpleidentity.InetSocketAddressSerializer;
-import org.mpisws.p2p.transport.util.Serializer;
-
 import rice.environment.Environment;
 import rice.environment.logging.LogManager;
 import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
 import rice.environment.params.simple.SimpleParameters;
-import rice.environment.processing.Processor;
-import rice.environment.processing.sim.SimProcessor;
 import rice.environment.random.RandomSource;
 import rice.environment.random.simple.SimpleRandomSource;
-import rice.environment.time.simulated.DirectTimeSource;
 import rice.p2p.commonapi.Endpoint;
 import rice.p2p.commonapi.Node;
 import rice.p2p.commonapi.NodeHandle;
-import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.p2p.commonapi.rawserialization.OutputBuffer;
-import rice.pastry.*;
+import rice.pastry.Id;
+import rice.pastry.NodeHandleFactory;
+import rice.pastry.NodeIdFactory;
+import rice.pastry.PastryNode;
 import rice.pastry.boot.Bootstrapper;
 import rice.pastry.socket.SocketNodeHandle;
 import rice.pastry.socket.SocketPastryNodeFactory;
 import rice.pastry.standard.ProximityNeighborSelector;
 import rice.pastry.standard.RandomNodeIdFactory;
 import rice.pastry.transport.NodeHandleAdapter;
-import rice.pastry.transport.TransportPastryNodeFactory;
-import rice.selector.SelectorManager;
+
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 /**
  * This tutorial shows how to use Scribe.
@@ -94,11 +78,11 @@ public class Recorder implements MyEvents {
   /**
    * this will keep track of our Scribe applications
    */
-  ArrayList<MyScribeClient> apps = new ArrayList<MyScribeClient>();
+  ArrayList<MyScribeClient> apps = new ArrayList<>();
 
-  final Map<Id, Long> storedRandSeed = new HashMap<Id, Long>();
+  final Map<Id, Long> storedRandSeed = new HashMap<>();
 
-  final Map<Node, RecordLayer<InetSocketAddress>> recorders = new HashMap<Node, RecordLayer<InetSocketAddress>>();
+  final Map<Node, RecordLayer<InetSocketAddress>> recorders = new HashMap<>();
 
   /**
    * Based on the rice.tutorial.lesson4.DistTutorial
@@ -154,9 +138,9 @@ public class Recorder implements MyEvents {
       protected TransportLayer<InetSocketAddress, ByteBuffer> getWireTransportLayer(InetSocketAddress innermostAddress, PastryNode pn) throws IOException {
         // record here
         
-        RecordLayer<InetSocketAddress> ret = new RecordLayer<InetSocketAddress>(
-            super.getWireTransportLayer(innermostAddress, pn), "0x"+pn.getNodeId().toStringBare(), 
-            new InetSocketAddressSerializer(), pn.getEnvironment());
+        RecordLayer<InetSocketAddress> ret = new RecordLayer<>(
+                super.getWireTransportLayer(innermostAddress, pn), "0x" + pn.getNodeId().toStringBare(),
+                new InetSocketAddressSerializer(), pn.getEnvironment());
         recorders.put(pn, ret);
         return ret;
       }
@@ -165,7 +149,8 @@ public class Recorder implements MyEvents {
       @SuppressWarnings("unchecked")
       protected Bootstrapper getBootstrapper(final PastryNode pn, NodeHandleAdapter tl, NodeHandleFactory handleFactory, ProximityNeighborSelector pns) {
         final Bootstrapper internal = super.getBootstrapper(pn, tl, handleFactory, pns);
-        Bootstrapper ret = new Bootstrapper() {        
+
+        return new Bootstrapper() {
           public void boot(Collection bootaddresses) {
             try {
               recorders.get(pn).logEvent(EVT_BOOT);
@@ -173,10 +158,8 @@ public class Recorder implements MyEvents {
               pn.getEnvironment().getLogManager().getLogger(Bootstrapper.class, null).logException("Error recording EVT_BOOT",ioe);
             }
             internal.boot(bootaddresses);
-          }        
+          }
         };
-        
-        return ret;
       }      
     };
 //    PastryNodeFactory factory = new TransportPastryNodeFactory(nidFactory, bindport, env);
@@ -186,7 +169,7 @@ public class Recorder implements MyEvents {
       
       // construct a node, passing the null boothandle on the first loop will
       // cause the node to start its own ring
-      final ArrayList<PastryNode> nodeContainer = new ArrayList<PastryNode>(1); 
+      final ArrayList<PastryNode> nodeContainer = new ArrayList<>(1);
       env.getSelectorManager().invoke(new Runnable() {
       
         public void run() {
@@ -327,10 +310,8 @@ public class Recorder implements MyEvents {
    */
   public static void printTree(ArrayList<MyScribeClient> apps) {
     // build a hashtable of the apps, keyed by nodehandle
-    Hashtable<NodeHandle,MyScribeClient> appTable = new Hashtable<NodeHandle,MyScribeClient>();
-    Iterator<MyScribeClient> i = apps.iterator();
-    while (i.hasNext()) {
-      MyScribeClient app = (MyScribeClient) i.next();
+    Hashtable<NodeHandle,MyScribeClient> appTable = new Hashtable<>();
+    for (MyScribeClient app : apps) {
       appTable.put(app.endpoint.getLocalNodeHandle(), app);
     }
     NodeHandle seed = ((MyScribeClient) apps.get(0)).endpoint
@@ -370,8 +351,8 @@ public class Recorder implements MyEvents {
     // recursively print all children
     MyScribeClient app = (MyScribeClient) appTable.get(curNode);
     NodeHandle[] children = app.getChildren();
-    for (int curChild = 0; curChild < children.length; curChild++) {
-      recursivelyPrintChildren(children[curChild], recursionDepth + 1, appTable);
+    for (NodeHandle child : children) {
+      recursivelyPrintChildren(child, recursionDepth + 1, appTable);
     }
   }
 

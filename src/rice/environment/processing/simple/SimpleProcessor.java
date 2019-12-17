@@ -39,16 +39,18 @@ advised of the possibility of such damage.
  */
 package rice.environment.processing.simple;
 
-import rice.*;
+import rice.Continuation;
+import rice.Executable;
 import rice.environment.Environment;
 import rice.environment.logging.LogManager;
-import rice.environment.processing.*;
+import rice.environment.processing.Processor;
+import rice.environment.processing.WorkRequest;
 import rice.environment.time.TimeSource;
 import rice.p2p.commonapi.Cancellable;
 import rice.selector.SelectorManager;
 
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.Queue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 /**
  * @author Jeff Hoye
@@ -65,7 +67,7 @@ public class SimpleProcessor implements Processor {
   long seq = Long.MIN_VALUE;
 
   public SimpleProcessor(String name) {
-    QUEUE = new PriorityBlockingQueue<ProcessingRequest>();
+    QUEUE = new PriorityBlockingQueue<>();
     THREAD = new ProcessingThread(name + ".ProcessingThread", QUEUE);
     THREAD.start();
     THREAD.setPriority(Thread.MIN_PRIORITY);
@@ -125,7 +127,7 @@ public class SimpleProcessor implements Processor {
    * This is a test to make sure the order is correct.
    */
   @SuppressWarnings("unchecked")
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
     Environment env = new Environment();
     Processor p = env.getProcessor();
     // block the processor for 1 second while we schedule some more stuff

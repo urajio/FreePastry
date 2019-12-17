@@ -39,11 +39,12 @@ advised of the possibility of such damage.
  */
 package rice.p2p.splitstream;
 
-import rice.p2p.scribe.*;
+import rice.p2p.scribe.Scribe;
+import rice.p2p.scribe.ScribePolicy;
 
 /**
  * @author Jeff Hoye
  */
 public interface SplitStreamScribePolicyFactory {
-  public ScribePolicy getSplitStreamScribePolicy(Scribe scribe, SplitStream splitstream);
+  ScribePolicy getSplitStreamScribePolicy(Scribe scribe, SplitStream splitstream);
 }

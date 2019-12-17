@@ -36,26 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.audit;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.peerreview.PeerReview;
 import org.mpisws.p2p.transport.peerreview.PeerReviewCallback;
-import org.mpisws.p2p.transport.peerreview.PeerReviewImpl;
 import org.mpisws.p2p.transport.peerreview.commitment.Authenticator;
 import org.mpisws.p2p.transport.peerreview.commitment.AuthenticatorStore;
-import org.mpisws.p2p.transport.peerreview.evidence.AuditResponse;
-import org.mpisws.p2p.transport.peerreview.evidence.ChallengeAudit;
-import org.mpisws.p2p.transport.peerreview.evidence.EvidenceTransferProtocol;
-import org.mpisws.p2p.transport.peerreview.evidence.ProofInconsistent;
-import org.mpisws.p2p.transport.peerreview.evidence.ProofNonconformant;
+import org.mpisws.p2p.transport.peerreview.evidence.*;
 import org.mpisws.p2p.transport.peerreview.history.IndexEntry;
 import org.mpisws.p2p.transport.peerreview.history.SecureHistory;
 import org.mpisws.p2p.transport.peerreview.identity.IdentityTransport;
@@ -67,11 +52,15 @@ import org.mpisws.p2p.transport.peerreview.message.ChallengeMessage;
 import org.mpisws.p2p.transport.peerreview.message.PeerReviewMessage;
 import org.mpisws.p2p.transport.peerreview.replay.Verifier;
 import org.mpisws.p2p.transport.peerreview.replay.playback.ReplaySM;
-
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.rawserialization.RawSerializable;
 import rice.p2p.util.MathUtils;
 import rice.selector.TimerTask;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.*;
+
 import static org.mpisws.p2p.transport.peerreview.Basics.renderStatus;
 
 public class AuditProtocolImpl<Handle extends RawSerializable, Identifier extends RawSerializable> implements AuditProtocol<Handle, Identifier> {
@@ -88,12 +77,12 @@ public class AuditProtocolImpl<Handle extends RawSerializable, Identifier extend
   /**
    * Here we remember calls to investigate() that have not been resolved yet 
    */
-  Map<Identifier,ActiveInvestigationInfo<Handle>> activeInvestigation = new HashMap<Identifier, ActiveInvestigationInfo<Handle>>();
+  Map<Identifier,ActiveInvestigationInfo<Handle>> activeInvestigation = new HashMap<>();
 
   /**
    * Here we remember calls to investigate() that have not been resolved yet 
    */
-  Map<Identifier,ActiveAuditInfo<Handle, Identifier>> activeAudit = new HashMap<Identifier, ActiveAuditInfo<Handle,Identifier>>();
+  Map<Identifier,ActiveAuditInfo<Handle, Identifier>> activeAudit = new HashMap<>();
 
   int logDownloadTimeout;
   boolean replayEnabled;
@@ -155,12 +144,12 @@ public class AuditProtocolImpl<Handle extends RawSerializable, Identifier extend
 
     /* Put together an AUDIT challenge */
     ChallengeAudit audit = new ChallengeAudit(needPrevCheckpoint,authFrom,authTo);    
-    ChallengeMessage<Identifier> auditRequest = new ChallengeMessage<Identifier>(peerreview.getLocalId(),evidenceSeq,audit);
+    ChallengeMessage<Identifier> auditRequest = new ChallengeMessage<>(peerreview.getLocalId(), evidenceSeq, audit);
 
     /* Create an entry in our audit buffer */
 
-    ActiveAuditInfo<Handle, Identifier> aai = new ActiveAuditInfo<Handle, Identifier>(
-        target,replayAnswer,false,peerreview.getTime()+logDownloadTimeout,auditRequest,evidenceSeq,null);
+    ActiveAuditInfo<Handle, Identifier> aai = new ActiveAuditInfo<>(
+            target, replayAnswer, false, peerreview.getTime() + logDownloadTimeout, auditRequest, evidenceSeq, null);
     activeAudit.put(peerreview.getIdentifierExtractor().extractIdentifier(target),aai);
     
     /* Send the AUDIT challenge to the target node */
@@ -638,7 +627,7 @@ public class AuditProtocolImpl<Handle extends RawSerializable, Identifier extend
         
         if (logger.level <= Logger.WARNING) logger.log("Audit revealed a protocol violation; filing evidence (snippet from "+lastCheckpointSeq+")");
 
-        ProofNonconformant<Handle> proof = new ProofNonconformant<Handle>(toAuthenticator,subjectHandle,snippet);
+        ProofNonconformant<Handle> proof = new ProofNonconformant<>(toAuthenticator, subjectHandle, snippet);
 //        unsigned int maxProofLen = 1+authenticatorSizeBytes+MAX_HANDLE_SIZE+sizeof(long long)+snippet2size;
 //        unsigned char *proof = (unsigned char*)malloc(maxProofLen);
 //        unsigned int proofLen = 0;
@@ -752,7 +741,7 @@ public class AuditProtocolImpl<Handle extends RawSerializable, Identifier extend
 //          assert(pos == sizeof(response));
           
           if (best != null && foo != null) {
-            AuthResponse<Identifier> response = new AuthResponse<Identifier>(request.subject,best,foo);
+            AuthResponse<Identifier> response = new AuthResponse<>(request.subject, best, foo);
             peerreview.transmit(handle, response, null, null);
           } else {
             if (logger.level <= Logger.WARNING) logger.log("Cannot respond to this request; we don't have any authenticators for "+request.subject);
@@ -798,7 +787,7 @@ public class AuditProtocolImpl<Handle extends RawSerializable, Identifier extend
    */
   protected void sendInvestigation(ActiveInvestigationInfo<Handle> investigation) {
     Identifier id = peerreview.getIdentifierExtractor().extractIdentifier(investigation.target);
-    AuthRequest<Identifier> request = new AuthRequest<Identifier>(investigation.since,id);
+    AuthRequest<Identifier> request = new AuthRequest<>(investigation.since, id);
    
     evidenceTransferProtocol.sendMessageToWitnesses(id, request, null, null);
   }
@@ -822,8 +811,8 @@ public class AuditProtocolImpl<Handle extends RawSerializable, Identifier extend
         logger.log("Extending existing investigation from "+ investigation.since + " to " + since * 1000000);
       investigation.since = since * 1000000; /* log granularity */
     } else {
-      investigation = new ActiveInvestigationInfo<Handle>(target, since * 1000000,
-          peerreview.getTime() + INVESTIGATION_INTERVAL_MILLIS, null, null);
+      investigation = new ActiveInvestigationInfo<>(target, since * 1000000,
+              peerreview.getTime() + INVESTIGATION_INTERVAL_MILLIS, null, null);
       activeInvestigation.put(id, investigation);
     }
     sendInvestigation(investigation);

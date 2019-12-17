@@ -37,14 +37,12 @@ advised of the possibility of such damage.
 
 package rice.post.delivery;
 
-import java.io.*;
-
-import rice.*;
-import rice.post.*;
-import rice.post.messaging.*;
-import rice.p2p.past.*;
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.post.messaging.SignedPostMessage;
+
+import java.io.IOException;
 
 /**
  * The undeliverable marker stored in Past

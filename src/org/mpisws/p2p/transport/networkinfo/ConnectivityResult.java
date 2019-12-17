@@ -40,7 +40,7 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 
 public interface ConnectivityResult {
-  public void udpSuccess(InetSocketAddress from, Map<String, Object> options);
-  public void tcpSuccess(InetSocketAddress from, Map<String, Object> options);
-  public void receiveException(Exception e);
+  void udpSuccess(InetSocketAddress from, Map<String, Object> options);
+  void tcpSuccess(InetSocketAddress from, Map<String, Object> options);
+  void receiveException(Exception e);
 }

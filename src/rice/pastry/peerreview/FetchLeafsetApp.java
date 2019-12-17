@@ -36,22 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.peerreview;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
-import org.mpisws.p2p.transport.peerreview.WitnessListener;
-
 import rice.Continuation;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.MessageDeserializer;
-import rice.pastry.NodeHandle;
 import rice.p2p.util.tuples.Tuple;
 import rice.pastry.Id;
+import rice.pastry.NodeHandle;
 import rice.pastry.NodeSet;
 import rice.pastry.PastryNode;
 import rice.pastry.client.PastryAppl;
@@ -60,11 +50,17 @@ import rice.pastry.messaging.PRawMessage;
 import rice.pastry.routing.RouteMessage;
 import rice.selector.TimerTask;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 public class FetchLeafsetApp extends PastryAppl {
   public static final int APP_ID = 0xf80d17e8;
   
   protected Map<Id, Tuple<TimerTask,Collection<Continuation<Collection<NodeHandle>,Exception>>>> pendingLookups =
-    new HashMap<Id, Tuple<TimerTask,Collection<Continuation<Collection<NodeHandle>,Exception>>>>();
+          new HashMap<>();
   
   
   protected int numNeighbors;
@@ -132,15 +128,15 @@ public class FetchLeafsetApp extends PastryAppl {
     boolean startTask = false;
     if (foo == null) {
       startTask = true;
-      foo = new Tuple<TimerTask, Collection<Continuation<Collection<NodeHandle>,Exception>>>(
-        new TimerTask() {      
-          @Override
-          public void run() {
-            logger.log("getNeighbors("+subject+") sending fetch");
-            thePastryNode.getRouter().route(new RouteMessage(subject,new FetchLeafsetRequest(thePastryNode.getLocalHandle(),subject),routeMsgVersion));
-          }      
-        },
-      new ArrayList<Continuation<Collection<NodeHandle>,Exception>>());      
+      foo = new Tuple<>(
+              new TimerTask() {
+                  @Override
+                  public void run() {
+                      logger.log("getNeighbors(" + subject + ") sending fetch");
+                      thePastryNode.getRouter().route(new RouteMessage(subject, new FetchLeafsetRequest(thePastryNode.getLocalHandle(), subject), routeMsgVersion));
+                  }
+              },
+              new ArrayList<>());
       pendingLookups.put(subject,foo);
     }
     

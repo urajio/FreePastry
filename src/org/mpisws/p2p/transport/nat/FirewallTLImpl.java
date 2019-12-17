@@ -36,22 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.nat;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
-
+import org.mpisws.p2p.transport.*;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.environment.time.TimeSource;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Drops all incoming TCP connections.
@@ -91,7 +83,7 @@ public class FirewallTLImpl<Identifier, MessageType> implements TransportLayer<I
     this.environment = env;
     this.timeSource = environment.getTimeSource();
     this.logger = env.getLogManager().getLogger(FirewallTLImpl.class, null);
-    this.udpTable = new HashMap<Identifier, Long>();
+    this.udpTable = new HashMap<>();
     this.tl = tl;
     tl.setCallback(this);
     tl.acceptSockets(false);    
@@ -119,7 +111,7 @@ public class FirewallTLImpl<Identifier, MessageType> implements TransportLayer<I
   /**
    * Only allow outgoing sockets.
    */
-  public void incomingSocket(P2PSocket<Identifier> s) throws IOException {
+  public void incomingSocket(P2PSocket<Identifier> s) {
     if (logger.level <= Logger.FINE) logger.log("closing incomingSocket("+s+")");
     s.close();
   }

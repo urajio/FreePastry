@@ -36,11 +36,10 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.socket.nat.rendezvous;
 
-import java.io.IOException;
-
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
-import rice.pastry.NodeHandle;
 import rice.pastry.messaging.PRawMessage;
+
+import java.io.IOException;
 
 public class PilotForwardMsg extends PRawMessage {
 

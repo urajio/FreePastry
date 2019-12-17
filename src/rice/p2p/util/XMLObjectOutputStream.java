@@ -39,7 +39,9 @@ package rice.p2p.util;
 
 import java.io.*;
 import java.lang.reflect.*;
-import java.util.*;
+import java.util.Hashtable;
+import java.util.Stack;
+import java.util.Vector;
 
 /**
  * XMLObjectOutputStream is an extension of ObjectOutputStream which provides
@@ -74,12 +76,12 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
   /**
    * A cache of the writeObject() methods, mapping class->writeObject()
    */
-  protected static SoftHashMap WRITE_OBJECTS = new SoftHashMap();
+  protected static final SoftHashMap WRITE_OBJECTS = new SoftHashMap();
   
   /**
    * A cache of the persistentFields, mapping class->Field[]
    */
-  protected static SoftHashMap PERSISTENT_FIELDS = new SoftHashMap();
+  protected static final SoftHashMap PERSISTENT_FIELDS = new SoftHashMap();
   
   /**
    * The underlying XML writing engine
@@ -373,9 +375,8 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
    */
   public void writeChars(String s) throws IOException {
     char[] chars = s.toCharArray();
-    
-    for (int i=0; i<chars.length; i++) 
-      writeChar(chars[i]);
+
+      for (char aChar : chars) writeChar(aChar);
   }
   
   /**
@@ -388,9 +389,8 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
    */
   public void writeBytes(String s) throws IOException {
     byte[] bytes = s.getBytes();
-    
-    for (int i=0; i<bytes.length; i++) 
-      writeByte(bytes[i]);
+
+      for (byte aByte : bytes) writeByte(aByte);
   }
   
   /**
@@ -488,7 +488,7 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
     Class defCl = cl;
     while (defCl != null) {
       try {
-        meth = defCl.getDeclaredMethod("writeReplace", new Class[0]);
+        meth = defCl.getDeclaredMethod("writeReplace");
         break;
       } catch (NoSuchMethodException ex) {
         defCl = defCl.getSuperclass();
@@ -534,7 +534,7 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
         return (Method) WRITE_OBJECTS.get(cl);
       
       try {
-        Method method = cl.getDeclaredMethod("writeObject", new Class[] {ObjectOutputStream.class});
+        Method method = cl.getDeclaredMethod("writeObject", ObjectOutputStream.class);
         method.setAccessible(true);
         
         WRITE_OBJECTS.put(cl, method);
@@ -645,12 +645,10 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
    */
   protected Class[] getSuperClasses(Class c) {
     Vector v = new Vector();
-    
-    while (true) {
-      if (c.getSuperclass().equals((new Object()).getClass())) 
-        break;
+
+    while (!c.getSuperclass().equals(Object.class)) {
       c = c.getSuperclass();
-      
+
       v.addElement(c);
     }
     
@@ -758,7 +756,7 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
       
     if (replace != null) {
       try {
-        o = replace.invoke(o, new Object[0]);
+        o = replace.invoke(o);
         
         if (o == null) {
           writeNull(field);
@@ -931,13 +929,13 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
     
     writer.attribute("class", o.getClass().getName());
     
-    StringBuffer classes = new StringBuffer();
+    StringBuilder classes = new StringBuilder();
     Class[] supers = getSuperClasses(o.getClass());
-    
-    for (int i=0; i<supers.length; i++) {
-      classes.append(supers[i].getName());
-      classes.append(",");
-    }
+
+      for (Class aSuper : supers) {
+          classes.append(aSuper.getName());
+          classes.append(",");
+      }
     
     writer.attribute("superclasses", classes.toString());
     
@@ -976,7 +974,7 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
         currentObjects.push(o);
         currentClasses.push(c);
         currentPutFields.push(new PutField());
-        method.invoke(o, new Object[] {this});
+        method.invoke(o, this);
         currentObjects.pop();
         currentClasses.pop();
         currentPutFields.pop();
@@ -1006,23 +1004,23 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
     writer.start("default");
     
     Field[] fields = getPersistentFields(c);
-    
-    for (int i=0; i<fields.length; i++) {
-      fields[i].setAccessible(true);
-      
-      if (! (Modifier.isStatic(fields[i].getModifiers()) || 
-             Modifier.isTransient(fields[i].getModifiers()))) {
-        if (fields[i].getType().isPrimitive()) {
-          writePrimitiveField(o, fields[i]);
-        } else {
-          try {
-            writeObject(fields[i].get(o), fields[i].getName());
-          } catch (IllegalAccessException e) {
-            throw new IOException("IllegalAccessException thrown " + e);
+
+      for (Field field : fields) {
+          field.setAccessible(true);
+
+          if (!(Modifier.isStatic(field.getModifiers()) ||
+                  Modifier.isTransient(field.getModifiers()))) {
+              if (field.getType().isPrimitive()) {
+                  writePrimitiveField(o, field);
+              } else {
+                  try {
+                      writeObject(field.get(o), field.getName());
+                  } catch (IllegalAccessException e) {
+                      throw new IOException("IllegalAccessException thrown " + e);
+                  }
+              }
           }
-        }
       }
-    }
     
     writer.end("default");
   }
@@ -1040,37 +1038,36 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
     writer.start("default");
     
     String[] primitives = p.getPrimitives();
-    
-    for (int i=0; i<primitives.length; i++) {
-      String name = primitives[i];
-      Object primitive = p.getPrimitive(name);
-      
-      if (primitive.getClass().equals(Integer.class)) {
-        writePrimitive(p.getInt(name), name); 
-      } else if (primitive.getClass().equals(Boolean.class)) {
-        writePrimitive(p.getBoolean(name), name); 
-      } else if (primitive.getClass().equals(Byte.class)) {
-        writePrimitive(p.getByte(name), name); 
-      } else if (primitive.getClass().equals(Character.class)) {
-        writePrimitive(p.getChar(name), name); 
-      } else if (primitive.getClass().equals(Double.class)) {
-        writePrimitive(p.getDouble(name), name); 
-      } else if (primitive.getClass().equals(Float.class)) {
-        writePrimitive(p.getFloat(name), name); 
-      } else if (primitive.getClass().equals(Long.class)) {
-        writePrimitive(p.getLong(name), name); 
-      } else if (primitive.getClass().equals(Short.class)) {
-        writePrimitive(p.getShort(name), name); 
-      } else {
-        throw new IllegalArgumentException("Field " + name + " is not primitive!");
+
+      for (String name : primitives) {
+          Object primitive = p.getPrimitive(name);
+
+          if (primitive.getClass().equals(Integer.class)) {
+              writePrimitive(p.getInt(name), name);
+          } else if (primitive.getClass().equals(Boolean.class)) {
+              writePrimitive(p.getBoolean(name), name);
+          } else if (primitive.getClass().equals(Byte.class)) {
+              writePrimitive(p.getByte(name), name);
+          } else if (primitive.getClass().equals(Character.class)) {
+              writePrimitive(p.getChar(name), name);
+          } else if (primitive.getClass().equals(Double.class)) {
+              writePrimitive(p.getDouble(name), name);
+          } else if (primitive.getClass().equals(Float.class)) {
+              writePrimitive(p.getFloat(name), name);
+          } else if (primitive.getClass().equals(Long.class)) {
+              writePrimitive(p.getLong(name), name);
+          } else if (primitive.getClass().equals(Short.class)) {
+              writePrimitive(p.getShort(name), name);
+          } else {
+              throw new IllegalArgumentException("Field " + name + " is not primitive!");
+          }
       }
-    }
     
     String[] objects = p.getObjects();
-    
-    for (int i=0; i<objects.length; i++) {
-      writeObject(p.getObject(objects[i]), objects[i]);
-    }
+
+      for (String object : objects) {
+          writeObject(p.getObject(object), object);
+      }
     
     writer.end("default");
   }
@@ -1277,35 +1274,35 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
     }
     
     public void put(String name, boolean value) {
-      primitives.put(name, new Boolean(value));
+      primitives.put(name, value);
     }
     
     public void put(String name, byte value) {
-      primitives.put(name, new Byte(value));
+      primitives.put(name, value);
     }
     
     public void put(String name, char value) {
-      primitives.put(name, new Character(value));
+      primitives.put(name, value);
     }
     
     public void put(String name, double value) {
-      primitives.put(name, new Double(value));
+      primitives.put(name, value);
     }
 
     public void put(String name, float value) {
-      primitives.put(name, new Float(value));
+      primitives.put(name, value);
     }
     
     public void put(String name, int value) {
-      primitives.put(name, new Integer(value));
+      primitives.put(name, value);
     }
     
     public void put(String name, long value) {
-      primitives.put(name, new Long(value));
+      primitives.put(name, value);
     }
     
     public void put(String name, short value) {
-      primitives.put(name, new Short(value));
+      primitives.put(name, value);
     }
     
     public void put(String name, Object value) {
@@ -1321,35 +1318,35 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
     }
     
     protected boolean getBoolean(String name) {
-      return ((Boolean) getPrimitive(name)).booleanValue();
+      return (Boolean) getPrimitive(name);
     }
     
     protected byte getByte(String name) {
-      return ((Byte) getPrimitive(name)).byteValue();
+      return (Byte) getPrimitive(name);
     }
     
     protected char getChar(String name) {
-      return ((Character) getPrimitive(name)).charValue();
+      return (Character) getPrimitive(name);
     }
     
     protected double getDouble(String name) {
-      return ((Double) getPrimitive(name)).doubleValue();
+      return (Double) getPrimitive(name);
     }
     
     protected float getFloat(String name) {
-      return ((Float) getPrimitive(name)).floatValue();
+      return (Float) getPrimitive(name);
     }
     
     protected int getInt(String name) {
-      return ((Integer) getPrimitive(name)).intValue();
+      return (Integer) getPrimitive(name);
     }
     
     protected long getLong(String name) {
-      return ((Long) getPrimitive(name)).longValue();
+      return (Long) getPrimitive(name);
     }
     
     protected short getShort(String name) {
-      return ((Short) getPrimitive(name)).shortValue();
+      return (Short) getPrimitive(name);
     } 
     
     /**

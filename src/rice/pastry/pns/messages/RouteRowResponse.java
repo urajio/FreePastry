@@ -36,16 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.pns.messages;
 
-import java.io.IOException;
-
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.pastry.NodeHandle;
-import rice.pastry.NodeHandleFactory;
 import rice.pastry.PastryNode;
-import rice.pastry.messaging.Message;
 import rice.pastry.messaging.PRawMessage;
 import rice.pastry.routing.RouteSet;
+
+import java.io.IOException;
 
 public class RouteRowResponse extends PRawMessage {
 
@@ -70,34 +68,32 @@ public class RouteRowResponse extends PRawMessage {
     buf.writeByte((byte)0); // version    
     buf.writeShort(index);
     buf.writeInt(row.length);
-    for (int i = 0; i < row.length; i++) {
-      if (row[i] == null) {
-        buf.writeBoolean(false);
-      } else {
-        buf.writeBoolean(true);
-        row[i].serialize(buf); 
+      for (RouteSet nodeHandles : row) {
+          if (nodeHandles == null) {
+              buf.writeBoolean(false);
+          } else {
+              buf.writeBoolean(true);
+              nodeHandles.serialize(buf);
+          }
       }
-    }    
   }
 
   public RouteRowResponse(InputBuffer buf, PastryNode localNode, NodeHandle sender, int dest) throws IOException {
     super(dest);
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        setSender(sender);
-        index = buf.readShort();
-        int numRouteSets = buf.readInt();
-        row = new RouteSet[numRouteSets];
-        for (int i = 0; i<numRouteSets; i++) {      
-          if (buf.readBoolean()) {
-            row[i] = new RouteSet(buf, localNode, localNode); 
+      if (version == 0) {
+          setSender(sender);
+          index = buf.readShort();
+          int numRouteSets = buf.readInt();
+          row = new RouteSet[numRouteSets];
+          for (int i = 0; i < numRouteSets; i++) {
+              if (buf.readBoolean()) {
+                  row[i] = new RouteSet(buf, localNode, localNode);
+              }
           }
-        }
-        break;
-      default:
-        throw new IOException("Unknown Version: "+version);
-    }     
+      } else {
+          throw new IOException("Unknown Version: " + version);
+      }
   }
 
   public short getType() {

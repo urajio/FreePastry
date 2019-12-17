@@ -36,14 +36,13 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.messaging;
 
-import java.io.*;
-import java.security.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.post.PostEntityAddress;
 
-import rice.post.messaging.*;
-import rice.post.*;
-
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
+import java.io.IOException;
 
 /**
  * This class wraps an EncrypedNotificationMessage and is

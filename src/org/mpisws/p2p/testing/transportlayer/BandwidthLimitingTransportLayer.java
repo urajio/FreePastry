@@ -111,7 +111,7 @@ public class BandwidthLimitingTransportLayer<Identifier> implements
     BUCKET_SIZE = bucketSize;
     BUCKET_TIME_LIMIT = bucketTimelimit;    
     logger = env.getLogManager().getLogger(BandwidthLimitingTransportLayer.class, null);
-    this.errorHandler = new DefaultErrorHandler<Identifier>(logger);
+    this.errorHandler = new DefaultErrorHandler<>(logger);
     tl.setCallback(this);
     
     environment.getSelectorManager().getTimer().schedule(new TimerTask(){    
@@ -131,8 +131,8 @@ public class BandwidthLimitingTransportLayer<Identifier> implements
   public MessageRequestHandle<Identifier, ByteBuffer> sendMessage(Identifier i, ByteBuffer m, 
       final MessageCallback<Identifier, ByteBuffer> deliverAckToMe, Map<String, Object> options) {
     
-    final MessageRequestHandleImpl<Identifier, ByteBuffer> returnMe = 
-      new MessageRequestHandleImpl<Identifier, ByteBuffer>(i, m, options);
+    final MessageRequestHandleImpl<Identifier, ByteBuffer> returnMe =
+            new MessageRequestHandleImpl<>(i, m, options);
     
     boolean success = true;
     synchronized(this) {
@@ -161,7 +161,7 @@ public class BandwidthLimitingTransportLayer<Identifier> implements
   }  
   
   public SocketRequestHandle<Identifier> openSocket(Identifier i, final SocketCallback<Identifier> deliverSocketToMe, Map<String, Object> options) {
-    final SocketRequestHandleImpl<Identifier> returnMe = new SocketRequestHandleImpl<Identifier>(i,options, logger);
+    final SocketRequestHandleImpl<Identifier> returnMe = new SocketRequestHandleImpl<>(i, options, logger);
     returnMe.setSubCancellable(tl.openSocket(i, new SocketCallback<Identifier>(){
       public void receiveResult(SocketRequestHandle<Identifier> cancellable, P2PSocket<Identifier> sock) {
         deliverSocketToMe.receiveResult(returnMe, new BandwidthLimitingSocket(sock));
@@ -186,7 +186,7 @@ public class BandwidthLimitingTransportLayer<Identifier> implements
   /**
    * Keep track of all of the BandwidthLimitingSockets
    */
-  Collection<BandwidthLimitingSocket> sockets = new ArrayList<BandwidthLimitingSocket>();
+  Collection<BandwidthLimitingSocket> sockets = new ArrayList<>();
   
   class BandwidthLimitingSocket extends SocketWrapperSocket<Identifier, Identifier> {
     public BandwidthLimitingSocket(P2PSocket<Identifier> socket) {
@@ -319,8 +319,8 @@ public class BandwidthLimitingTransportLayer<Identifier> implements
       NodeIdFactory nidFactory, final int amt, final int time) throws IOException {  
     
     // anonymously extend SPNF
-    PastryNodeFactory factory = new SocketPastryNodeFactory(nidFactory, bindport, env) {
-      
+    return new SocketPastryNodeFactory(nidFactory, bindport, env) {
+
       /**
        * Override getWireTransportLayer to return the BandwidthLimitingTL wrapping
        * the default wire implementation.
@@ -329,44 +329,43 @@ public class BandwidthLimitingTransportLayer<Identifier> implements
       protected TransportLayer<InetSocketAddress, ByteBuffer> getWireTransportLayer(
           InetSocketAddress innermostAddress, PastryNode pn) throws IOException {
         // get the default layer
-        TransportLayer<InetSocketAddress, ByteBuffer> wtl = 
-          super.getWireTransportLayer(innermostAddress, pn);        
-        
+        TransportLayer<InetSocketAddress, ByteBuffer> wtl =
+          super.getWireTransportLayer(innermostAddress, pn);
+
         // wrap it with our layer
-        return new BandwidthLimitingTransportLayer<InetSocketAddress>(
-            wtl, amt, time, pn.getEnvironment());
-      }      
+        return new BandwidthLimitingTransportLayer<>(
+                wtl, amt, time, pn.getEnvironment());
+      }
     };
-    return factory;
   } 
   
   public static PastryNodeFactory exampleB(int bindport, Environment env, 
-      NodeIdFactory nidFactory, final int amt, final int time) throws IOException {    
-    PastryNodeFactory factory = new SocketPastryNodeFactory(nidFactory, bindport, env) {
+      NodeIdFactory nidFactory, final int amt, final int time) throws IOException {
+    return new SocketPastryNodeFactory(nidFactory, bindport, env) {
 
       @Override
       protected TransLivenessProximity<MultiInetSocketAddress, ByteBuffer> getSourceRouteManagerLayer(
-          TransportLayer<SourceRoute<MultiInetSocketAddress>, ByteBuffer> ltl, 
-          LivenessProvider<SourceRoute<MultiInetSocketAddress>> livenessProvider, 
-          Pinger<SourceRoute<MultiInetSocketAddress>> pinger, 
-          PastryNode pn, 
-          MultiInetSocketAddress proxyAddress, 
+          TransportLayer<SourceRoute<MultiInetSocketAddress>, ByteBuffer> ltl,
+          LivenessProvider<SourceRoute<MultiInetSocketAddress>> livenessProvider,
+          Pinger<SourceRoute<MultiInetSocketAddress>> pinger,
+          PastryNode pn,
+          MultiInetSocketAddress proxyAddress,
           MultiAddressSourceRouteFactory esrFactory) throws IOException {
-        
+
         // get the default layer
-        final TransLivenessProximity<MultiInetSocketAddress, ByteBuffer> srm = 
+        final TransLivenessProximity<MultiInetSocketAddress, ByteBuffer> srm =
           super.getSourceRouteManagerLayer(
             ltl, livenessProvider, pinger, pn, proxyAddress, esrFactory);
-        
+
         // wrap the default layer with our layer
-        final BandwidthLimitingTransportLayer<MultiInetSocketAddress> bll = 
-          new BandwidthLimitingTransportLayer<MultiInetSocketAddress>(
-            srm.getTransportLayer(), amt, time, pn.getEnvironment());
-        
+        final BandwidthLimitingTransportLayer<MultiInetSocketAddress> bll =
+                new BandwidthLimitingTransportLayer<>(
+                        srm.getTransportLayer(), amt, time, pn.getEnvironment());
+
         return new TransLivenessProximity<MultiInetSocketAddress, ByteBuffer>(){
           public TransportLayer<MultiInetSocketAddress, ByteBuffer> getTransportLayer() {
             return bll;
-          }        
+          }
           public LivenessProvider<MultiInetSocketAddress> getLivenessProvider() {
             return srm.getLivenessProvider();
           }
@@ -376,6 +375,5 @@ public class BandwidthLimitingTransportLayer<Identifier> implements
         };
       }
     };
-    return factory;    
   }
 }

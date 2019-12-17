@@ -36,13 +36,13 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.rendezvous;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.environment.time.TimeSource;
 import rice.p2p.util.tuples.MutableTuple;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class EphemeralDBImpl<Identifier, HighIdentifier> implements EphemeralDB<Identifier, HighIdentifier> {
   /**
@@ -58,12 +58,12 @@ public class EphemeralDBImpl<Identifier, HighIdentifier> implements EphemeralDB<
   Logger logger;
   
   protected long nextTag = NO_TAG+1;
-  protected Map<HighIdentifier, Long> highToTag = new HashMap<HighIdentifier, Long>();
-  protected Map<Identifier, Long> ephemeralToTag = new HashMap<Identifier, Long>();
+  protected Map<HighIdentifier, Long> highToTag = new HashMap<>();
+  protected Map<Identifier, Long> ephemeralToTag = new HashMap<>();
   /**
    * maps tag to ephemeral and timestamp
    */
-  protected Map<Long, MutableTuple<Identifier, Long>> tagToEphemeral = new HashMap<Long, MutableTuple<Identifier,Long>>();
+  protected Map<Long, MutableTuple<Identifier, Long>> tagToEphemeral = new HashMap<>();
 
   /**
    * 
@@ -137,7 +137,7 @@ public class EphemeralDBImpl<Identifier, HighIdentifier> implements EphemeralDB<
 
     // if we're here, we need to create a new one
     tag = nextTag++;
-    MutableTuple<Identifier, Long> ret = new MutableTuple<Identifier, Long>(addr, now);
+    MutableTuple<Identifier, Long> ret = new MutableTuple<>(addr, now);
     ephemeralToTag.put(addr, tag);
     tagToEphemeral.put(tag,ret);
     if (logger.level <= Logger.FINE) logger.log("getTagForEphemeral("+addr+"):"+tag);

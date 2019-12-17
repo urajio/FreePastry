@@ -39,14 +39,15 @@ advised of the possibility of such damage.
  */
 package rice.environment.logging.file;
 
-import java.io.*;
-import java.io.PrintStream;
-
 import rice.environment.logging.LogManager;
 import rice.environment.logging.simple.SimpleLogManager;
 import rice.environment.params.Parameters;
 import rice.environment.time.TimeSource;
 import rice.environment.time.simple.SimpleTimeSource;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 
 /**
  * @author Jeff Hoye

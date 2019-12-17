@@ -36,19 +36,16 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.proximity;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
+import org.mpisws.p2p.transport.liveness.PingListener;
+import org.mpisws.p2p.transport.liveness.Pinger;
+import rice.environment.Environment;
+import rice.environment.logging.Logger;
+import rice.environment.time.TimeSource;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.mpisws.p2p.transport.liveness.PingListener;
-import org.mpisws.p2p.transport.liveness.Pinger;
-
-import rice.environment.Environment;
-import rice.environment.logging.Logger;
-import rice.environment.time.TimeSource;
 
 public class MinRTTProximityProvider<Identifier> implements ProximityProvider<Identifier>, PingListener<Identifier> {
   /**
@@ -63,7 +60,7 @@ public class MinRTTProximityProvider<Identifier> implements ProximityProvider<Id
    /**
     * Holds only pending DeadCheckers
     */
-   Map<Identifier, EntityManager> managers;
+   final Map<Identifier, EntityManager> managers;
 
    Pinger<Identifier> tl;
    
@@ -78,7 +75,7 @@ public class MinRTTProximityProvider<Identifier> implements ProximityProvider<Id
     this.logger = env.getLogManager().getLogger(MinRTTProximityProvider.class, null);
     this.time = env.getTimeSource();
     tl.addPingListener(this);
-    this.managers = new HashMap<Identifier, EntityManager>();
+    this.managers = new HashMap<>();
   }
   
   public int proximity(Identifier i, Map<String, Object> options) {
@@ -182,7 +179,7 @@ public class MinRTTProximityProvider<Identifier> implements ProximityProvider<Id
     }
   }
 
-  Collection<ProximityListener<Identifier>> listeners = new ArrayList<ProximityListener<Identifier>>();
+  final Collection<ProximityListener<Identifier>> listeners = new ArrayList<>();
   public void addProximityListener(ProximityListener<Identifier> listener) {
     synchronized(listeners) {
       listeners.add(listener);
@@ -198,7 +195,7 @@ public class MinRTTProximityProvider<Identifier> implements ProximityProvider<Id
   public void notifyProximityListeners(Identifier i, int prox, Map<String, Object> options) {
     Collection<ProximityListener<Identifier>> temp;
     synchronized(listeners) {
-      temp = new ArrayList<ProximityListener<Identifier>>(listeners);
+      temp = new ArrayList<>(listeners);
     }
     for (ProximityListener<Identifier> p : temp) {
       p.proximityChanged(i, prox, options);

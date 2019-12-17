@@ -36,13 +36,13 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.simpleidentity;
 
-import java.io.IOException;
-import java.util.Map;
-
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
+import java.io.IOException;
+import java.util.Map;
+
 public interface Serializer<Identifier> {
-  public void serialize(Identifier i, OutputBuffer b) throws IOException;
-  public Identifier deserialize(InputBuffer b, Identifier i, Map<String, Object> options) throws IOException;
+  void serialize(Identifier i, OutputBuffer b) throws IOException;
+  Identifier deserialize(InputBuffer b, Identifier i, Map<String, Object> options) throws IOException;
 }

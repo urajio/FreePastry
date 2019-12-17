@@ -36,20 +36,21 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.glacier.v2;
 
-import java.io.*;
-import java.util.Arrays;
-
 import rice.environment.logging.Logger;
 import rice.environment.random.RandomSource;
-import rice.environment.random.simple.SimpleRandomSource;
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Arrays;
 
 public class BloomFilter implements Serializable {
   
   private static final long serialVersionUID = -3938913031743354080L;
   
-  private byte bitfield[];
-  private int hashParams[];
+  private byte[] bitfield;
+  private int[] hashParams;
   
   public BloomFilter(int length, int[] hashParams) {
     bitfield = new byte[(length+7)/8];
@@ -176,9 +177,9 @@ System.outt.println(); */
   }
   
   public void serialize(OutputBuffer buf) throws IOException {
-    buf.writeInt(hashParams.length); 
-    for (int i = 0; i < hashParams.length; i++) {
-      buf.writeInt(hashParams[i]);
+    buf.writeInt(hashParams.length);
+    for (int hashParam : hashParams) {
+      buf.writeInt(hashParam);
     }    
     buf.writeInt(bitfield.length); 
     buf.write(bitfield, 0, bitfield.length);

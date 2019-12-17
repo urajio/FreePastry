@@ -36,10 +36,10 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.util;
 
+import rice.p2p.commonapi.Cancellable;
+
 import java.util.ArrayList;
 import java.util.Collection;
-
-import rice.p2p.commonapi.Cancellable;
 
 /**
  * Allows you to cancel a group of things.
@@ -53,7 +53,7 @@ public class AttachableCancellable implements Cancellable {
   /**
    * If subCancellable = null, it's been cancelled.
    */
-  Collection<Cancellable> subCancellable = new ArrayList<Cancellable>();
+  Collection<Cancellable> subCancellable = new ArrayList<>();
 
   public boolean isCancelled() {
     return subCancellable == null;

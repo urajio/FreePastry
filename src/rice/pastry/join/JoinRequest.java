@@ -36,14 +36,18 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.join;
 
-import rice.p2p.commonapi.rawserialization.*;
-import rice.pastry.*;
-import rice.pastry.messaging.*;
-import rice.pastry.routing.*;
-import rice.pastry.leafset.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.pastry.Id;
+import rice.pastry.NodeHandle;
+import rice.pastry.NodeHandleFactory;
+import rice.pastry.PastryNode;
+import rice.pastry.leafset.LeafSet;
+import rice.pastry.messaging.PRawMessage;
+import rice.pastry.routing.RouteSet;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.Date;
 
 /**
  * Request to join this network.
@@ -71,7 +75,7 @@ public class JoinRequest extends PRawMessage {
 
   private short rowCount;
 
-  private RouteSet rows[][];
+  private RouteSet[][] rows;
 
   private LeafSet leafSet;
 
@@ -171,7 +175,7 @@ public class JoinRequest extends PRawMessage {
    * @param row the row to push.
    */
 
-  public void pushRow(RouteSet row[]) {
+  public void pushRow(RouteSet[] row) {
     rows[--rowCount] = row;
   }
 
@@ -238,14 +242,14 @@ public class JoinRequest extends PRawMessage {
       RouteSet[] thisRow = rows[i];
       if (thisRow != null) {
         buf.writeBoolean(true);
-        for (int j=0; j<thisRow.length; j++) {
-          if (thisRow[j] != null) {
-            buf.writeBoolean(true);
-            thisRow[j].serialize(buf);
-          } else {
-            buf.writeBoolean(false);
+          for (RouteSet nodeHandles : thisRow) {
+              if (nodeHandles != null) {
+                  buf.writeBoolean(true);
+                  nodeHandles.serialize(buf);
+              } else {
+                  buf.writeBoolean(false);
+              }
           }
-        }
       } else {
         buf.writeBoolean(false);
       }

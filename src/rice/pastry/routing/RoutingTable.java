@@ -36,11 +36,8 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.routing;
 
-import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.p2p.util.tuples.Tuple;
 import rice.pastry.*;
-import rice.pastry.Id.Distance;
 
 import java.util.*;
 
@@ -86,7 +83,7 @@ public class RoutingTable extends Observable implements NodeSetEventSource {
 
   protected PastryNode pn;
   
-  private RouteSet routingTable[][];
+  private RouteSet[][] routingTable;
 
   private int maxEntries;
 
@@ -447,9 +444,8 @@ public class RoutingTable extends Observable implements NodeSetEventSource {
    */
 
   public RouteSet getRouteSet(int index, int digit) {
-    RouteSet ns = routingTable[index][digit];
 
-    return ns;
+    return routingTable[index][digit];
   }
 
   /**
@@ -632,8 +628,8 @@ public class RoutingTable extends Observable implements NodeSetEventSource {
     
     // pass the event to the Observers of this RoutingTable
     synchronized (listeners) {
-      for (int i = 0; i < listeners.size(); i++) {
-        ((NodeSetListener)listeners.get(i)).nodeSetUpdate(this,handle,added); 
+      for (NodeSetListener listener : listeners) {
+        ((NodeSetListener) listener).nodeSetUpdate(this, handle, added);
       }
     }
     // handle deprecated interface
@@ -723,7 +719,7 @@ public class RoutingTable extends Observable implements NodeSetEventSource {
   }
 
   public int numUniqueEntries() {
-    HashSet<NodeHandle> set = new HashSet<NodeHandle>();
+    HashSet<NodeHandle> set = new HashSet<>();
     int maxr = numRows();
     int maxc = numColumns();
     for (int r = 0; r < maxr; r++) {
@@ -739,7 +735,7 @@ public class RoutingTable extends Observable implements NodeSetEventSource {
     return set.size();
   }
 
-  ArrayList<NodeSetListener> listeners = new ArrayList<NodeSetListener>();
+  final ArrayList<NodeSetListener> listeners = new ArrayList<>();
   
   /**
    * Generates too many objects to use this interface
@@ -778,7 +774,7 @@ public class RoutingTable extends Observable implements NodeSetEventSource {
    * @return list of NodeHandle
    */
   public synchronized List<NodeHandle> asList() {
-    List<NodeHandle> rtHandles = new ArrayList<NodeHandle>(numEntries());
+    List<NodeHandle> rtHandles = new ArrayList<>(numEntries());
 
     for (int r = 0; r < numRows(); r++) {
       RouteSet[] row = getRow(r);

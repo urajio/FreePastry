@@ -36,9 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport;
 
-import java.util.Map;
-
 import rice.p2p.commonapi.Cancellable;
+
+import java.util.Map;
 
 /**
  * Can cancel the request to open the socket.  Also, returned with the
@@ -53,11 +53,11 @@ public interface SocketRequestHandle<Identifier> extends Cancellable {
    * The identifier that the caller requested to open to.
    * @return
    */
-  public Identifier getIdentifier();
+  Identifier getIdentifier();
   
   /**
    * The options that the caller used.
    * @return
    */
-  public Map<String, Object> getOptions();
+  Map<String, Object> getOptions();
 }

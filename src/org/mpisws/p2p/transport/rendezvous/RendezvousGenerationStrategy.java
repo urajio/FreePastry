@@ -45,5 +45,5 @@ import java.util.Map;
  * @param <Identifier>
  */
 public interface RendezvousGenerationStrategy<Identifier> {
-  public Identifier getRendezvousPoint(Identifier dest, Map<String, Object> options);
+  Identifier getRendezvousPoint(Identifier dest, Map<String, Object> options);
 }

@@ -47,12 +47,12 @@ package rice.environment.random;
  * @author Jeff Hoye
  */
 public interface RandomSource {
-  public boolean nextBoolean();
-  public void nextBytes(byte[] bytes);
-  public double nextDouble();
-  public float nextFloat();
-  public double nextGaussian();
-  public int nextInt();
-  public int nextInt(int max);
-  public long nextLong();
+  boolean nextBoolean();
+  void nextBytes(byte[] bytes);
+  double nextDouble();
+  float nextFloat();
+  double nextGaussian();
+  int nextInt();
+  int nextInt(int max);
+  long nextLong();
 }

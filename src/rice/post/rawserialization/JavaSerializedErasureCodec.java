@@ -39,14 +39,15 @@ advised of the possibility of such damage.
  */
 package rice.post.rawserialization;
 
-import java.io.*;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Endpoint;
-import rice.p2p.glacier.*;
+import rice.p2p.glacier.ErasureCodec;
+import rice.p2p.glacier.Fragment;
 import rice.p2p.past.PastContent;
 import rice.p2p.past.rawserialization.PastContentDeserializer;
+
+import java.io.*;
 
 /**
  * To support reverse compatability with on-disk Java Serialized data.
@@ -87,7 +88,7 @@ public class JavaSerializedErasureCodec extends ErasureCodec {
         if (logger.level <= Logger.WARNING) logger.log("JSEC.encodeObject("+obj+")");
       }      
     }
-    byte bytes[];
+    byte[] bytes;
 
     try {
       ByteArrayOutputStream byteStream = new ByteArrayOutputStream();

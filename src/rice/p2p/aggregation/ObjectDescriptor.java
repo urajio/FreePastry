@@ -36,8 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.aggregation;
 
-import java.io.Serializable;
 import rice.p2p.commonapi.Id;
+
+import java.io.Serializable;
 
 public class ObjectDescriptor implements Serializable, Comparable<ObjectDescriptor> {
   
@@ -66,33 +67,32 @@ public class ObjectDescriptor implements Serializable, Comparable<ObjectDescript
   }
 
   public int compareTo(ObjectDescriptor other) {
-    ObjectDescriptor metadata = (ObjectDescriptor) other;
-    
-    int result = this.key.compareTo(metadata.key);
+
+    int result = this.key.compareTo(((ObjectDescriptor) other).key);
     if (result != 0)
       return result;
       
-    if (metadata.version > this.version)
+    if (((ObjectDescriptor) other).version > this.version)
       return -1;
-    if (metadata.version < this.version)
+    if (((ObjectDescriptor) other).version < this.version)
       return 1;
     
-    if (metadata.currentLifetime > this.currentLifetime) 
+    if (((ObjectDescriptor) other).currentLifetime > this.currentLifetime)
       return -1;
-    if (metadata.currentLifetime < this.currentLifetime) 
+    if (((ObjectDescriptor) other).currentLifetime < this.currentLifetime)
       return 1;
 
-    if (metadata.refreshedLifetime > this.refreshedLifetime) 
+    if (((ObjectDescriptor) other).refreshedLifetime > this.refreshedLifetime)
       return -1;
-    if (metadata.refreshedLifetime < this.refreshedLifetime) 
+    if (((ObjectDescriptor) other).refreshedLifetime < this.refreshedLifetime)
       return 1;
 
-    if (metadata.size > this.size) 
+    if (((ObjectDescriptor) other).size > this.size)
       return -1;
-    else if (metadata.size < this.size) 
+    else if (((ObjectDescriptor) other).size < this.size)
       return 1;
 
     return 0;
   }
-};
+}
 

@@ -36,19 +36,8 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.statement;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.peerreview.PeerReview;
 import org.mpisws.p2p.transport.peerreview.PeerReviewCallback;
-import org.mpisws.p2p.transport.peerreview.PeerReviewImpl;
 import org.mpisws.p2p.transport.peerreview.audit.LogSnippet;
 import org.mpisws.p2p.transport.peerreview.challenge.ChallengeResponseProtocol;
 import org.mpisws.p2p.transport.peerreview.commitment.Authenticator;
@@ -61,22 +50,22 @@ import org.mpisws.p2p.transport.peerreview.identity.IdentityTransport;
 import org.mpisws.p2p.transport.peerreview.infostore.Evidence;
 import org.mpisws.p2p.transport.peerreview.infostore.PeerInfoStore;
 import org.mpisws.p2p.transport.peerreview.message.AckMessage;
-import org.mpisws.p2p.transport.peerreview.message.PeerReviewMessage;
 import org.mpisws.p2p.transport.peerreview.message.UserDataMessage;
 import org.mpisws.p2p.transport.peerreview.replay.Verifier;
-
-import rice.Continuation;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.rawserialization.RawSerializable;
 import rice.p2p.util.MathUtils;
 import rice.p2p.util.tuples.Tuple;
 
+import java.io.IOException;
+import java.util.*;
+
 public class StatementProtocolImpl<Handle extends RawSerializable, Identifier extends RawSerializable> implements StatementProtocol<Handle, Identifier> {
 
   protected Logger logger;
   
-  protected Map<Identifier, LinkedList<IncompleteStatementInfo<Handle, Identifier>>> incompleteStatement = 
-    new HashMap<Identifier, LinkedList<IncompleteStatementInfo<Handle, Identifier>>>();
+  protected Map<Identifier, LinkedList<IncompleteStatementInfo<Handle, Identifier>>> incompleteStatement =
+          new HashMap<>();
   
   protected ChallengeResponseProtocol<Handle, Identifier> challengeProtocol;
   protected IdentityTransport<Handle, Identifier> transport;
@@ -155,10 +144,10 @@ public class StatementProtocolImpl<Handle extends RawSerializable, Identifier ex
     if (logger.level <= Logger.INFO) logger.log("Incoming "+((statement.getType() == MSG_ACCUSATION) ? "accusation" : "response")+" from "+source);
     
     /* Find an empty spot in our message buffer and store the message there */
-    IncompleteStatementInfo<Handle, Identifier> idx = new IncompleteStatementInfo<Handle, Identifier>(false,source,peerreview.getTime() + STATEMENT_COMPLETION_TIMEOUT_MILLIS,statement,false,null,options);
+    IncompleteStatementInfo<Handle, Identifier> idx = new IncompleteStatementInfo<>(false, source, peerreview.getTime() + STATEMENT_COMPLETION_TIMEOUT_MILLIS, statement, false, null, options);
     LinkedList<IncompleteStatementInfo<Handle, Identifier>> foo = incompleteStatement.get(statement.subject);
     if (foo == null) {
-      foo = new LinkedList<IncompleteStatementInfo<Handle,Identifier>>();
+      foo = new LinkedList<>();
       incompleteStatement.put(statement.subject, foo);
     }
     foo.add(idx);

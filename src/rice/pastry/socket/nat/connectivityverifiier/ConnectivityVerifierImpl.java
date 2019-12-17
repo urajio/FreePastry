@@ -36,18 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.socket.nat.connectivityverifiier;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
 import org.mpisws.p2p.transport.networkinfo.ConnectivityResult;
 import org.mpisws.p2p.transport.networkinfo.InetSocketAddressLookup;
-
 import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
@@ -56,6 +47,14 @@ import rice.p2p.util.AttachableCancellable;
 import rice.pastry.Id;
 import rice.pastry.PastryNode;
 import rice.pastry.socket.SocketPastryNodeFactory;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class ConnectivityVerifierImpl implements ConnectivityVerifier {
   SocketPastryNodeFactory spnf;
@@ -107,7 +106,7 @@ public class ConnectivityVerifierImpl implements ConnectivityVerifier {
     // TODO: make sure the addresses are Internet routable?
     // TODO: Timeout (can be in parallel, so timeout ~every second, and try the next one, then cancel everything if one comes through)
 
-    final ArrayList<InetSocketAddress> probeList = new ArrayList<InetSocketAddress>(probeAddresses);
+    final ArrayList<InetSocketAddress> probeList = new ArrayList<>(probeAddresses);
     final AttachableCancellable ret = new AttachableCancellable();
 
     // getInetSocketAddressLookup verifyies that we are on the selector
@@ -195,7 +194,7 @@ public class ConnectivityVerifierImpl implements ConnectivityVerifier {
     // TODO: make sure the addresses are Internet routable?
     // TODO: Timeout (can be in parallel, so timeout ~every second, and try the next one, then cancel everything if one comes through)
 
-    final ArrayList<InetSocketAddress> probeList = new ArrayList<InetSocketAddress>(probeAddresses);
+    final ArrayList<InetSocketAddress> probeList = new ArrayList<>(probeAddresses);
     final AttachableCancellable ret = new AttachableCancellable();
 
     // getInetSocketAddressLookup verifyies that we are on the selector
@@ -278,7 +277,7 @@ public class ConnectivityVerifierImpl implements ConnectivityVerifier {
   public Cancellable verifyConnectivity(final MultiInetSocketAddress local,
       final Collection<InetSocketAddress> probeAddresses,
       final ConnectivityResult deliverResultToMe) {
-    final ArrayList<InetSocketAddress> probeList = new ArrayList<InetSocketAddress>(probeAddresses);
+    final ArrayList<InetSocketAddress> probeList = new ArrayList<>(probeAddresses);
 //    logger.logException("verifyConnectivity("+local+","+probeAddresses+")", new Exception("Stack Trace"));
 //    logger.log("verifyConnectivity("+local+","+probeAddresses+")");
     if (logger.level <= Logger.FINER) logger.log("verifyConnectivity("+local+","+probeAddresses+")");

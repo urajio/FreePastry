@@ -37,12 +37,14 @@ advised of the possibility of such damage.
 
 package rice.p2p.util;
 
-import java.io.*;
-import java.math.*;
-import java.util.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdSet;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Iterator;
 
 /**
  * @(#) IdBloomFilter.java

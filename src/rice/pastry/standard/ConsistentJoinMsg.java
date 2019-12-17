@@ -39,14 +39,16 @@ advised of the possibility of such damage.
  */
 package rice.pastry.standard;
 
-import java.io.IOException;
-import java.util.*;
-
-import rice.p2p.commonapi.rawserialization.*;
-import rice.pastry.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.pastry.NodeHandle;
+import rice.pastry.NodeHandleFactory;
 import rice.pastry.join.JoinAddress;
 import rice.pastry.leafset.LeafSet;
-import rice.pastry.messaging.*;
+import rice.pastry.messaging.PRawMessage;
+
+import java.io.IOException;
+import java.util.HashSet;
 
 /**
  * @author Jeff Hoye
@@ -84,29 +86,25 @@ public class ConsistentJoinMsg extends PRawMessage {
     ls.serialize(buf);
     buf.writeBoolean(request);
     buf.writeInt(failed.size());
-    Iterator<NodeHandle> i = failed.iterator();
-    while(i.hasNext()) {
-      NodeHandle h = (NodeHandle)i.next(); 
-      h.serialize(buf);
-    }
+      for (NodeHandle h : failed) {
+          h.serialize(buf);
+      }
   }
   
   public ConsistentJoinMsg(InputBuffer buf, NodeHandleFactory nhf, NodeHandle sender) throws IOException {
     super(JoinAddress.getCode());    
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        setSender(sender);
-        ls = LeafSet.build(buf, nhf);
-        request = buf.readBoolean();
-        failed = new HashSet<NodeHandle>();
-        int numInSet = buf.readInt();
-        for (int i = 0; i < numInSet; i++) {
-          failed.add(nhf.readNodeHandle(buf));
-        }
-        break;
-      default:
-        throw new IOException("Unknown Version: "+version);
-    }      
+      if (version == 0) {
+          setSender(sender);
+          ls = LeafSet.build(buf, nhf);
+          request = buf.readBoolean();
+          failed = new HashSet<>();
+          int numInSet = buf.readInt();
+          for (int i = 0; i < numInSet; i++) {
+              failed.add(nhf.readNodeHandle(buf));
+          }
+      } else {
+          throw new IOException("Unknown Version: " + version);
+      }
   }
 }

@@ -37,22 +37,20 @@ advised of the possibility of such damage.
 
 package rice.p2p.multiring;
 
-import rice.*;
-
-import java.io.IOException;
-import java.util.*;
-
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-
+import rice.Continuation;
+import rice.Executable;
 import rice.environment.Environment;
 import rice.p2p.commonapi.*;
 import rice.p2p.commonapi.appsocket.AppSocketReceiver;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.multiring.messaging.RingMessage;
-import rice.p2p.util.MCAdapter;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.MessageDeserializer;
+import rice.p2p.commonapi.rawserialization.RawMessage;
 import rice.p2p.util.MRHAdapter;
 import rice.p2p.util.rawserialization.JavaSerializedMessage;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @(#) MultiringEndpoint.java
@@ -425,10 +423,9 @@ public class MultiringEndpoint implements Endpoint {
   }
 
   public NodeHandleSet readNodeHandleSet(InputBuffer buf, short type) throws IOException {
-    switch(type) {
-      case MultiringNodeHandleSet.TYPE:
-        return new MultiringNodeHandleSet(buf, endpoint);
-    }
+      if (type == MultiringNodeHandleSet.TYPE) {
+          return new MultiringNodeHandleSet(buf, endpoint);
+      }
     return endpoint.readNodeHandleSet(buf, type);
   }
   

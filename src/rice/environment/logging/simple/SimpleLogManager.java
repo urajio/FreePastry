@@ -39,15 +39,15 @@ advised of the possibility of such damage.
  */
 package rice.environment.logging.simple;
 
-import java.io.PrintStream;
-import java.util.Hashtable;
-
-import rice.environment.logging.*;
+import rice.environment.logging.AbstractLogManager;
+import rice.environment.logging.CloneableLogManager;
 import rice.environment.logging.LogManager;
-import rice.environment.params.ParameterChangeListener;
+import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
 import rice.environment.time.TimeSource;
 import rice.environment.time.simple.SimpleTimeSource;
+
+import java.io.PrintStream;
 
 /**
  * This class creates loggers that log to a specified PrintStream System.out by default.

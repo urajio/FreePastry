@@ -37,23 +37,27 @@ advised of the possibility of such damage.
 
 package rice.pastry.client;
 
+import org.mpisws.p2p.transport.priority.PriorityTransportLayer;
+import org.mpisws.p2p.transport.util.OptionsFactory;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.DeliveryNotification;
 import rice.p2p.commonapi.MessageReceipt;
-import rice.p2p.commonapi.appsocket.*;
+import rice.p2p.commonapi.appsocket.AppSocket;
+import rice.p2p.commonapi.appsocket.AppSocketReceiver;
 import rice.p2p.commonapi.rawserialization.MessageDeserializer;
 import rice.pastry.*;
-import rice.pastry.messaging.*;
-import rice.pastry.standard.*;
-import rice.pastry.transport.PMessageReceipt;
-import rice.pastry.routing.*;
-import rice.pastry.leafset.*;
+import rice.pastry.leafset.LeafSet;
+import rice.pastry.messaging.JavaSerializedDeserializer;
+import rice.pastry.messaging.Message;
+import rice.pastry.messaging.RawMessageDelivery;
+import rice.pastry.routing.RouteMessage;
+import rice.pastry.routing.RouteMessageNotification;
+import rice.pastry.routing.RoutingTable;
+import rice.pastry.routing.SendOptions;
+import rice.pastry.standard.StandardAddress;
 
 import java.io.IOException;
 import java.util.Map;
-
-import org.mpisws.p2p.transport.priority.PriorityTransportLayer;
-import org.mpisws.p2p.transport.util.OptionsFactory;
 
 /**
  * A PastryAppl is an abstract class that every Pastry application
@@ -70,7 +74,7 @@ public abstract class PastryAppl /*implements Observer*/
   // private block
   protected String instance;
 
-  protected PastryNode thePastryNode;
+  protected final PastryNode thePastryNode;
 
   protected int address;
 
@@ -182,9 +186,6 @@ public abstract class PastryAppl /*implements Observer*/
     Message m;
     try {
       m = msg.deserialize(deserializer);
-    } catch (IOException ioe) {
-      if (logger.level <= Logger.SEVERE) logger.logException("Error deserializing "+msg+" in "+this+".  Message will be dropped.", ioe);
-      return;
     } catch (RuntimeException re) {
       if (logger.level <= Logger.SEVERE) logger.logException("Error deserializing "+msg+" in "+this+".  Message will be dropped.", re);
       throw re;

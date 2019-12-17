@@ -37,12 +37,13 @@ advised of the possibility of such damage.
 
 package rice.pastry;
 
-import java.io.*;
-import java.lang.ref.*;
-import java.util.*;
-
 import rice.environment.random.RandomSource;
 import rice.p2p.commonapi.rawserialization.RawSerializable;
+
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.Random;
+import java.util.WeakHashMap;
 
 /**
  * Represents a Pastry identifier for a node, object or key. A single identifier and the bit length
@@ -67,7 +68,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
   /**
    * The static translation array
    */
-  public static final String tran[] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"};
+  public static final String[] tran = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"};
   
   /**
    * This is the bit length of the node ids. If it is n, then there are 2^n possible different Ids.
@@ -92,14 +93,14 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
   /**
    * The actual contents of this Id
    */
-  private int Id[];
+  private int[] Id;
 
   /**
    * Constructor.
    *
    * @param material an array of length at least IdBitLength/32 containing raw Id material.
    */
-  protected Id(int material[]) {
+  protected Id(int[] material) {
     Id = new int[nlen];
     for (int i = 0; (i < nlen) && (i < material.length); i++) 
       Id[i] = material[i];
@@ -123,13 +124,13 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
    * @return a random Id
    */
   public static Id makeRandomId(Random rng) {
-    byte material[] = new byte[IdBitLength / 8];
+    byte[] material = new byte[IdBitLength / 8];
     rng.nextBytes(material);
     return build(material);
   }
   
   public static Id makeRandomId(RandomSource rng) {
-    byte material[] = new byte[IdBitLength / 8];
+    byte[] material = new byte[IdBitLength / 8];
     rng.nextBytes(material);
     return build(material);
   }
@@ -143,7 +144,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
    *
    * @param material an array of length at least IdBitLength/32 containing raw Id material.
    */
-  public static Id build(int material[]) {
+  public static Id build(int[] material) {
     return resolve(ID_MAP, new Id(material));
   }
   
@@ -168,9 +169,9 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
   }
   
   public void serialize(rice.p2p.commonapi.rawserialization.OutputBuffer buf) throws IOException {
-    for (int i = 0; i < Id.length; i++) {
-      buf.writeInt(Id[i]);
-    }
+      for (int value : Id) {
+          buf.writeInt(value);
+      }
   }
 
   
@@ -293,7 +294,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
    *
    * @return The real Id
    */
-  private Object readResolve() throws ObjectStreamException {
+  private Object readResolve() {
     return resolve(ID_MAP, this);
   }
   
@@ -476,7 +477,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
    *
    * @param target an array of length at least IdBitLength/8 for the Id to be stored in.
    */
-  public void blit(byte target[]) {
+  public void blit(byte[] target) {
     blit(target, 0);
   }
   
@@ -486,7 +487,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
    * @param offset The offset to start at
    * @param target an array of length at least IdBitLength/8 for the distance to be stored in.
    */
-  public void blit(byte target[], int offset) {
+  public void blit(byte[] target, int offset) {
     for (int j = 0; j < IdBitLength / 8; j++) {
       int k = Id[j / 4] >> ((j % 4) * 8);
       target[offset+j] = (byte) (k & 0xff);
@@ -499,7 +500,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
    * @return a fresh copy of the Id material
    */
   public byte[] copy() {
-    byte target[] = new byte[IdBitLength / 8];
+    byte[] target = new byte[IdBitLength / 8];
     blit(target);
     return target;
   }
@@ -637,9 +638,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
       invert(dist);
     }
 
-    Distance d = new Distance(dist);
-
-    return d;
+    return new Distance(dist);
   }
 
   public Distance distance(Id nid, Distance d) {
@@ -668,9 +667,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
       invert(dist);
     }
 
-    Distance d = new Distance(dist);
-
-    return d;
+    return new Distance(dist);
   }
 
 
@@ -755,11 +752,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
     int val = Id[index];
     int mask = (1 << shift);
 
-    if ((val & mask) != 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return (val & mask) != 0;
   }
 
   /**
@@ -833,7 +826,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
    * @return A String representation of this Id, abbreviated
    */
   public String toString() {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     buffer.append("<0x");
     
     int n = IdBitLength / 4;
@@ -850,7 +843,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
    * @return
    */
   public String toStringBare() {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     
     int n = IdBitLength / 4;
     for (int i = n-1; i >= n-6; i--) 
@@ -866,7 +859,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
    * @return The complete representation of this Id, in hexadecimal
    */
   public String toStringFull() {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     int n = IdBitLength / 4;
     for (int i = n - 1; i >= 0; i--) 
@@ -926,7 +919,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
   private int[] absDistance(Id nid) {
     return absDistance(nid,new int[nlen]);
   }
-  private int[] absDistance(Id nid, int dist[]) {
+  private int[] absDistance(Id nid, int[] dist) {
     long x;
     long y;
     long diff;
@@ -994,7 +987,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
 
     private static final long serialVersionUID = 5464763824924998962L;
     
-    private int difference[];
+    private int[] difference;
 
     /**
      * Constructor.
@@ -1031,7 +1024,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
      *
      * @param target an array of length at least IdBitLength/8 for the distance to be stored in.
      */
-    public void blit(byte target[]) {
+    public void blit(byte[] target) {
       blit(target, 0);
     }
     
@@ -1041,7 +1034,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
      * @param offset The offset to start at
      * @param target an array of length at least IdBitLength/8 for the distance to be stored in.
      */
-    public void blit(byte target[], int offset) {
+    public void blit(byte[] target, int offset) {
       for (int j = 0; j < IdBitLength / 8; j++) {
         int k = difference[j / 4] >> ((j % 4) * 8);
         target[offset+j] = (byte) (k & 0xff);
@@ -1054,7 +1047,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
      * @return a fresh copy of the distance material
      */
     public byte[] copy() {
-      byte target[] = new byte[IdBitLength / 8];
+      byte[] target = new byte[IdBitLength / 8];
       blit(target);
       return target;
     }
@@ -1090,11 +1083,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
      * @return true if they are the same, false otherwise.
      */
     public boolean equals(Object obj) {
-      if (compareTo((Id.Distance)obj) == 0) {
-        return true;
-      } else {
-        return false;
-      }
+      return compareTo((Distance) obj) == 0;
     }
 
     /**
@@ -1180,7 +1169,7 @@ public class Id implements rice.p2p.commonapi.Id, RawSerializable {
     public String toString() {
       String s = "0x";
 
-      String tran[] = {"0", "1", "2", "3", "4", "5", "6", "7",
+      String[] tran = {"0", "1", "2", "3", "4", "5", "6", "7",
         "8", "9", "A", "B", "C", "D", "E", "F"};
 
       for (int j = IdBitLength / 8 - 1; j >= 0; j--) {

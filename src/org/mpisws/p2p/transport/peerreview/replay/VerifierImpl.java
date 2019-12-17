@@ -36,50 +36,39 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.replay;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.ClosedChannelException;
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayerCallback;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.peerreview.PeerReview;
 import org.mpisws.p2p.transport.peerreview.PeerReviewCallback;
 import org.mpisws.p2p.transport.peerreview.history.IndexEntry;
 import org.mpisws.p2p.transport.peerreview.history.SecureHistory;
 import org.mpisws.p2p.transport.peerreview.identity.IdentityTransport;
-import org.mpisws.p2p.transport.peerreview.replay.EventCallback;
 import org.mpisws.p2p.transport.peerreview.replay.playback.ReplaySM;
-import org.mpisws.p2p.transport.util.Serializer;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.environment.random.RandomSource;
-import rice.environment.time.simulated.DirectTimeSource;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.RawSerializable;
 import rice.p2p.util.rawserialization.SimpleInputBuffer;
 import rice.p2p.util.rawserialization.SimpleOutputBuffer;
+
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class VerifierImpl<Handle extends RawSerializable, Identifier extends RawSerializable> implements Verifier<Handle> {
 
   /**
    * Maps EVT_XXX -> EventCallback
    */
-  Map<Short, EventCallback> eventCallback = new HashMap<Short, EventCallback>();
+  Map<Short, EventCallback> eventCallback = new HashMap<>();
   
   /**
    * So we can call back when we get an ack.
    */
-  Map<Long, VerifierMRH<Handle>> callbacks = new HashMap<Long, VerifierMRH<Handle>>();
+  Map<Long, VerifierMRH<Handle>> callbacks = new HashMap<>();
   
   protected Handle localHandle;
   protected SecureHistory history;
@@ -115,7 +104,7 @@ public class VerifierImpl<Handle extends RawSerializable, Identifier extends Raw
       SecureHistory history, 
       Handle localHandle, 
       long firstEntryToReplay, 
-      Object extInfo) /* : ReplayWrapper() */ throws IOException {    
+      Object extInfo) /* : ReplayWrapper() */ {
     if (!(env.getSelectorManager() instanceof ReplaySM)) {
       throw new IllegalArgumentException("Environment.getSelectorManager() must be a ReplaySM, was a "+env.getSelectorManager().getClass());          
     }
@@ -192,10 +181,10 @@ public class VerifierImpl<Handle extends RawSerializable, Identifier extends Raw
   
   public boolean verifiedOK() { 
     return !foundFault; 
-  };
+  }
 
 
-  public IndexEntry getNextEvent() {
+    public IndexEntry getNextEvent() {
     return next;
   }
   
@@ -520,7 +509,7 @@ public class VerifierImpl<Handle extends RawSerializable, Identifier extends Raw
     }
 
     long sendSeq = next.getSeq();
-    VerifierMRH<Handle> ret = new VerifierMRH<Handle>(target,message,deliverAckToMe,options);
+    VerifierMRH<Handle> ret = new VerifierMRH<>(target, message, deliverAckToMe, options);
     callbacks.put(sendSeq,ret);
     
     // If the SEND is hashed, simply compare it to the predicted entry
@@ -691,7 +680,7 @@ public class VerifierImpl<Handle extends RawSerializable, Identifier extends Raw
   
   public boolean isSuccess() {
     if (initialized && verifiedOK()) {
-      if (next == null) return true;
+      return next == null;
     }
 //    logger.log("i:"+initialized+" v:"+verifiedOK()+" n:"+nextEvent);
     return false;
@@ -720,16 +709,14 @@ public class VerifierImpl<Handle extends RawSerializable, Identifier extends Raw
       parameterTypes[0] = String.class;      
       try {
         Constructor ctor = c.getConstructor(parameterTypes);
-        IOException ioe = (IOException)ctor.newInstance(message);
-        return ioe;
+        return (IOException)ctor.newInstance(message);
 //      } catch (NoSuchMethodException nsme) {
 //      } catch (IllegalAccessException iae) {        
 //      } catch (InvocationTargetException ite) {
       } catch (Exception e) {
         try {
-          Constructor ctor = c.getConstructor(new Class[0]);
-          IOException ioe = (IOException)ctor.newInstance(message);
-          return ioe;
+          Constructor ctor = c.getConstructor();
+          return (IOException)ctor.newInstance(message);
         } catch (Exception e2) {
           throw new RuntimeException("Couldn't find constructor for"+className+" "+message);          
         }
@@ -746,13 +733,13 @@ public class VerifierImpl<Handle extends RawSerializable, Identifier extends Raw
 
   // ********************* Socket Stuff *************************
   
-  Map<Integer, ReplaySocket<Handle>> sockets = new HashMap<Integer, ReplaySocket<Handle>>();
+  Map<Integer, ReplaySocket<Handle>> sockets = new HashMap<>();
 
   public SocketRequestHandle<Handle> openSocket(final Handle i, SocketCallback<Handle> deliverSocketToMe, final Map<String, Object> options) {
     try {
       int socketId = openSocket(i);
 //      logger.log("openSocket("+i+"):"+socketId);
-      ReplaySocket<Handle> socket = new ReplaySocket<Handle>(i,socketId,this,options);
+      ReplaySocket<Handle> socket = new ReplaySocket<>(i, socketId, this, options);
       socket.setDeliverSocketToMe(deliverSocketToMe);
       sockets.put(socketId, socket);
       return socket;
@@ -782,17 +769,17 @@ public class VerifierImpl<Handle extends RawSerializable, Identifier extends Raw
   }
 
   protected void incomingSocket(Handle from, int socketId) throws IOException {
-    ReplaySocket<Handle> socket = new ReplaySocket<Handle>(from, socketId, this, null);
+    ReplaySocket<Handle> socket = new ReplaySocket<>(from, socketId, this, null);
     sockets.put(socketId, socket);
     app.incomingSocket(socket);
   }
   
-  protected void socketOpened(int socketId) throws IOException {
+  protected void socketOpened(int socketId) {
 //    logger.log("socketOpened("+socketId+")");
     sockets.get(socketId).socketOpened();
   }
 
-  protected void socketException(int socketId, IOException ioe) throws IOException {
+  protected void socketException(int socketId, IOException ioe) {
     //logger.log("socketException("+socketId+")");
 //    sockets.get(socketId).receiveException(new IOException("Replay Exception"));
     sockets.get(socketId).receiveException(ioe);

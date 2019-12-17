@@ -36,12 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.aggregation.messaging;
 
-import java.io.IOException;
-
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.glacier.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.Message;
+import rice.p2p.commonapi.NodeHandle;
 
 public abstract class AggregationMessage implements Message {
 

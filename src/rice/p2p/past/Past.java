@@ -37,10 +37,12 @@ advised of the possibility of such damage.
 
 package rice.p2p.past;
 
-import rice.*;
+import rice.Continuation;
 import rice.environment.Environment;
-import rice.p2p.commonapi.*;
-import rice.p2p.past.rawserialization.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.past.rawserialization.PastContentDeserializer;
+import rice.p2p.past.rawserialization.PastContentHandleDeserializer;
 
 /**
  * @(#) Past.java
@@ -71,7 +73,7 @@ public interface Past {
    * @param obj the object to be inserted
    * @param command Command to be performed when the result is received
    */
-  public void insert(PastContent obj, Continuation<Boolean[], Exception> command);
+  void insert(PastContent obj, Continuation<Boolean[], Exception> command);
  
   /**
    * Retrieves the object stored in this instance of Past with the
@@ -98,7 +100,7 @@ public interface Past {
    * @param id the key to be queried
    * @param command Command to be performed when the result is received
    */
-  public void lookup(Id id, Continuation<PastContent, Exception> command);
+  void lookup(Id id, Continuation<PastContent, Exception> command);
   
   /**
    * Retrieves the object stored in this instance of Past with the
@@ -125,7 +127,7 @@ public interface Past {
    * @param cache Whether or not the result should be cached
    * @param command Command to be performed when the result is received
    */
-  public void lookup(Id id, boolean cache, Continuation command);
+  void lookup(Id id, boolean cache, Continuation command);
 
   /**
    * Retrieves the handles of up to max replicas of the object stored
@@ -144,7 +146,7 @@ public interface Past {
    * @param max the maximal number of replicas requested
    * @param command Command to be performed when the result is received 
    */
-  public void lookupHandles(Id id, int max, Continuation command);
+  void lookupHandles(Id id, int max, Continuation command);
   
   /**
    * Retrieves the handle for the given object stored on the requested 
@@ -155,7 +157,7 @@ public interface Past {
    * @param handle The node on which the handle is requested
    * @param command Command to be performed when the result is received 
    */
-  public void lookupHandle(Id id, NodeHandle handle, Continuation command);
+  void lookupHandle(Id id, NodeHandle handle, Continuation command);
   
   /**
    * Retrieves the object associated with a given content handle.
@@ -169,31 +171,31 @@ public interface Past {
    * @param handle the key to be queried
    * @param command Command to be performed when the result is received 
    */
-  public void fetch(PastContentHandle handle, Continuation command);
+  void fetch(PastContentHandle handle, Continuation command);
   
   /**
    * get the nodeHandle of the local Past node
    *
    * @return the nodehandle
    */
-  public NodeHandle getLocalNodeHandle();
+  NodeHandle getLocalNodeHandle();
 
   /**
    * Returns the number of replicas used in this Past
    *
    * @return the number of replicas for each object
    */
-  public int getReplicationFactor();
+  int getReplicationFactor();
 
-  public Environment getEnvironment();
+  Environment getEnvironment();
 
   /**
    * @return
    */
-  public String getInstance();
+  String getInstance();
   
-  public void setContentDeserializer(PastContentDeserializer deserializer);
-  public void setContentHandleDeserializer(PastContentHandleDeserializer deserializer);
+  void setContentDeserializer(PastContentDeserializer deserializer);
+  void setContentHandleDeserializer(PastContentHandleDeserializer deserializer);
   
 }
 

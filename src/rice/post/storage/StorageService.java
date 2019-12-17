@@ -36,32 +36,44 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.storage;
 
-import java.security.*;
-import java.security.spec.*;
-import java.util.*;
-import java.math.*;
-import java.io.*;
-
-import javax.crypto.*;
-import javax.crypto.spec.*;
-
-import rice.*;
-import rice.Continuation.*;
+import rice.Continuation;
+import rice.Continuation.StandardContinuation;
+import rice.Executable;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.p2p.aggregation.*;
-import rice.p2p.commonapi.*;
+import rice.p2p.aggregation.AggregationImpl;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.p2p.past.*;
-import rice.p2p.past.gc.*;
-import rice.p2p.past.rawserialization.*;
 import rice.p2p.glacier.VersioningPast;
 import rice.p2p.glacier.v2.GlacierContentHandle;
-import rice.p2p.util.*;
+import rice.p2p.past.Past;
+import rice.p2p.past.PastContent;
+import rice.p2p.past.PastContentHandle;
+import rice.p2p.past.gc.GCPast;
+import rice.p2p.past.rawserialization.JavaPastContentDeserializer;
+import rice.p2p.past.rawserialization.JavaPastContentHandleDeserializer;
+import rice.p2p.past.rawserialization.PastContentDeserializer;
+import rice.p2p.past.rawserialization.PastContentHandleDeserializer;
+import rice.p2p.util.MathUtils;
+import rice.p2p.util.SecurityUtils;
+import rice.post.PostEntityAddress;
+import rice.post.PostException;
+import rice.post.PostImpl;
+import rice.post.PostLog;
+import rice.post.log.Log;
 
-import rice.post.*;
-import rice.post.log.*;
-import rice.post.security.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * This class represents a service which stores data in PAST.  This
@@ -152,15 +164,14 @@ public class StorageService {
             return new SignedData(buf, endpoint);
         }
         return super.deserializePastContent(buf, endpoint, contentType);
-      };
+      }
     };
     PastContentHandleDeserializer pchd = new JavaPastContentHandleDeserializer() {
       
       public PastContentHandle deserializePastContentHandle(InputBuffer buf, Endpoint endpoint,
           short contentType) throws IOException {
-        switch(contentType) {
-          case StorageServiceDataHandle.TYPE:
-            return new StorageServiceDataHandle(buf, endpoint);
+        if (contentType == StorageServiceDataHandle.TYPE) {
+          return new StorageServiceDataHandle(buf, endpoint);
         }
         return super.deserializePastContentHandle(buf, endpoint, contentType);
       }    
@@ -300,14 +311,14 @@ public class StorageService {
             PastContentHandle[] handles = (PastContentHandle[]) o;
             
             // the object already exists - simply refresh and return a reference
-            for (int i=0; i<handles.length; i++) {
-              if (handles[i] != null) {
-                refreshContentHash(new ContentHashReference[] {new ContentHashReference(new Id[] {location}, new byte[][] {key})}, new StandardContinuation(parent) {
+            for (PastContentHandle handle : handles) {
+              if (handle != null) {
+                refreshContentHash(new ContentHashReference[]{new ContentHashReference(new Id[]{location}, new byte[][]{key})}, new StandardContinuation(parent) {
                   public void receiveResult(Object o) {
-                    parent.receiveResult(new Object[] {location, key});
+                    parent.receiveResult(new Object[]{location, key});
                   }
                 });
-                
+
                 return;
               }
             }
@@ -317,9 +328,9 @@ public class StorageService {
               public void receiveResult(Object o) {
                 Boolean[] results = (Boolean[]) o;
                 int failed = 0;
-                
-                for (int i=0; i<results.length; i++) {
-                  if ((results[i] == null) || (! results[i].booleanValue())) 
+
+                for (Boolean aBoolean : results) {
+                  if ((aBoolean == null) || (!aBoolean))
                     failed++;
                 }
              
@@ -387,10 +398,10 @@ public class StorageService {
           // then actually put it all together and deserialize
           final byte[] plainText = new byte[length];
           int sofar = 0;
-          
-          for (int j=0; j<data.length; j++) {
-            System.arraycopy(data[j], 0, plainText, sofar, data[j].length);
-            sofar += data[j].length;
+
+          for (byte[] datum : data) {
+            System.arraycopy(datum, 0, plainText, sofar, datum.length);
+            sofar += datum.length;
           }
           
           endpoint.process(new Executable() {
@@ -477,10 +488,9 @@ public class StorageService {
   public void refreshContentHash(ContentHashReference[] references, Continuation command) {
     if (immutablePast instanceof GCPast) {
       HashSet idset = new HashSet();
-      
-      for (int i=0; i<references.length; i++)
-        for (int j=0; j<references[i].getLocations().length; j++)
-          idset.add(references[i].getLocations()[j]);
+
+      for (ContentHashReference reference : references)
+        idset.addAll(Arrays.asList(reference.getLocations()));
       
       Id[] ids = (Id[]) idset.toArray(new Id[0]);
       
@@ -521,9 +531,9 @@ public class StorageService {
         PastContentHandle[] handles = (PastContentHandle[]) o;
         GlacierContentHandle handle = null;
 
-        for (int i=0; i<handles.length; i++) {
-          GlacierContentHandle thisH = (GlacierContentHandle) handles[i];
-          
+        for (PastContentHandle pastContentHandle : handles) {
+          GlacierContentHandle thisH = (GlacierContentHandle) pastContentHandle;
+
           if ((thisH != null) && ((handle == null) || (thisH.getVersion() > handle.getVersion())))
             handle = thisH;
         }
@@ -678,9 +688,9 @@ public class StorageService {
         public void receiveResult(Object o) {
           Boolean[] results = (Boolean[]) o;
           int failed = 0;
-          
-          for (int i=0; i<results.length; i++) 
-            if ((results[i] == null) || (! results[i].booleanValue())) 
+
+          for (Boolean aBoolean : results)
+            if ((aBoolean == null) || (!aBoolean))
               failed++;
           
           if (failed <= results.length/2)        
@@ -764,11 +774,11 @@ public class StorageService {
             throw new StorageException(reference.getLocation(), "Signed data not found in PAST - null returned!");
           
           StorageServiceDataHandle handle = null;
-          
-          for (int i=0; i<handles.length; i++) {
-            StorageServiceDataHandle thisH = (StorageServiceDataHandle) handles[i];
-                        
-            if ((thisH != null) && ((handle == null) || (thisH.getVersion() > handle.getVersion()))) 
+
+          for (PastContentHandle pastContentHandle : handles) {
+            StorageServiceDataHandle thisH = (StorageServiceDataHandle) pastContentHandle;
+
+            if ((thisH != null) && ((handle == null) || (thisH.getVersion() > handle.getVersion())))
               handle = thisH;
           }
           
@@ -913,9 +923,9 @@ public class StorageService {
         public void receiveResult(Object o) {
           Boolean[] results = (Boolean[]) o;
           int failed = 0;
-          
-          for (int i=0; i<results.length; i++)
-            if ((results[i] == null) || (! results[i].booleanValue())) 
+
+          for (Boolean aBoolean : results)
+            if ((aBoolean == null) || (!aBoolean))
               failed++;
           
           if (failed > results.length/2)         

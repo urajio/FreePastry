@@ -37,12 +37,14 @@ advised of the possibility of such damage.
 
 package org.mpisws.p2p.transport.multiaddress;
 
-import java.io.*;
-import java.net.*;
-
 import org.mpisws.p2p.transport.simpleidentity.InetSocketAddressSerializer;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
-import rice.p2p.commonapi.rawserialization.*;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 /**
  * Class which represets a source route to a remote IP address.
@@ -54,7 +56,7 @@ public class MultiInetSocketAddress implements Serializable {
   static InetSocketAddressSerializer serializer = new InetSocketAddressSerializer();
   
   // the address list, most external first
-  protected InetSocketAddress address[];
+  protected InetSocketAddress[] address;
   
   /**
    * Constructor
@@ -82,9 +84,9 @@ public class MultiInetSocketAddress implements Serializable {
    */
   public int hashCode() {
     int result = 31173;
-    for (int i = 0; i < address.length; i++) {
-      result ^=  address[i].hashCode();
-    }
+      for (InetSocketAddress inetSocketAddress : address) {
+          result ^= inetSocketAddress.hashCode();
+      }
     return result;
   }
   
@@ -141,7 +143,7 @@ public class MultiInetSocketAddress implements Serializable {
         result.append(theAddr.toString());
       } else {
         String ha = theAddr2.getHostAddress();
-        result.append(ha + ":" + theAddr.getPort());
+        result.append(ha).append(":").append(theAddr.getPort());
       }
       if (ctr < address.length - 1) result.append(";");
     } // ctr 
@@ -275,16 +277,16 @@ public class MultiInetSocketAddress implements Serializable {
   public void serialize(OutputBuffer buf) throws IOException {
 //    System.out.println("EISA.serialize():numAddresses:"+address.length);
     buf.writeByte((byte)address.length);
-    for (int ctr = 0; ctr < address.length; ctr++) {
-      serializer.serialize(address[ctr], buf);
-    }
+      for (InetSocketAddress inetSocketAddress : address) {
+          serializer.serialize(inetSocketAddress, buf);
+      }
   }
 
   public short getSerializedLength() {
     int ret = 1; // num addresses
-    for (int ctr = 0; ctr < address.length; ctr++) {
-      ret += serializer.getSerializedLength(address[ctr]);
-    }
+      for (InetSocketAddress inetSocketAddress : address) {
+          ret += serializer.getSerializedLength(inetSocketAddress);
+      }
     return (short)ret; 
   }
 

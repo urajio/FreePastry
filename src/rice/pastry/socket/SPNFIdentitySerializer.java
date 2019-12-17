@@ -36,21 +36,19 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.socket;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.identity.IdentitySerializer;
 import org.mpisws.p2p.transport.identity.SerializerListener;
 import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
 import org.mpisws.p2p.transport.sourceroute.SourceRoute;
-
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.pastry.Id;
-import rice.pastry.NodeHandle;
 import rice.pastry.NodeHandleFactoryListener;
 import rice.pastry.PastryNode;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SPNFIdentitySerializer implements 
     IdentitySerializer<TransportLayerNodeHandle<MultiInetSocketAddress>, 
@@ -102,8 +100,8 @@ public class SPNFIdentitySerializer implements
     return i.getLastHop();
   }
 
-  Map<SerializerListener<TransportLayerNodeHandle<MultiInetSocketAddress>>, NodeHandleFactoryListener<SocketNodeHandle>> listeners = 
-    new HashMap<SerializerListener<TransportLayerNodeHandle<MultiInetSocketAddress>>, NodeHandleFactoryListener<SocketNodeHandle>>();
+  Map<SerializerListener<TransportLayerNodeHandle<MultiInetSocketAddress>>, NodeHandleFactoryListener<SocketNodeHandle>> listeners =
+          new HashMap<>();
   public void addSerializerListener(final 
       SerializerListener<TransportLayerNodeHandle<MultiInetSocketAddress>> listener) {
     NodeHandleFactoryListener<SocketNodeHandle> foo = new NodeHandleFactoryListener<SocketNodeHandle>() {

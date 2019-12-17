@@ -39,6 +39,6 @@ package org.mpisws.p2p.transport.wire;
 import org.mpisws.p2p.transport.SocketCountListener;
 
 public interface SocketOpeningTransportLayer<Identifier> {
-  public void addSocketCountListener(SocketCountListener<Identifier> listener); 
-  public void removeSocketCountListener(SocketCountListener<Identifier> listener); 
+  void addSocketCountListener(SocketCountListener<Identifier> listener);
+  void removeSocketCountListener(SocketCountListener<Identifier> listener);
 }

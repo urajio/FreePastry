@@ -37,16 +37,15 @@ advised of the possibility of such damage.
 
 package rice.p2p.scribe.messaging;
 
-import java.io.IOException;
+import rice.p2p.commonapi.CancellableTask;
+import rice.p2p.commonapi.Message;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.scribe.ScribeMultiClient;
+import rice.p2p.scribe.Topic;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.scribe.*;
-import rice.p2p.scribe.rawserialization.ScribeContentDeserializer;
 
 /**
  * @(#) SubscribeLostMessage.java
@@ -72,7 +71,7 @@ public class SubscribeLostMessage implements Message {
    * @param dest The destination address
    */
   public SubscribeLostMessage(NodeHandle source, Collection<Topic> topics, int id, ScribeMultiClient client) {
-    this.topics = new HashSet<Topic>(topics);
+    this.topics = new HashSet<>(topics);
     this.id = id;
     this.client = client;
   }

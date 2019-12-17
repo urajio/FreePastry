@@ -46,5 +46,5 @@ import java.util.Map;
  * @param <Identifier>
  */
 public interface SourceRouteForwardStrategy<Identifier> {
-  public boolean forward(Identifier nextHop, SourceRoute<Identifier> sr, boolean socket, Map<String, Object> options);
+  boolean forward(Identifier nextHop, SourceRoute<Identifier> sr, boolean socket, Map<String, Object> options);
 }

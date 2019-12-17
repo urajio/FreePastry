@@ -72,15 +72,14 @@ public class Tuple<A,B> {
         if (!this.a.equals(that.a)) return false;
       }
       
-      if (this.b == null) { 
-        if (that.b != null) return false;        
+      if (this.b == null) {
+        return that.b == null;
       } else {
         if (that.b == null) return false;
         // we know this.a && that.a != null
-        if (!this.b.equals(that.b)) return false;
+        return this.b.equals(that.b);
       }
-      
-      return true;
+
     }
     return false;
   }

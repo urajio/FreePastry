@@ -37,11 +37,7 @@ advised of the possibility of such damage.
 
 package rice.p2p.past.gc;
 
-import java.io.Serializable;
-
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.past.*;
+import rice.p2p.past.PastContentHandle;
 
 /**
  * @(#) PastContentHandle.java
@@ -63,14 +59,14 @@ public interface GCPastContentHandle extends PastContentHandle {
    *
    * @return The version number of this object
    */
-  public long getVersion();
+  long getVersion();
   
   /**
    * Returns the current expiration time of this object.
    *
    * @return The current expiration time of this object
    */
-  public long getExpiration();
+  long getExpiration();
 
 }
 

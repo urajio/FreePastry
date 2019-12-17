@@ -39,13 +39,16 @@ advised of the possibility of such damage.
  */
 package rice.pastry.messaging;
 
-import java.io.*;
-
-import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Message;
 import rice.p2p.commonapi.NodeHandle;
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.MessageDeserializer;
 import rice.pastry.PastryNode;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.StreamCorruptedException;
 
 /**
  * Handles "old" java serialized messages for programming convienience
@@ -79,9 +82,8 @@ public class JavaSerializedDeserializer implements MessageDeserializer {
       ObjectInputStream ois = new PastryObjectInputStream(new ByteArrayInputStream(array), pn);
       
       o = ois.readObject();
-      Message ret = (Message)o;
 
-      return ret;
+      return (Message)o;
     } catch (StreamCorruptedException sce) {
       if (!deserializeOnlyTypeZero)
         throw new RuntimeException("Not a java serialized message!  See http://freepastry.org/FreePastry/extendingRawMessages.html for more information.", sce);

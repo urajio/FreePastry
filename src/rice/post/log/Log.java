@@ -36,16 +36,18 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.log;
 
-import java.io.*;
-import java.security.*;
-import java.util.*;
-
-import rice.*;
-import rice.Continuation.*;
+import rice.Continuation;
+import rice.Continuation.StandardContinuation;
 import rice.environment.logging.Logger;
-import rice.p2p.commonapi.*;
-import rice.post.*;
+import rice.p2p.commonapi.Id;
+import rice.post.Post;
 import rice.post.storage.*;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.Vector;
 
 /**
  * Class which represents a log in the POST system.  Clients can use
@@ -105,7 +107,7 @@ public class Log implements PostData {
   /**
    * References to the last n entries in this log.
    */
-  protected LogEntryReference topEntryReferences[];
+  protected LogEntryReference[] topEntryReferences;
 
   /**
    * The most recent entry in this log.
@@ -193,7 +195,7 @@ public class Log implements PostData {
   protected void sync(Continuation command) {
     post.getStorageService().storeSigned(this, location, new StandardContinuation(command) {
       public void receiveResult(Object o) {
-        parent.receiveResult(new Boolean(true)); 
+        parent.receiveResult(Boolean.TRUE);
       }
     });
   }
@@ -462,7 +464,7 @@ public class Log implements PostData {
    * @param key
    * @throws IllegalArgumentException Always
    */
- public ContentHashReference buildContentHashReference(Id[] location, byte key[][]) {
+ public ContentHashReference buildContentHashReference(Id[] location, byte[][] key) {
    throw new IllegalArgumentException("Logs are only stored as signed blocks.");
   }
 
@@ -474,7 +476,7 @@ public class Log implements PostData {
    * @param key The for the data
    * @throws IllegalArgumentException Always
    */
-  public SecureReference buildSecureReference(Id location, byte key[]) {
+  public SecureReference buildSecureReference(Id location, byte[] key) {
     throw new IllegalArgumentException("Logs are only stored as signed blocks.");
   }
 
@@ -550,9 +552,7 @@ public class Log implements PostData {
         if (newlength > N_TOP_ENTRIES)
           newlength = N_TOP_ENTRIES;
       LogEntryReference[] temp = new LogEntryReference[newlength];
-      for (int i = 1; i < newlength; i++) {
-        temp[i] = topEntryReferences[i-1];
-      }
+      System.arraycopy(topEntryReferences, 0, temp, 1, newlength - 1);
       temp[0] = reference;
       topEntryReferences = temp;
       topEntryReference = reference;
@@ -593,15 +593,15 @@ public class Log implements PostData {
   }
 
   private String topEntryReferencesToString() {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     result.append("[ ");
 
       if (topEntryReferences != null) {
-        for (int i=0; i<topEntryReferences.length; i++) {
-          if (topEntryReferences[i] == null) {
+        for (LogEntryReference entryReference : topEntryReferences) {
+          if (entryReference == null) {
             result.append("null ");
           } else {
-            result.append(topEntryReferences[i].toString());
+            result.append(entryReference.toString());
           }
         }
       }

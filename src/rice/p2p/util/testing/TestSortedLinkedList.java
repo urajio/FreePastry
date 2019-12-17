@@ -36,16 +36,16 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.util.testing;
 
-import java.util.Random;
-
 import rice.p2p.util.SortedLinkedList;
+
+import java.util.Random;
 
 
 public class TestSortedLinkedList {
 
   
   public static void main(String[] args) {
-    SortedLinkedList<Integer> foo = new SortedLinkedList<Integer>();
+    SortedLinkedList<Integer> foo = new SortedLinkedList<>();
     
     Random r = new Random();
     for (int ctr = 0; ctr < 10; ctr++) {

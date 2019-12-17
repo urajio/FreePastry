@@ -36,11 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.routing;
 
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.pastry.*;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.*;
-import java.io.*;
 
 /**
  * A set of nodes typically stored in the routing table. The set contains a
@@ -98,9 +102,9 @@ public class RouteSet implements NodeSetI, Serializable,
     } else {
       s+=":"; 
     }
-    for (int i = 0; i < nodes.length; i++) {
-      s+=nodes[i]+","; 
-    }
+      for (NodeHandle node : nodes) {
+          s += node + ",";
+      }
     return s;
   }
   
@@ -199,9 +203,9 @@ public class RouteSet implements NodeSetI, Serializable,
    */
   public void update(Observable o, Object arg) {
     // if the proximity is initialized for the time, insert the handle
-    if (((Integer) arg) == NodeHandle.PROXIMITY_CHANGED) {
+    if (arg == NodeHandle.PROXIMITY_CHANGED) {
       put((NodeHandle) o);
-    } else if (((Integer) arg) == NodeHandle.DECLARED_DEAD) {
+    } else if (arg == NodeHandle.DECLARED_DEAD) {
       // changed to remove dead handles - AM
       remove((NodeHandle) o);
     }
@@ -431,8 +435,7 @@ public class RouteSet implements NodeSetI, Serializable,
   /**
    * serialize the RouteSet records the closest node
    */
-  private void writeObject(ObjectOutputStream out) throws IOException,
-      ClassNotFoundException {
+  private void writeObject(ObjectOutputStream out) throws IOException {
     if (closest == -1)
       closestNode();
 
@@ -480,7 +483,7 @@ public class RouteSet implements NodeSetI, Serializable,
    *         found.
    */
   public rice.p2p.commonapi.NodeHandle getHandle(rice.p2p.commonapi.Id id) {
-    return getHandle((Id) id);
+    return getHandle(id);
   }
 
   /**

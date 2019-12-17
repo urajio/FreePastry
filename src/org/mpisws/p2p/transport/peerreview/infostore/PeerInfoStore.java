@@ -36,31 +36,31 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.infostore;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
 import org.mpisws.p2p.transport.peerreview.commitment.Authenticator;
 
+import java.io.File;
+import java.io.IOException;
+
 public interface PeerInfoStore<Handle, Identifier> extends PeerReviewConstants {
-  public void setStatusChangeListener(StatusChangeListener<Identifier> listener);
-  public void addEvidence(Identifier localIdentifier, Identifier subject, long evidenceSeq, Evidence evidence) throws IOException;
-  public void addEvidence(Identifier localIdentifier, Identifier subject, long evidenceSeq, Evidence evidence, Handle interestedParty) throws IOException;
-  public void addResponse(Identifier originator, Identifier subject, long timestamp, Evidence response) throws IOException;
+  void setStatusChangeListener(StatusChangeListener<Identifier> listener);
+  void addEvidence(Identifier localIdentifier, Identifier subject, long evidenceSeq, Evidence evidence) throws IOException;
+  void addEvidence(Identifier localIdentifier, Identifier subject, long evidenceSeq, Evidence evidence, Handle interestedParty) throws IOException;
+  void addResponse(Identifier originator, Identifier subject, long timestamp, Evidence response) throws IOException;
   int getStatus(Identifier id);
-  public void notifyStatusChanged(Identifier subject, int value);
-  public boolean setStorageDirectory(File file) throws IOException;
+  void notifyStatusChanged(Identifier subject, int value);
+  boolean setStorageDirectory(File file) throws IOException;
   
-  public Evidence getEvidence(Identifier originator, Identifier subject, long timestamp) throws IOException;
+  Evidence getEvidence(Identifier originator, Identifier subject, long timestamp) throws IOException;
 
-  public EvidenceRecord<Handle, Identifier> statFirstUnansweredChallenge(Identifier subject);
-  public EvidenceRecord<Handle, Identifier> statProof(Identifier subject);
+  EvidenceRecord<Handle, Identifier> statFirstUnansweredChallenge(Identifier subject);
+  EvidenceRecord<Handle, Identifier> statProof(Identifier subject);
   
-  public EvidenceRecord<Handle, Identifier> findEvidence(Identifier originator, Identifier subject, long timestamp);
-  public EvidenceRecord<Handle, Identifier> findEvidence(Identifier originator, Identifier subject, long timestamp, boolean create);
+  EvidenceRecord<Handle, Identifier> findEvidence(Identifier originator, Identifier subject, long timestamp);
+  EvidenceRecord<Handle, Identifier> findEvidence(Identifier originator, Identifier subject, long timestamp, boolean create);
 
-  public Authenticator getLastCheckedAuth(Identifier id);
-  public void setLastCheckedAuth(Identifier id, Authenticator auth);
+  Authenticator getLastCheckedAuth(Identifier id);
+  void setLastCheckedAuth(Identifier id, Authenticator auth);
 
-  public String getHistoryName(Identifier subject);
+  String getHistoryName(Identifier subject);
 }

@@ -36,37 +36,19 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.multiaddress;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.ClosedChannelException;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.exception.NodeIsFaultyException;
-import org.mpisws.p2p.transport.util.MessageRequestHandleImpl;
-import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
-import org.mpisws.p2p.transport.util.DefaultCallback;
-import org.mpisws.p2p.transport.util.DefaultErrorHandler;
-import org.mpisws.p2p.transport.util.InsufficientBytesException;
-import org.mpisws.p2p.transport.util.SocketInputBuffer;
-import org.mpisws.p2p.transport.util.SocketWrapperSocket;
-import org.mpisws.p2p.transport.wire.WireTransportLayer;
-
-import rice.Continuation;
+import org.mpisws.p2p.transport.util.*;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Cancellable;
 import rice.p2p.util.rawserialization.SimpleInputBuffer;
 import rice.p2p.util.rawserialization.SimpleOutputBuffer;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 /**
  * This class adds an epoch and a list of InetSocketAddresses, and also disambiguates between them
@@ -109,10 +91,10 @@ public class MultiInetAddressTransportLayerImpl implements MultiInetAddressTrans
     if (wire == null) throw new IllegalArgumentException("TransportLayer<InetSocketAddress, ByteBuffer> wire must be non-null");
     if (localAddress == null) throw new IllegalArgumentException("EpochInetSocketAddress localAddress must be non-null");
     
-    this.callback = new DefaultCallback<MultiInetSocketAddress, ByteBuffer>(env);
+    this.callback = new DefaultCallback<>(env);
     
     if (this.errorHandler == null) {
-      this.errorHandler = new DefaultErrorHandler<MultiInetSocketAddress>(logger); 
+      this.errorHandler = new DefaultErrorHandler<>(logger);
     }
     if (this.strategy == null) {
       this.strategy = new SimpleAddressStrategy(); 
@@ -133,7 +115,7 @@ public class MultiInetAddressTransportLayerImpl implements MultiInetAddressTrans
     
     if (deliverSocketToMe == null) throw new IllegalArgumentException("deliverSocketToMe must be non-null!");
 
-    final SocketRequestHandleImpl<MultiInetSocketAddress> handle = new SocketRequestHandleImpl<MultiInetSocketAddress>(i, options, logger);
+    final SocketRequestHandleImpl<MultiInetSocketAddress> handle = new SocketRequestHandleImpl<>(i, options, logger);
     
     if (logger.level <= Logger.INFO-50) logger.log("openSocket("+i+","+deliverSocketToMe+","+options+")");
     SimpleOutputBuffer sob = new SimpleOutputBuffer(localAddress.getSerializedLength());
@@ -177,7 +159,7 @@ public class MultiInetAddressTransportLayerImpl implements MultiInetAddressTrans
               if (b.hasRemaining()) {
                 socket.register(false, true, this); 
               } else {
-                deliverSocketToMe.receiveResult(handle, new SocketWrapperSocket<MultiInetSocketAddress, InetSocketAddress>(i, socket, logger, errorHandler, socket.getOptions())); 
+                deliverSocketToMe.receiveResult(handle, new SocketWrapperSocket<>(i, socket, logger, errorHandler, socket.getOptions()));
               }
             }
           
@@ -188,7 +170,7 @@ public class MultiInetAddressTransportLayerImpl implements MultiInetAddressTrans
           }); 
           
         } else {
-          deliverSocketToMe.receiveResult(handle, new SocketWrapperSocket<MultiInetSocketAddress, InetSocketAddress>(i, result, logger, errorHandler, result.getOptions()));            
+          deliverSocketToMe.receiveResult(handle, new SocketWrapperSocket<>(i, result, logger, errorHandler, result.getOptions()));
         }
       }    
       public void receiveException(SocketRequestHandle<InetSocketAddress> c, Exception exception) {
@@ -213,7 +195,7 @@ public class MultiInetAddressTransportLayerImpl implements MultiInetAddressTrans
           try {
             MultiInetSocketAddress eisa = MultiInetSocketAddress.build(sib);
             if (logger.level <= Logger.FINEST) logger.log("Read "+eisa);
-            callback.incomingSocket(new SocketWrapperSocket<MultiInetSocketAddress, InetSocketAddress>(eisa, socket, logger, errorHandler, socket.getOptions()));
+            callback.incomingSocket(new SocketWrapperSocket<>(eisa, socket, logger, errorHandler, socket.getOptions()));
           } catch (InsufficientBytesException ibe) {
             socket.register(true, false, this); 
           } catch (IOException e) {
@@ -229,8 +211,8 @@ public class MultiInetAddressTransportLayerImpl implements MultiInetAddressTrans
     } else {
       // just pass up the socket
       callback.incomingSocket(
-          new SocketWrapperSocket<MultiInetSocketAddress, InetSocketAddress>(
-              new MultiInetSocketAddress(s.getIdentifier()),s, logger, errorHandler, s.getOptions())); 
+              new SocketWrapperSocket<>(
+                      new MultiInetSocketAddress(s.getIdentifier()), s, logger, errorHandler, s.getOptions()));
     }
   }
 
@@ -244,7 +226,7 @@ public class MultiInetAddressTransportLayerImpl implements MultiInetAddressTrans
     if (logger.level <= Logger.FINE) logger.log("sendMessage("+i+","+m+")");
 
     final MessageRequestHandleImpl<MultiInetSocketAddress, ByteBuffer> handle 
-      = new MessageRequestHandleImpl<MultiInetSocketAddress, ByteBuffer>(i, m, options);
+      = new MessageRequestHandleImpl<>(i, m, options);
     final ByteBuffer buf;
     if (sendIdentifier) {
       SimpleOutputBuffer sob = new SimpleOutputBuffer(m.remaining() + localAddress.getSerializedLength());

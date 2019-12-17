@@ -37,9 +37,11 @@ advised of the possibility of such damage.
 
 package rice.p2p.replication.manager;
 
-import rice.*;
-
-import rice.p2p.commonapi.*;
+import rice.Continuation;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdRange;
+import rice.p2p.commonapi.IdSet;
+import rice.p2p.commonapi.NodeHandle;
 
 /**
  * @(#) ReplicationManagerClient.java
@@ -65,7 +67,7 @@ public interface ReplicationManagerClient {
    *           heard about the key.
    * @param command The command to return the result to
    */
-  public void fetch(Id id, NodeHandle hint, Continuation command);
+  void fetch(Id id, NodeHandle hint, Continuation command);
   
   /**
    * This upcall is to notify the client that the given id can be safely removed
@@ -74,7 +76,7 @@ public interface ReplicationManagerClient {
    *
    * @param id The id to remove
    */
-  public void remove(Id id, Continuation command);
+  void remove(Id id, Continuation command);
   
   /**
    * This upcall should return the set of keys that the application
@@ -83,7 +85,7 @@ public interface ReplicationManagerClient {
    *
    * @param range the requested range
    */
-  public IdSet scan(IdRange range);
+  IdSet scan(IdRange range);
   
   /**
    * This upcall should return whether or not the given id is currently stored
@@ -92,7 +94,7 @@ public interface ReplicationManagerClient {
    * @param id The id in question
    * @return Whether or not the id exists
    */
-  public boolean exists(Id id);
+  boolean exists(Id id);
   
   /**
    * This upcall should return whether or not the given id is currently stored
@@ -101,7 +103,7 @@ public interface ReplicationManagerClient {
    * @param id The id in question
    * @return Whether or not the id exists somewhere in the overlay
    */
-  public void existsInOverlay(Id id, Continuation command);
+  void existsInOverlay(Id id, Continuation command);
   
   /**
    * Asks a client to reinsert an object it already holds into the overlay
@@ -109,6 +111,6 @@ public interface ReplicationManagerClient {
    * @param id The id in question
    * @return 
    */
-  public void reInsert(Id id, Continuation command);
+  void reInsert(Id id, Continuation command);
 }
 

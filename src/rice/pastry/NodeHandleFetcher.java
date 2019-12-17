@@ -47,5 +47,5 @@ import rice.p2p.commonapi.Cancellable;
  *
  */
 public interface NodeHandleFetcher {
-  public Cancellable getNodeHandle(Object o, Continuation<NodeHandle, Exception> c);
+  Cancellable getNodeHandle(Object o, Continuation<NodeHandle, Exception> c);
 }

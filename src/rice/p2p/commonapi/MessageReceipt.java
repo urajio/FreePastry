@@ -36,8 +36,6 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.commonapi;
 
-import org.mpisws.p2p.transport.MessageRequestHandle;
-
 /**
  * Returned by a call to endpoint.route().  
  * 
@@ -47,7 +45,7 @@ import org.mpisws.p2p.transport.MessageRequestHandle;
  *
  */
 public interface MessageReceipt extends Cancellable {
-  public Message getMessage();
-  public Id getId();
-  public NodeHandle getHint();
+  Message getMessage();
+  Id getId();
+  NodeHandle getHint();
 }

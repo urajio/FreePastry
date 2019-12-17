@@ -36,16 +36,8 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.testing.deadforever;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-
-import org.mpisws.p2p.transport.TransportLayer;
-
 import rice.environment.Environment;
 import rice.p2p.commonapi.Id;
-import rice.p2p.commonapi.NodeHandleSet;
 import rice.pastry.NodeHandle;
 import rice.pastry.NodeIdFactory;
 import rice.pastry.PastryNode;
@@ -53,6 +45,10 @@ import rice.pastry.PastryNodeFactory;
 import rice.pastry.leafset.LeafSet;
 import rice.pastry.socket.SocketPastryNodeFactory;
 import rice.pastry.standard.RandomNodeIdFactory;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 /**
  * This tutorial shows how to setup a FreePastry node using the Socket Protocol.

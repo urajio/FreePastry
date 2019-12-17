@@ -36,30 +36,22 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.direct;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.exception.NodeIsFaultyException;
 import org.mpisws.p2p.transport.liveness.LivenessListener;
 import org.mpisws.p2p.transport.liveness.LivenessProvider;
 import org.mpisws.p2p.transport.util.MessageRequestHandleImpl;
 import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Cancellable;
 import rice.p2p.commonapi.CancellableTask;
 import rice.pastry.direct.NetworkSimulator;
 import rice.pastry.direct.NodeRecord;
+
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.util.Map;
 
 public class DirectTransportLayer<Identifier, MessageType> implements TransportLayer<Identifier, MessageType> {
   protected boolean acceptMessages = true;
@@ -116,20 +108,20 @@ public class DirectTransportLayer<Identifier, MessageType> implements TransportL
   }
 
   public SocketRequestHandle<Identifier> openSocket(Identifier i, SocketCallback<Identifier> deliverSocketToMe, Map<String, Object> options) {
-    SocketRequestHandleImpl<Identifier> handle = new SocketRequestHandleImpl<Identifier>(i,options, logger);
+    SocketRequestHandleImpl<Identifier> handle = new SocketRequestHandleImpl<>(i, options, logger);
 
     
     if (simulator.isAlive(i)) {
       int delay = (int)Math.round(simulator.networkDelay(localIdentifier, i));
-      DirectAppSocket<Identifier, MessageType> socket = new DirectAppSocket<Identifier, MessageType>(i, localIdentifier, deliverSocketToMe, simulator, handle, options);
-      CancelAndClose<Identifier, MessageType> cancelAndClose = new CancelAndClose<Identifier, MessageType>(socket, simulator.enqueueDelivery(socket.getAcceptorDelivery(),
-          delay));
+      DirectAppSocket<Identifier, MessageType> socket = new DirectAppSocket<>(i, localIdentifier, deliverSocketToMe, simulator, handle, options);
+      CancelAndClose<Identifier, MessageType> cancelAndClose = new CancelAndClose<>(socket, simulator.enqueueDelivery(socket.getAcceptorDelivery(),
+              delay));
       handle.setSubCancellable(cancelAndClose);
     } else {
       int delay = 5000;  // TODO: Make this configurable
       handle.setSubCancellable(
           simulator.enqueueDelivery(
-              new ConnectorExceptionDelivery<Identifier>(deliverSocketToMe, handle, new SocketTimeoutException()),delay));
+                  new ConnectorExceptionDelivery<>(deliverSocketToMe, handle, new SocketTimeoutException()),delay));
     }
     
     return handle;
@@ -140,7 +132,7 @@ public class DirectTransportLayer<Identifier, MessageType> implements TransportL
       MessageCallback<Identifier, MessageType> deliverAckToMe, 
       Map<String, Object> options) {
     if (!simulator.isAlive(localIdentifier)) return null; // just make this stop, the local node is dead, he shouldn't be doing anything
-    MessageRequestHandleImpl<Identifier, MessageType> handle = new MessageRequestHandleImpl<Identifier, MessageType>(i, m, options);
+    MessageRequestHandleImpl<Identifier, MessageType> handle = new MessageRequestHandleImpl<>(i, m, options);
     
     if (livenessProvider.getLiveness(i, null) >= LivenessListener.LIVENESS_DEAD) {
       if (logger.level <= Logger.FINE)

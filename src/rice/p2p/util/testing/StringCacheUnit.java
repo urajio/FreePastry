@@ -38,9 +38,10 @@ package rice.p2p.util.testing;
 
 import rice.environment.random.RandomSource;
 import rice.environment.random.simple.SimpleRandomSource;
-import rice.p2p.util.*;
-import java.io.*;
-import java.util.*;
+import rice.p2p.util.StringCache;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class StringCacheUnit {
 
@@ -92,7 +93,7 @@ public class StringCacheUnit {
     }
   
     System.out.print("    Loading 10000 4-char strings\t\t\t\t");
-    HashSet<String> set = new HashSet<String>();
+    HashSet<String> set = new HashSet<>();
     char[] array = new char[4];
     String t = null;
     
@@ -102,20 +103,17 @@ public class StringCacheUnit {
       if (! set.contains(t)) {
         set.add(t);
       } else {
-        Iterator<String> j = set.iterator();
-        
-        while (j.hasNext()) {
-          String other = (String) j.next();
-          
-          if (other.equals(t)) {
-            if (other != t) {
-              System.out.println("[ FAILED ]");
-              System.out.println("    Output:\t" + t + " " + t.hashCode() + " " + other + " " + other.hashCode());
-            } else {
-              System.out.println("MATCH! (" + t + ")");
-            }
+
+          for (String other : set) {
+              if (other.equals(t)) {
+                  if (other != t) {
+                      System.out.println("[ FAILED ]");
+                      System.out.println("    Output:\t" + t + " " + t.hashCode() + " " + other + " " + other.hashCode());
+                  } else {
+                      System.out.println("MATCH! (" + t + ")");
+                  }
+              }
           }
-        }
       }
     }
 

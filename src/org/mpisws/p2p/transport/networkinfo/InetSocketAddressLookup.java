@@ -36,16 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.networkinfo;
 
+import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
+import rice.Continuation;
+import rice.Destructable;
+import rice.p2p.commonapi.Cancellable;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Map;
-
-import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
-
-import rice.Continuation;
-import rice.Destructable;
-import rice.p2p.commonapi.Cancellable;
 
 /**
  * First, call getMyInetAddress to find the external address.  
@@ -65,9 +64,9 @@ public interface InetSocketAddressLookup extends Destructable {
    * @param options
    * @return
    */
-  public Cancellable getExternalNodes(InetSocketAddress bootstrap,
-      Continuation<Collection<InetSocketAddress>, IOException> c,
-      Map<String, Object> options);
+  Cancellable getExternalNodes(InetSocketAddress bootstrap,
+                               Continuation<Collection<InetSocketAddress>, IOException> c,
+                               Map<String, Object> options);
 
 
   
@@ -79,9 +78,9 @@ public interface InetSocketAddressLookup extends Destructable {
    * @param options can be null
    * @return you can cancel the operation
    */
-  public Cancellable getMyInetAddress(InetSocketAddress bootstrap, 
-      Continuation<InetSocketAddress, IOException> c, 
-      Map<String, Object> options);
+  Cancellable getMyInetAddress(InetSocketAddress bootstrap,
+                               Continuation<InetSocketAddress, IOException> c,
+                               Map<String, Object> options);
   
   /** 
    * Verify that I have connectivity by using a third party.
@@ -95,8 +94,8 @@ public interface InetSocketAddressLookup extends Destructable {
    * @param proxyAddr
    * @return
    */
-  public Cancellable verifyConnectivity(MultiInetSocketAddress local, 
-      InetSocketAddress probeAddresses, 
-      ConnectivityResult deliverResultToMe, 
-      Map<String, Object> options);  
+  Cancellable verifyConnectivity(MultiInetSocketAddress local,
+                                 InetSocketAddress probeAddresses,
+                                 ConnectivityResult deliverResultToMe,
+                                 Map<String, Object> options);
 }

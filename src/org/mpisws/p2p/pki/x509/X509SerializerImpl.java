@@ -36,6 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.pki.x509;
 
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.NoSuchProviderException;
@@ -43,9 +46,6 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-
-import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
 public class X509SerializerImpl implements X509Serializer {
 
@@ -61,9 +61,7 @@ public class X509SerializerImpl implements X509Serializer {
       buf.writeInt(encoded.length);
       buf.write(encoded, 0, encoded.length);
     } catch (CertificateEncodingException cee) {
-      IOException ioe = new IOException(cee.getLocalizedMessage());
-      ioe.initCause(cee);
-      throw ioe;
+      throw new IOException(cee.getLocalizedMessage(), cee);
     }
   }
   
@@ -74,9 +72,7 @@ public class X509SerializerImpl implements X509Serializer {
       ByteArrayInputStream bytearrayinputstream = new ByteArrayInputStream(encoded);
       return (X509Certificate)certificatefactory.generateCertificate(bytearrayinputstream);    
     } catch (CertificateException ce) {
-      IOException ioe = new IOException(ce.getLocalizedMessage());
-      ioe.initCause(ce);
-      throw ioe;
+      throw new IOException(ce.getLocalizedMessage(), ce);
     }
   }
 

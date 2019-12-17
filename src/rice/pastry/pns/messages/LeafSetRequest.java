@@ -36,13 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.pns.messages;
 
-import java.io.IOException;
-
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.pastry.NodeHandle;
-import rice.pastry.messaging.Message;
 import rice.pastry.messaging.PRawMessage;
+
+import java.io.IOException;
 
 public class LeafSetRequest extends PRawMessage {
   public static final short TYPE = 1;

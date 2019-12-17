@@ -37,15 +37,16 @@ advised of the possibility of such damage.
 package rice.pastry.testing;
 
 import rice.environment.Environment;
-import rice.environment.params.simple.SimpleParameters;
-import rice.environment.time.simulated.DirectTimeSource;
-import rice.pastry.*;
-import rice.pastry.direct.*;
-import rice.pastry.standard.*;
-import rice.pastry.join.*;
+import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
+import rice.pastry.direct.DirectPastryNodeFactory;
+import rice.pastry.direct.EuclideanNetwork;
+import rice.pastry.direct.NetworkSimulator;
+import rice.pastry.standard.RandomNodeIdFactory;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.Date;
+import java.util.NoSuchElementException;
+import java.util.Vector;
 
 /**
  * Pastry test.
@@ -131,7 +132,7 @@ public class PastryTest {
 //    return simulator.simulate();
   }
 
-  public static void main(String args[]) throws IOException {
+  public static void main(String[] args) {
     PastryTest pt = new PastryTest(Environment.directEnvironment());
 
     int n = 4000;

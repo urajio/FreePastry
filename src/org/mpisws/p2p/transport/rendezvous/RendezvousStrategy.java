@@ -36,17 +36,13 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.rendezvous;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.MessageCallback;
 import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-
 import rice.Continuation;
 import rice.p2p.commonapi.Cancellable;
-import rice.pastry.socket.nat.rendezvous.RendezvousSocketNodeHandle;
+
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 /**
  * Uses a 3rd party channel to request a node to connect to a dest.
@@ -55,7 +51,7 @@ import rice.pastry.socket.nat.rendezvous.RendezvousSocketNodeHandle;
  *
  */
 public interface RendezvousStrategy<Identifier> {
-  public static int SUCCESS = 1;
+  int SUCCESS = 1;
 
   /**
    * Calls ChannelOpener.openChannel(dest, credentials) on target
@@ -78,7 +74,7 @@ public interface RendezvousStrategy<Identifier> {
    * @param deliverResultToMe notify me when success/failure
    * @return a way to cancel the request
    */
-  public Cancellable openChannel(Identifier target, Identifier rendezvous, Identifier source, int uid, Continuation<Integer, Exception> deliverResultToMe, Map<String, Object> options);
+  Cancellable openChannel(Identifier target, Identifier rendezvous, Identifier source, int uid, Continuation<Integer, Exception> deliverResultToMe, Map<String, Object> options);
   
   /**
    * Sends the message via an out-of-band channel.  Usually routing.
@@ -89,7 +85,7 @@ public interface RendezvousStrategy<Identifier> {
    * @param options
    * @return
    */
-  public MessageRequestHandle<Identifier, ByteBuffer> sendMessage(Identifier i, ByteBuffer m, MessageCallback<Identifier, ByteBuffer> deliverAckToMe, Map<String, Object> options);
+  MessageRequestHandle<Identifier, ByteBuffer> sendMessage(Identifier i, ByteBuffer m, MessageCallback<Identifier, ByteBuffer> deliverAckToMe, Map<String, Object> options);
 
-  public void setTransportLayer(RendezvousTransportLayer<Identifier> ret);
+  void setTransportLayer(RendezvousTransportLayer<Identifier> ret);
 }

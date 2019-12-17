@@ -36,43 +36,24 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.liveness;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-
-import org.mpisws.p2p.transport.ClosedChannelException;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.exception.NodeIsFaultyException;
 import org.mpisws.p2p.transport.util.DefaultErrorHandler;
 import org.mpisws.p2p.transport.util.MessageRequestHandleImpl;
 import org.mpisws.p2p.transport.util.SocketWrapperSocket;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
 import rice.environment.time.TimeSource;
-import rice.p2p.commonapi.Cancellable;
 import rice.p2p.util.TimerWeakHashMap;
 import rice.p2p.util.rawserialization.SimpleOutputBuffer;
 import rice.selector.Timer;
 import rice.selector.TimerTask;
+
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 public class LivenessTransportLayerImpl<Identifier> implements 
     LivenessTypes,
@@ -156,7 +137,7 @@ public class LivenessTransportLayerImpl<Identifier> implements
   /**
    * Holds only pending DeadCheckers
    */
-  Map<Identifier, EntityManager> managers;
+  final Map<Identifier, EntityManager> managers;
 
   private TransportLayerCallback<Identifier, ByteBuffer> callback;
   
@@ -174,11 +155,11 @@ public class LivenessTransportLayerImpl<Identifier> implements
     this.time = env.getTimeSource();
     this.timer = env.getSelectorManager().getTimer();
     random = new Random();
-    this.livenessListeners = new ArrayList<LivenessListener<Identifier>>();
-    this.pingListeners = new ArrayList<PingListener<Identifier>>();
+    this.livenessListeners = new ArrayList<>();
+    this.pingListeners = new ArrayList<>();
 //    this.managers = new HashMap<Identifier, EntityManager>();
 //    if (cleanMemory) {
-      this.managers = new TimerWeakHashMap<Identifier, EntityManager>(env.getSelectorManager(), 300000);
+      this.managers = new TimerWeakHashMap<>(env.getSelectorManager(), 300000);
 //    } else {
 //      this.managers = new HashMap<Identifier, EntityManager>();      
 //    }
@@ -198,7 +179,7 @@ public class LivenessTransportLayerImpl<Identifier> implements
     tl.setCallback(this);
     this.errorHandler = errorHandler;
     if (this.errorHandler == null) {
-      this.errorHandler = new DefaultErrorHandler<Identifier>(logger);
+      this.errorHandler = new DefaultErrorHandler<>(logger);
     }
   }
   
@@ -305,8 +286,8 @@ public class LivenessTransportLayerImpl<Identifier> implements
       final MessageCallback<Identifier, ByteBuffer> deliverAckToMe, 
       Map<String, Object> options) {
 //    logger.log("sendMessage("+i+","+m+")");      
-    final MessageRequestHandleImpl<Identifier, ByteBuffer> handle = 
-      new MessageRequestHandleImpl<Identifier, ByteBuffer>(i, m, options);
+    final MessageRequestHandleImpl<Identifier, ByteBuffer> handle =
+            new MessageRequestHandleImpl<>(i, m, options);
         
     EntityManager mgr = getManager(i);
     if ((mgr != null) && (mgr.liveness >= LIVENESS_DEAD)) {
@@ -482,7 +463,7 @@ public class LivenessTransportLayerImpl<Identifier> implements
     errorHandler = handler;
     this.errorHandler = errorHandler;
     if (this.errorHandler == null) {
-      this.errorHandler = new DefaultErrorHandler<Identifier>(logger);
+      this.errorHandler = new DefaultErrorHandler<>(logger);
     }
   }
 
@@ -532,7 +513,7 @@ public class LivenessTransportLayerImpl<Identifier> implements
     List<LivenessListener<Identifier>> temp;
 
     synchronized(livenessListeners) {
-      temp = new ArrayList<LivenessListener<Identifier>>(livenessListeners);
+      temp = new ArrayList<>(livenessListeners);
     }
     for (LivenessListener<Identifier> listener : temp) {
       listener.livenessChanged(i, liveness, options);
@@ -555,7 +536,7 @@ public class LivenessTransportLayerImpl<Identifier> implements
   private void notifyPingListenersPing(Identifier i) {
     List<PingListener<Identifier>> temp;
     synchronized(pingListeners) {
-      temp = new ArrayList<PingListener<Identifier>>(pingListeners);
+      temp = new ArrayList<>(pingListeners);
     }
     for (PingListener<Identifier> listener : temp) {
       listener.pingReceived(i, null);
@@ -565,7 +546,7 @@ public class LivenessTransportLayerImpl<Identifier> implements
   private void notifyPingListenersPong(Identifier i, int rtt, Map<String, Object> options) {
     List<PingListener<Identifier>> temp;
     synchronized(pingListeners) {
-      temp = new ArrayList<PingListener<Identifier>>(pingListeners);
+      temp = new ArrayList<>(pingListeners);
     }
     for (PingListener<Identifier> listener : temp) {
       listener.pingResponse(i, rtt, options);
@@ -587,7 +568,7 @@ public class LivenessTransportLayerImpl<Identifier> implements
     protected int numTries;
     
     // the path to check
-    protected EntityManager manager;
+    protected final EntityManager manager;
     
     // for debugging
     long startTime; // the start time
@@ -728,7 +709,7 @@ public class LivenessTransportLayerImpl<Identifier> implements
     // whether or not a check dead is currently being carried out on this route
     private DeadChecker pendingDeadchecker;
     
-    protected Set<LSocket> sockets;
+    protected final Set<LSocket> sockets;
     
     /**
      * Constructor - builds a route manager given the route
@@ -738,7 +719,7 @@ public class LivenessTransportLayerImpl<Identifier> implements
     public EntityManager(Identifier identifier) {
 //      logger.log("new EntityManager("+identifier+")@"+System.identityHashCode(this)+" @"+System.identityHashCode(LivenessTransportLayerImpl.this));        
       if (identifier == null) throw new IllegalArgumentException("identifier is null");
-      this.identifier = new WeakReference<Identifier>(identifier);
+      this.identifier = new WeakReference<>(identifier);
       this.liveness = LIVENESS_SUSPECTED;
 
 //      proximity = DEFAULT_PROXIMITY;
@@ -746,7 +727,7 @@ public class LivenessTransportLayerImpl<Identifier> implements
       
       this.pendingDeadchecker = null;
       this.updated = 0L;
-      sockets = new HashSet<LSocket>();
+      sockets = new HashSet<>();
     }
     
     public DeadChecker getPending() {
@@ -871,7 +852,7 @@ public class LivenessTransportLayerImpl<Identifier> implements
       ArrayList<LSocket> temp;
       synchronized(sockets) {
         // the close() operation can cause a ConcurrentModificationException
-        temp = new ArrayList<LSocket>(sockets);
+        temp = new ArrayList<>(sockets);
         sockets.clear();
       }
       for (LSocket sock : temp) {
@@ -957,11 +938,8 @@ public class LivenessTransportLayerImpl<Identifier> implements
       int rto = DEFAULT_RTO;
       synchronized (this) {
         if (this.getPending() != null) {
-          if (this.liveness < LIVENESS_DEAD) { 
-            return true;
-          } else {
-            return false; // prolly won't change
-          }
+          // prolly won't change
+          return this.liveness < LIVENESS_DEAD;
         } 
         
         long now = time.currentTimeMillis();

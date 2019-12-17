@@ -36,24 +36,21 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.testing.rendezvous;
 
+import rice.environment.Environment;
+import rice.p2p.commonapi.Id;
+import rice.pastry.NodeHandle;
+import rice.pastry.NodeIdFactory;
+import rice.pastry.PastryNode;
+import rice.pastry.leafset.LeafSet;
+import rice.pastry.socket.SocketPastryNodeFactory;
+import rice.pastry.socket.internet.InternetPastryNodeFactory;
+import rice.pastry.standard.RandomNodeIdFactory;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Collections;
-
-import rice.environment.Environment;
-import rice.p2p.commonapi.Id;
-import rice.p2p.commonapi.NodeHandleSet;
-import rice.pastry.NodeHandle;
-import rice.pastry.NodeIdFactory;
-import rice.pastry.PastryNode;
-import rice.pastry.PastryNodeFactory;
-import rice.pastry.leafset.LeafSet;
-import rice.pastry.socket.SocketPastryNodeFactory;
-import rice.pastry.socket.internet.InternetPastryNodeFactory;
-import rice.pastry.socket.nat.rendezvous.RendezvousSocketPastryNodeFactory;
-import rice.pastry.standard.RandomNodeIdFactory;
 
 /**
  * This tutorial shows how to setup a FreePastry node using the Socket Protocol.

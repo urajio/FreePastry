@@ -36,27 +36,17 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.liveness;
 
+import org.mpisws.p2p.transport.*;
+import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
+import rice.environment.Environment;
+import rice.environment.logging.Logger;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
-import org.mpisws.p2p.transport.liveness.LivenessListener;
-import org.mpisws.p2p.transport.liveness.LivenessProvider;
-import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
-
-import rice.environment.Environment;
-import rice.environment.logging.Logger;
 
 /**
  * Returns alive if there is a socket.
@@ -73,8 +63,8 @@ public class SocketLivenessTL<Identifier> implements
   /**
    * Our sockets for the nodes.  Used to determine liveness.
    */
-  protected Map<Identifier, P2PSocket<Identifier>> sockets = new HashMap<Identifier, P2PSocket<Identifier>>();
-  protected Collection<LivenessListener<Identifier>> livenessListeners = new ArrayList<LivenessListener<Identifier>>();
+  protected Map<Identifier, P2PSocket<Identifier>> sockets = new HashMap<>();
+  protected Collection<LivenessListener<Identifier>> livenessListeners = new ArrayList<>();
   protected TransportLayer<Identifier, ByteBuffer> tl;
   protected TransportLayerCallback<Identifier, ByteBuffer> callback;
   protected Logger logger;

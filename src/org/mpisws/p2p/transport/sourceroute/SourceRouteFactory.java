@@ -36,17 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.sourceroute;
 
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+
 import java.io.IOException;
 import java.util.List;
 
-import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
-
-import rice.p2p.commonapi.rawserialization.InputBuffer;
-
 public interface SourceRouteFactory<Identifier> {
-  public SourceRoute<Identifier> getSourceRoute(List<Identifier> route);
-  public SourceRoute<Identifier> reverse(SourceRoute<Identifier> route);
-  public SourceRoute<Identifier> build(InputBuffer buf, Identifier local, Identifier lastHop) throws IOException;
-  public SourceRoute<Identifier> getSourceRoute(Identifier local, Identifier dest);  
-  public SourceRoute<Identifier> getSourceRoute(Identifier local);  
+  SourceRoute<Identifier> getSourceRoute(List<Identifier> route);
+  SourceRoute<Identifier> reverse(SourceRoute<Identifier> route);
+  SourceRoute<Identifier> build(InputBuffer buf, Identifier local, Identifier lastHop) throws IOException;
+  SourceRoute<Identifier> getSourceRoute(Identifier local, Identifier dest);
+  SourceRoute<Identifier> getSourceRoute(Identifier local);
 }

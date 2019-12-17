@@ -37,16 +37,19 @@ advised of the possibility of such damage.
 package rice.pastry.routing;
 
 import rice.p2p.commonapi.Cancellable;
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.MessageDeserializer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.commonapi.rawserialization.RawMessage;
 import rice.p2p.util.rawserialization.SimpleInputBuffer;
-
-import rice.pastry.*;
+import rice.pastry.Id;
+import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
 import rice.pastry.commonapi.PastryEndpointMessage;
 import rice.pastry.messaging.*;
-import rice.pastry.transport.PMessageNotification;
-import rice.pastry.transport.PMessageReceipt;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -275,9 +278,8 @@ public class RouteMessage extends PRawMessage implements Serializable,
     if (internalMsg == null) {
       return "R[serialized{"+auxAddress+","+internalType+"}]";
     }
-    String str = "R[" + internalMsg + "]";
 
-    return str;
+    return "R[" + internalMsg + "]";
   }
 
   // Common API Support

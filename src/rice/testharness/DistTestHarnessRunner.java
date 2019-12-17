@@ -37,13 +37,6 @@ advised of the possibility of such damage.
 
 package rice.testharness;
 
-import java.io.*;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
-import java.util.Vector;
-
 import rice.environment.Environment;
 import rice.p2p.commonapi.Message;
 import rice.p2p.scribe.ScribeContent;
@@ -51,12 +44,18 @@ import rice.pastry.NodeHandle;
 import rice.pastry.NodeIdFactory;
 import rice.pastry.PastryNode;
 import rice.pastry.dist.DistPastryNodeFactory;
-import rice.pastry.routing.RoutingTable;
 import rice.pastry.socket.SocketPastryNodeFactory;
 import rice.pastry.standard.RandomNodeIdFactory;
 import rice.testharness.messaging.CollectResultsMessage;
 import rice.testharness.messaging.InitTestMessage;
 import rice.testharness.messaging.StartTestMessage;
+
+import java.io.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 
 /**
@@ -177,9 +176,8 @@ public class DistTestHarnessRunner {
    */
   protected PastryNode createPastryNode() {
     //System.out.println("DTHR.createPastryNode()");
-    PastryNode pn = factory.newNode(getPastryBootstrap());
 
-    return pn;
+    return factory.newNode(getPastryBootstrap());
   }
 
   /**
@@ -206,13 +204,11 @@ public class DistTestHarnessRunner {
       if (address.equals(bootAddress)) {
         return null;
       } else {
-        NodeHandle ret = factory.getNodeHandle(bootAddress);
-        return ret;
+        return factory.getNodeHandle(bootAddress);
       }
     } else {
-      NodeHandle ret = factory.getNodeHandle(address);
-      
-  return ret;
+
+      return factory.getNodeHandle(address);
 
   // eliminated wire dependency -PD
   //return factory.getNodeHandle(((WireNodeHandle) ((PastryNode) pastryNodes.elementAt(pastryNodes.size() - 1)).getLocalHandle()).getAddress());
@@ -285,8 +281,8 @@ public class DistTestHarnessRunner {
     Environment env = new Environment();
     
     boolean std = true;
-    for (int i = 0; i < args.length; i++) {
-      if (args[i].equals( "std")) std = true; 
+    for (String arg : args) {
+      if (arg.equals("std")) std = true;
     }
     if (!std) { 
       PrintStream ps = new PrintStream(new FileOutputStream("log4.txt", true));
@@ -462,10 +458,10 @@ public class DistTestHarnessRunner {
   public static synchronized void pause(int ms) {
     //System.err.println("waiting for " + (ms/1000) + " sec");
     //System.out.println("waiting for " + (ms/1000) + " sec");
-    try { Thread.currentThread().sleep(ms); } catch (InterruptedException e) {}
+    try { Thread.sleep(ms); } catch (InterruptedException e) {}
   }
 
   public static synchronized void pauseQuiet(int ms) {
-    try { Thread.currentThread().sleep(ms); } catch (InterruptedException e) {}
+    try { Thread.sleep(ms); } catch (InterruptedException e) {}
   }  
 }

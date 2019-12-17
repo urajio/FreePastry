@@ -39,9 +39,9 @@ advised of the possibility of such damage.
  */
 package rice.p2p.commonapi.rawserialization;
 
-import java.io.IOException;
-
 import rice.p2p.commonapi.NodeHandle;
+
+import java.io.IOException;
 
 public interface NodeHandleReader {
   /**
@@ -50,7 +50,7 @@ public interface NodeHandleReader {
    * @return
    * @throws IOException 
    */
-  public NodeHandle readNodeHandle(InputBuffer buf) throws IOException;
-  public NodeHandle coalesce(NodeHandle handle);
+  NodeHandle readNodeHandle(InputBuffer buf) throws IOException;
+  NodeHandle coalesce(NodeHandle handle);
 
 }

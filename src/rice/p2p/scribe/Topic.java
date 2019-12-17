@@ -37,11 +37,14 @@ advised of the possibility of such damage.
 
 package rice.p2p.scribe;
 
-import java.io.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * @(#) Topic.java

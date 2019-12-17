@@ -36,11 +36,10 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.util;
 
-import java.nio.ByteBuffer;
-
 import org.mpisws.p2p.transport.P2PSocket;
-
 import rice.Continuation;
+
+import java.nio.ByteBuffer;
 
 /**
  * Concurrently reads a buffer and writes a buffer at the same time, 
@@ -74,31 +73,31 @@ public class BufferReaderWriter<Identifier> {
   public BufferReaderWriter(P2PSocket<Identifier> sock, ByteBuffer writeMe, boolean writeSize, Continuation<ByteBuffer, Exception> c, int readSize) {
     this.socket = sock;
     this.c = c;
-    new BufferReader<Identifier>(sock,new Continuation<ByteBuffer, Exception>() {
-    
-      public void receiveResult(ByteBuffer result) {
-        read = result;
-        doneReading = true;
-        done(null);
-      }
-    
-      public void receiveException(Exception exception) {
-        failed = true;
-        done(exception);
-      }    
-    },readSize);
-    new BufferWriter<Identifier>(writeMe,sock,new Continuation<P2PSocket<Identifier>, Exception>() {
+      new BufferReader<>(sock, new Continuation<ByteBuffer, Exception>() {
 
-      public void receiveException(Exception exception) {
-        failed = true;
-        done(exception);
-      }
+          public void receiveResult(ByteBuffer result) {
+              read = result;
+              doneReading = true;
+              done(null);
+          }
 
-      public void receiveResult(P2PSocket<Identifier> result) {
-        doneWriting = true;
-        done(null);        
-      }    
-    },writeSize);
+          public void receiveException(Exception exception) {
+              failed = true;
+              done(exception);
+          }
+      }, readSize);
+      new BufferWriter<>(writeMe, sock, new Continuation<P2PSocket<Identifier>, Exception>() {
+
+          public void receiveException(Exception exception) {
+              failed = true;
+              done(exception);
+          }
+
+          public void receiveResult(P2PSocket<Identifier> result) {
+              doneWriting = true;
+              done(null);
+          }
+      }, writeSize);
   }
   
   public void done(Exception e) {

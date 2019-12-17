@@ -39,10 +39,8 @@ advised of the possibility of such damage.
  */
 package rice.testing.routeconsistent.viewer;
 
-import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.*;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -125,7 +123,7 @@ public class Node {
     
     String firstChar = nodeName.substring(2,3);
     //System.out.println("nodeName:"+nodeName+" firstChar \""+firstChar+"\"");
-    if (Integer.valueOf(firstChar,16).intValue() <= 7) {
+    if (Integer.valueOf(firstChar, 16) <= 7) {
       primary = r1;
       secondary = r2;
     } else {
@@ -323,10 +321,10 @@ public class Node {
       Long l = cr.offsets.get(this.nodeName);
       if (l == null) {
         // add the value if it isn't already there
-        cr.offsets.put(this.nodeName, new Long(diff));        
+        cr.offsets.put(this.nodeName, diff);
       } else {
         // update the value if it is already there
-        cr.offsets.put(this.nodeName, new Long(diff+l.longValue()));
+        cr.offsets.put(this.nodeName, diff + l);
       }
     }
   }
@@ -336,7 +334,7 @@ public class Node {
    * @return
    */
   public Collection<Overlap> overlaps(Node that) {
-    List<Overlap> l = new LinkedList<Overlap>();
+    List<Overlap> l = new LinkedList<>();
     if (this.t1 > that.t2) return l;
     if (this.t2 < that.t1) return l;
     l.addAll(this.r1.overlaps(that.r1));
@@ -346,9 +344,7 @@ public class Node {
     if (l.size() > 0) {
       long minTime = Long.MAX_VALUE;
       long maxTime = 0;
-      Iterator<Overlap> i = l.iterator();
-      while(i.hasNext()) {
-        Overlap o = (Overlap)i.next(); 
+      for (Overlap o : l) {
         if (o.t1 < minTime) minTime = o.t1;
         if (o.t2 > maxTime) maxTime = o.t2;
       }

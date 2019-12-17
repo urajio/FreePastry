@@ -39,13 +39,15 @@ advised of the possibility of such damage.
  */
 package rice.p2p.scribe.javaserialized;
 
-import java.io.*;
-
 import rice.p2p.commonapi.Endpoint;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.scribe.ScribeContent;
 import rice.p2p.scribe.rawserialization.ScribeContentDeserializer;
 import rice.p2p.util.rawserialization.JavaDeserializer;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 /**
  * uses p2p.util.JavaDeserializer to deserialize ScribeContent using Java Serialization
@@ -65,8 +67,7 @@ public class JavaScribeContentDeserializer implements ScribeContentDeserializer 
 
     try {
       Object o = ois.readObject();
-      ScribeContent ret = (ScribeContent)o;
-      return ret;
+      return (ScribeContent)o;
     } catch (ClassNotFoundException e) {
       throw new RuntimeException("Unknown class type in message - cant deserialize.", e);
     }    

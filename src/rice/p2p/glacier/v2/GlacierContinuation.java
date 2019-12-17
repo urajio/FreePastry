@@ -88,4 +88,4 @@ public abstract class GlacierContinuation {
   public String toString() {
     return "Unknown continuation #"+getMyUID();
   }
-};
+}

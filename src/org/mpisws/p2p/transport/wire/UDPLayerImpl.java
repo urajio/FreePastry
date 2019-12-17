@@ -36,30 +36,24 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.wire;
 
+import org.mpisws.p2p.transport.MessageCallback;
+import org.mpisws.p2p.transport.MessageRequestHandle;
+import rice.environment.logging.Logger;
+import rice.environment.params.Parameters;
+import rice.selector.SelectionKeyHandler;
+
 import java.io.IOException;
 import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-
-import rice.environment.logging.Logger;
-import rice.environment.params.Parameters;
-import rice.selector.SelectionKeyHandler;
+import java.util.*;
 
 public class UDPLayerImpl extends SelectionKeyHandler implements UDPLayer {
   public static final Map<String, Object> OPTIONS;  
   static {
-    Map<String, Object> map = new HashMap<String, Object>();
+    Map<String, Object> map = new HashMap<>();
     map.put(WireTransportLayer.OPTION_TRANSPORT_TYPE, WireTransportLayer.TRANSPORT_TYPE_DATAGRAM);
     OPTIONS = Collections.unmodifiableMap(map);    
   }
@@ -89,8 +83,8 @@ public class UDPLayerImpl extends SelectionKeyHandler implements UDPLayer {
    * 
    * TODO: Extend this to accept different versions, perhaps have a different layer-callback/version
    */
-  
-  List<Envelope> pendingMsgs;
+
+  final List<Envelope> pendingMsgs;
   
   WireTransportLayerImpl wire;
   
@@ -101,7 +95,7 @@ public class UDPLayerImpl extends SelectionKeyHandler implements UDPLayer {
     
     this.logger = wire.environment.getLogManager().getLogger(UDPLayer.class, null);
 
-    this.pendingMsgs = new LinkedList<Envelope>();
+    this.pendingMsgs = new LinkedList<>();
     openServerSocket();
   }
 

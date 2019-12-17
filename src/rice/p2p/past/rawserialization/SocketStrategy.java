@@ -48,8 +48,8 @@ import rice.p2p.past.PastContent;
  * @author Jeff Hoye
  */
 public interface SocketStrategy {
-  public static final int TYPE_INSERT = 1;
-  public static final int TYPE_FETCH = 2;
+  int TYPE_INSERT = 1;
+  int TYPE_FETCH = 2;
   
   
   /**
@@ -59,5 +59,5 @@ public interface SocketStrategy {
    * @param content
    * @return
    */
-  public boolean sendAlongSocket(int sendType, PastContent content);
+  boolean sendAlongSocket(int sendType, PastContent content);
 }

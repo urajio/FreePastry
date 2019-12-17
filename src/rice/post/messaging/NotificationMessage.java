@@ -36,13 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.messaging;
 
-import rice.post.*;
 import rice.p2p.commonapi.Endpoint;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.pastry.messaging.*;
-import java.io.*;
-import rice.post.messaging.*;
- 
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.post.PostClientAddress;
+import rice.post.PostEntityAddress;
+
+import java.io.IOException;
+
 /**
  * This class represents an abstract message in the Post system
  * which serves as a notification.  Each Post application should

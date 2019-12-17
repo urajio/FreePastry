@@ -36,19 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.liveness;
 
+import org.mpisws.p2p.transport.ErrorHandler;
+import org.mpisws.p2p.transport.P2PSocket;
+import org.mpisws.p2p.transport.TransportLayer;
+import rice.environment.Environment;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
-
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.liveness.LivenessTransportLayerImpl.EntityManager;
-import org.mpisws.p2p.transport.liveness.LivenessTransportLayerImpl.LSocket;
-
-import rice.environment.Environment;
 
 /**
  * Cancels liveness check if you read/write to TCP or read UDP from the node.

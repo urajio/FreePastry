@@ -36,36 +36,19 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.wire;
 
+import org.mpisws.p2p.transport.*;
+import org.mpisws.p2p.transport.util.DefaultCallback;
+import org.mpisws.p2p.transport.util.DefaultErrorHandler;
+import rice.environment.Environment;
+import rice.environment.logging.Logger;
+import rice.environment.params.Parameters;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
-
-import org.mpisws.p2p.transport.ListenableTransportLayer;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.SocketCountListener;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.TransportLayerCallback;
-import org.mpisws.p2p.transport.TransportLayerListener;
-import org.mpisws.p2p.transport.util.DefaultCallback;
-import org.mpisws.p2p.transport.util.DefaultErrorHandler;
-
-import rice.Continuation;
-import rice.environment.Environment;
-import rice.environment.logging.Logger;
-import rice.environment.params.Parameters;
-import rice.p2p.commonapi.Cancellable;
-import rice.p2p.commonapi.rawserialization.RawMessage;
-import rice.p2p.util.rawserialization.SimpleOutputBuffer;
-import rice.pastry.NetworkListener;
-import rice.pastry.messaging.Message;
 
 public class WireTransportLayerImpl implements WireTransportLayer, ListenableTransportLayer<InetSocketAddress>, SocketOpeningTransportLayer<InetSocketAddress> {
   // state
@@ -122,11 +105,11 @@ public class WireTransportLayerImpl implements WireTransportLayer, ListenableTra
       forceBindAddress = p.getBoolean("wire_forceBindAddress");
     }
     
-    this.callback = new DefaultCallback<InetSocketAddress, ByteBuffer>(logger);    
+    this.callback = new DefaultCallback<>(logger);
     this.errorHandler = errorHandler;
     
     if (this.errorHandler == null) {
-      this.errorHandler = new DefaultErrorHandler<InetSocketAddress>(logger); 
+      this.errorHandler = new DefaultErrorHandler<>(logger);
     }
     
     if (enableUDPServer) {
@@ -200,7 +183,7 @@ public class WireTransportLayerImpl implements WireTransportLayer, ListenableTra
   
   public void setErrorHandler(ErrorHandler<InetSocketAddress> handler) {
     if (handler == null) {
-      this.errorHandler = new DefaultErrorHandler<InetSocketAddress>(logger);
+      this.errorHandler = new DefaultErrorHandler<>(logger);
       return;
     }
     this.errorHandler = handler;
@@ -223,8 +206,8 @@ public class WireTransportLayerImpl implements WireTransportLayer, ListenableTra
     callback.incomingSocket(sm);
   }
   
-  Collection<TransportLayerListener<InetSocketAddress>> listeners = 
-    new ArrayList<TransportLayerListener<InetSocketAddress>>();
+  final Collection<TransportLayerListener<InetSocketAddress>> listeners =
+          new ArrayList<>();
   public void addTransportLayerListener(
       TransportLayerListener<InetSocketAddress> listener) {
     synchronized(listeners) {
@@ -241,13 +224,13 @@ public class WireTransportLayerImpl implements WireTransportLayer, ListenableTra
   
   protected Iterable<TransportLayerListener<InetSocketAddress>> getTLlisteners() {
     synchronized(listeners) {
-      return new ArrayList<TransportLayerListener<InetSocketAddress>>(listeners);
+      return new ArrayList<>(listeners);
     }
   }
   
   
-  Collection<SocketCountListener<InetSocketAddress>> slisteners = 
-    new ArrayList<SocketCountListener<InetSocketAddress>>();
+  final Collection<SocketCountListener<InetSocketAddress>> slisteners =
+          new ArrayList<>();
 
   public void addSocketCountListener(
       SocketCountListener<InetSocketAddress> listener) {
@@ -265,7 +248,7 @@ public class WireTransportLayerImpl implements WireTransportLayer, ListenableTra
   
   protected Iterable<SocketCountListener<InetSocketAddress>> getSlisteners() {
     synchronized(slisteners) {
-      return new ArrayList<SocketCountListener<InetSocketAddress>>(slisteners);
+      return new ArrayList<>(slisteners);
     }
   }
     

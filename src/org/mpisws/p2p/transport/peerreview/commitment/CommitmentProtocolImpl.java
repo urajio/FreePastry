@@ -36,14 +36,6 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.commitment;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.security.SignatureException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.MessageCallback;
 import org.mpisws.p2p.transport.MessageRequestHandle;
 import org.mpisws.p2p.transport.peerreview.PeerReview;
@@ -61,13 +53,19 @@ import org.mpisws.p2p.transport.peerreview.message.AckMessage;
 import org.mpisws.p2p.transport.peerreview.message.OutgoingUserDataMessage;
 import org.mpisws.p2p.transport.peerreview.message.UserDataMessage;
 import org.mpisws.p2p.transport.util.MessageRequestHandleImpl;
-
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.rawserialization.RawSerializable;
 import rice.p2p.util.MathUtils;
 import rice.p2p.util.rawserialization.SimpleInputBuffer;
 import rice.p2p.util.tuples.Tuple;
 import rice.selector.TimerTask;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.security.SignatureException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class CommitmentProtocolImpl<Handle extends RawSerializable, Identifier extends RawSerializable> implements 
     CommitmentProtocol<Handle, Identifier>, PeerReviewConstants {
@@ -84,7 +82,7 @@ public class CommitmentProtocolImpl<Handle extends RawSerializable, Identifier e
    * We need to keep some state for each peer, including separate transmit and
    * receive queues
    */
-  Map<Identifier, PeerInfo<Handle>> peer = new HashMap<Identifier, PeerInfo<Handle>>();
+  Map<Identifier, PeerInfo<Handle>> peer = new HashMap<>();
   
   /**
    * We cache a few recently received messages, so we can recognize duplicates.
@@ -161,14 +159,14 @@ public class CommitmentProtocolImpl<Handle extends RawSerializable, Identifier e
   }
 
   protected void addToReceiveCache(Identifier id, long senderSeq, long indexInLocalHistory) {
-    receiveCache.put(new Tuple<Identifier, Long>(id,senderSeq), new ReceiveInfo<Identifier>(id, senderSeq, indexInLocalHistory));
+    receiveCache.put(new Tuple<>(id, senderSeq), new ReceiveInfo<>(id, senderSeq, indexInLocalHistory));
   }
   
   protected PeerInfo<Handle> lookupPeer(Handle handle) {
     PeerInfo<Handle> ret = peer.get(peerreview.getIdentifierExtractor().extractIdentifier(handle));
     if (ret != null) return ret;
     
-    ret = new PeerInfo<Handle>(handle); 
+    ret = new PeerInfo<>(handle);
     peer.put(peerreview.getIdentifierExtractor().extractIdentifier(handle), ret);
     return ret;
   }
@@ -240,18 +238,16 @@ public class CommitmentProtocolImpl<Handle extends RawSerializable, Identifier e
   
       byte[] hToSign = transport.hash(ByteBuffer.wrap(MathUtils.longToByteArray(seqOfRecvEntry)), ByteBuffer.wrap(myHashTop));
   
-      AckMessage<Identifier> ack = new AckMessage<Identifier>(
-          peerreview.getLocalId(),
-          udm.getTopSeq(),
-          seqOfRecvEntry,
-          myHashTopMinusOne,
-          transport.sign(hToSign));
+      AckMessage<Identifier> ack = new AckMessage<>(
+              peerreview.getLocalId(),
+              udm.getTopSeq(),
+              seqOfRecvEntry,
+              myHashTopMinusOne,
+              transport.sign(hToSign));
       
-      return new Tuple<AckMessage<Identifier>,Boolean>(ack, loggedPreviously);
+      return new Tuple<>(ack, loggedPreviously);
     } catch (IOException ioe) {
-      RuntimeException throwMe = new RuntimeException("Unexpect error logging message :"+udm);
-      throwMe.initCause(ioe);
-      throw throwMe;
+      throw new RuntimeException("Unexpect error logging message :"+udm, ioe);
     }
   }
   
@@ -439,7 +435,7 @@ public class CommitmentProtocolImpl<Handle extends RawSerializable, Identifier e
   }
   
   protected long findRecvEntry(Identifier id, long seq) {
-    ReceiveInfo<Identifier> ret = receiveCache.get(new Tuple<Identifier, Long>(id,seq));
+    ReceiveInfo<Identifier> ret = receiveCache.get(new Tuple<>(id, seq));
     if (ret == null) return -1;
     return ret.indexInLocalHistory;
   }
@@ -451,7 +447,7 @@ public class CommitmentProtocolImpl<Handle extends RawSerializable, Identifier e
   /**
    * Handle an incoming USERDATA message 
    */
-  public void handleIncomingMessage(Handle source, UserDataMessage<Handle> msg, Map<String, Object> options) throws IOException {
+  public void handleIncomingMessage(Handle source, UserDataMessage<Handle> msg, Map<String, Object> options) {
 //    char buf1[256];    
 
     /* Check whether the timestamp (in the sequence number) is close enough to our local time.
@@ -468,7 +464,7 @@ public class CommitmentProtocolImpl<Handle extends RawSerializable, Identifier e
      * trusted, the message is going to be delivered directly by makeProgress();
      * otherwise a challenge is sent.
      */
-    lookupPeer(source).recvQueue.addLast(new Tuple<UserDataMessage<Handle>, Map<String,Object>>(msg,options));
+    lookupPeer(source).recvQueue.addLast(new Tuple<>(msg, options));
 
     makeProgress(peerreview.getIdentifierExtractor().extractIdentifier(source));
   }
@@ -491,9 +487,9 @@ public class CommitmentProtocolImpl<Handle extends RawSerializable, Identifier e
     hTopMinusOne = history.getTopLevelEntry().getHash();
     EvtSend<Identifier> evtSend;
     if (relevantlen < message.remaining()) {      
-      evtSend = new EvtSend<Identifier>(peerreview.getIdentifierExtractor().extractIdentifier(target),message,relevantlen,transport);
+      evtSend = new EvtSend<>(peerreview.getIdentifierExtractor().extractIdentifier(target), message, relevantlen, transport);
     } else {
-      evtSend = new EvtSend<Identifier>(peerreview.getIdentifierExtractor().extractIdentifier(target),message);
+      evtSend = new EvtSend<>(peerreview.getIdentifierExtractor().extractIdentifier(target), message);
     }
     
 
@@ -501,7 +497,7 @@ public class CommitmentProtocolImpl<Handle extends RawSerializable, Identifier e
 //      logger.log("XXXa "+Arrays.toString(evtSend.serialize().array()));
       history.appendEntry(evtSend.getType(), true, evtSend.serialize());
     } catch (IOException ioe) {
-      MessageRequestHandle<Handle, ByteBuffer> ret = new MessageRequestHandleImpl<Handle, ByteBuffer>(target,message,options);
+      MessageRequestHandle<Handle, ByteBuffer> ret = new MessageRequestHandleImpl<>(target, message, options);
       if (deliverAckToMe != null) deliverAckToMe.sendFailed(ret, ioe);
       return ret;
     }
@@ -526,7 +522,7 @@ public class CommitmentProtocolImpl<Handle extends RawSerializable, Identifier e
     try {
       history.appendEntry(EVT_SENDSIGN, true, relevantMsg, ByteBuffer.wrap(signature));
     } catch (IOException ioe) {
-      MessageRequestHandle<Handle, ByteBuffer> ret = new MessageRequestHandleImpl<Handle, ByteBuffer>(target,message,options);
+      MessageRequestHandle<Handle, ByteBuffer> ret = new MessageRequestHandleImpl<>(target, message, options);
       if (deliverAckToMe != null) deliverAckToMe.sendFailed(ret, ioe);
       return ret;
     }
@@ -537,7 +533,7 @@ public class CommitmentProtocolImpl<Handle extends RawSerializable, Identifier e
 
     PeerInfo<Handle> pi = lookupPeer(target);
 
-    OutgoingUserDataMessage<Handle> udm = new OutgoingUserDataMessage<Handle>(top.getSeq(), peerreview.getLocalHandle(), hTopMinusOne, signature, message, relevantlen, options, pi, deliverAckToMe);
+    OutgoingUserDataMessage<Handle> udm = new OutgoingUserDataMessage<>(top.getSeq(), peerreview.getLocalHandle(), hTopMinusOne, signature, message, relevantlen, options, pi, deliverAckToMe);
     
     /* ... and put it into the send queue. If the node is trusted and does not have any
        unacknowledged messages, makeProgress() will simply send it out. */
@@ -589,7 +585,7 @@ public class CommitmentProtocolImpl<Handle extends RawSerializable, Identifier e
 
           if (logger.level <= Logger.FINE) logger.log("ACK is okay; logging "+ackMessage);
           
-          EvtAck<Identifier> evtAck = new EvtAck<Identifier>(ackMessage.getNodeId(), ackMessage.getSendEntrySeq(), ackMessage.getRecvEntrySeq(), ackMessage.getHashTopMinusOne(), ackMessage.getSignature());
+          EvtAck<Identifier> evtAck = new EvtAck<>(ackMessage.getNodeId(), ackMessage.getSendEntrySeq(), ackMessage.getRecvEntrySeq(), ackMessage.getHashTopMinusOne(), ackMessage.getSignature());
           history.appendEntry(EVT_ACK, true, evtAck.serialize());
           udm.sendComplete(); //ackMessage.getSendEntrySeq());
 

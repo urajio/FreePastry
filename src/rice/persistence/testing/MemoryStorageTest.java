@@ -45,15 +45,19 @@ package rice.persistence.testing;
  * 
  * @version $Id$
  */
-import java.io.*;
-import java.util.*;
 
-import rice.*;
+import rice.Continuation;
 import rice.environment.Environment;
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.commonapi.IdSet;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
-import rice.pastry.commonapi.*;
-import rice.persistence.*;
+import rice.pastry.commonapi.PastryIdFactory;
+import rice.persistence.MemoryStorage;
+import rice.persistence.Storage;
+
+import java.io.IOException;
+import java.util.HashSet;
 
 /**
  * This class is a class which tests the Storage class
@@ -83,7 +87,7 @@ public class MemoryStorageTest extends Test {
     for (int i = 0; i < 500; i ++){
         x[3] = i;
         data[i] = FACTORY.buildId(x);
-        metadata[i] = new Integer(i);
+        metadata[i] = i;
     }
     this.store = store;
   }
@@ -91,7 +95,7 @@ public class MemoryStorageTest extends Test {
   public void setUp(final Continuation c) {
     final Continuation put4 = new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           stepDone(SUCCESS);
         } else {
           stepDone(FAILURE, "Fourth object was not inserted.");
@@ -99,7 +103,7 @@ public class MemoryStorageTest extends Test {
         }
 
         sectionEnd();
-        c.receiveResult(new Boolean(true));
+        c.receiveResult(Boolean.TRUE);
       }
 
       public void receiveException(Exception e) {
@@ -109,7 +113,7 @@ public class MemoryStorageTest extends Test {
 
     final Continuation put3 = new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           stepDone(SUCCESS);
         } else {
           stepDone(FAILURE, "Third object was not inserted.");
@@ -127,7 +131,7 @@ public class MemoryStorageTest extends Test {
 
     final Continuation put2 = new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           stepDone(SUCCESS);
         } else {
           stepDone(FAILURE, "Second object was not inserted.");
@@ -145,7 +149,7 @@ public class MemoryStorageTest extends Test {
 
     Continuation put1 = new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           stepDone(SUCCESS);
         } else {
           stepDone(FAILURE, "First object was not inserted.");
@@ -178,7 +182,7 @@ public class MemoryStorageTest extends Test {
         }
 
         sectionEnd();
-        c.receiveResult(new Boolean(true));
+        c.receiveResult(Boolean.TRUE);
       }
 
       public void receiveException(Exception e) {
@@ -280,7 +284,7 @@ public class MemoryStorageTest extends Test {
     
     Continuation get0 = new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           sectionStart("Retrieving Objects");
 
           stepStart("Retrieving First Object");
@@ -305,7 +309,7 @@ public class MemoryStorageTest extends Test {
   public void testExists(final Continuation c) {
     testRetreival(new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           sectionStart("Checking for Objects");
           stepStart("Checking for First Object");
           if (storage.exists(data[1])) stepDone(SUCCESS); else stepDone(FAILURE);
@@ -334,7 +338,7 @@ public class MemoryStorageTest extends Test {
           
           sectionStart("Modifying Metadata");
           stepStart("Changing Metadata");
-          storage.setMetadata(data[4], new Integer(5001), new Continuation() {
+          storage.setMetadata(data[4], 5001, new Continuation() {
             public void receiveResult(Object o) {
               stepDone(SUCCESS);
               
@@ -342,7 +346,7 @@ public class MemoryStorageTest extends Test {
               if ((new Integer(5001)).equals(storage.getMetadata(data[4]))) stepDone(SUCCESS); else stepDone(FAILURE);
               sectionEnd();
               
-              c.receiveResult(new Boolean(true));
+              c.receiveResult(Boolean.TRUE);
             }
             
             public void receiveException(Exception e) {
@@ -371,7 +375,7 @@ public class MemoryStorageTest extends Test {
 
         sectionEnd();
 
-        c.receiveResult(new Boolean(true));
+        c.receiveResult(Boolean.TRUE);
       }
 
       public void receiveException(Exception e) {
@@ -392,7 +396,7 @@ public class MemoryStorageTest extends Test {
     
     final Continuation check1 = new Continuation() {
       public void receiveResult(Object o) {
-        if ((! store) || o.equals(new Boolean(true))) {
+        if ((! store) || o.equals(Boolean.TRUE)) {
           stepDone(SUCCESS);
         } else {
           stepDone(FAILURE);
@@ -418,7 +422,7 @@ public class MemoryStorageTest extends Test {
 
     Continuation remove1 = new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           sectionStart("Testing Removal");
 
           stepStart("Removing First Object");
@@ -447,13 +451,13 @@ public class MemoryStorageTest extends Test {
 
         sectionEnd();
 
-        c.receiveResult(new Boolean(true));
+        c.receiveResult(Boolean.TRUE);
       }
     };
 
     final Continuation query = new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           stepDone(SUCCESS);
         } else {
           stepDone(FAILURE);
@@ -496,7 +500,7 @@ public class MemoryStorageTest extends Test {
 
     Continuation insertString = new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           sectionStart("Testing Scan");
 
           stepStart("Inserting String as Key");
@@ -525,7 +529,7 @@ public class MemoryStorageTest extends Test {
     final Continuation checkRandom = new Continuation() {
       public void receiveResult(Object o) {
         stepStart("Checking object deletion");
-        int NUM_DELETED = ((Integer) o).intValue();
+        int NUM_DELETED = (Integer) o;
         int length = storage.scan(FACTORY.buildIdRange(data[13 + START_NUM], data[13 + END_NUM + SKIP])).numElements();
         
         int desired = NUM_ELEMENTS - NUM_DELETED;
@@ -534,7 +538,7 @@ public class MemoryStorageTest extends Test {
           stepDone(SUCCESS);
           
           sectionEnd();
-          c.receiveResult(new Boolean(true));
+          c.receiveResult(Boolean.TRUE);
         } else {
           stepDone(FAILURE, "Expected " + desired + " objects after deletes, found " + length + ".");
           return;
@@ -557,14 +561,14 @@ public class MemoryStorageTest extends Test {
           stepStart("Removing random subset of objects");
         }
 
-        if (o.equals(new Boolean(false))) {
+        if (o.equals(Boolean.FALSE)) {
           stepDone(FAILURE, "Deletion of " + count + " failed.");
           return;
         }
 
         if (count == END_NUM) {
           stepDone(SUCCESS);
-          checkRandom.receiveResult(new Integer(num_deleted));
+          checkRandom.receiveResult(num_deleted);
           return;
         }
 
@@ -573,7 +577,7 @@ public class MemoryStorageTest extends Test {
           storage.unstore(data[13 + (count += SKIP)], this);
         } else {
           count += SKIP;
-          receiveResult(new Boolean(true));
+          receiveResult(Boolean.TRUE);
         }
       }
 
@@ -600,7 +604,7 @@ public class MemoryStorageTest extends Test {
         }
         
         stepDone(SUCCESS);
-        removeRandom.receiveResult(new Boolean(true));
+        removeRandom.receiveResult(Boolean.TRUE);
       }
 
       public void receiveException(Exception e) {
@@ -622,7 +626,7 @@ public class MemoryStorageTest extends Test {
         }
         
         stepDone(SUCCESS);
-        checkScan.receiveResult(new Boolean(true));
+        checkScan.receiveResult(Boolean.TRUE);
       }
 
       public void receiveException(Exception e) {
@@ -636,7 +640,7 @@ public class MemoryStorageTest extends Test {
       private int count = START_NUM;
 
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(false))) {
+        if (o.equals(Boolean.FALSE)) {
           stepDone(FAILURE, "Insertion of " + count + " failed.");
           return;
         }
@@ -648,7 +652,7 @@ public class MemoryStorageTest extends Test {
 
         if (count > END_NUM) {
           stepDone(SUCCESS);
-          checkExists.receiveResult(new Boolean(true));
+          checkExists.receiveResult(Boolean.TRUE);
           return;
         }
 
@@ -671,7 +675,7 @@ public class MemoryStorageTest extends Test {
     final Continuation validateNullValue = new Continuation() {
 
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           stepDone(FAILURE, "Null value should return false");
           return;
         }
@@ -679,7 +683,7 @@ public class MemoryStorageTest extends Test {
         stepDone(SUCCESS);
         sectionEnd();  
         
-        c.receiveResult(new Boolean(true));
+        c.receiveResult(Boolean.TRUE);
       }
 
       public void receiveException(Exception e) {
@@ -690,7 +694,7 @@ public class MemoryStorageTest extends Test {
     final Continuation insertNullValue = new Continuation() {
 
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           stepDone(FAILURE, "Null key should return false");
           return;
         }
@@ -710,7 +714,7 @@ public class MemoryStorageTest extends Test {
     final Continuation insertNullKey = new Continuation() {
 
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(false))) {
+        if (o.equals(Boolean.FALSE)) {
           stepDone(FAILURE, "Randon insert tests failed.");
           return;
         }
@@ -735,7 +739,7 @@ public class MemoryStorageTest extends Test {
     
     testErrors(new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(false))) {
+        if (o.equals(Boolean.FALSE)) {
           stepDone(FAILURE, "Error tests failed");
           return;
         }
@@ -747,7 +751,7 @@ public class MemoryStorageTest extends Test {
           int num = 0;
           
           public void receiveResult(Object o) {
-            if (o.equals(new Boolean(false))) {
+            if (o.equals(Boolean.FALSE)) {
               stepDone(FAILURE, "Insert of Id #" + num + " failed");
               return;
             }
@@ -763,7 +767,7 @@ public class MemoryStorageTest extends Test {
                 int num = 0;
                 
                 public void receiveResult(Object o) {
-                  if (o.equals(new Boolean(false))) {
+                  if (o.equals(Boolean.FALSE)) {
                     stepDone(FAILURE, "Reinsert of Id #" + num + " failed");
                     return;
                   }
@@ -782,7 +786,7 @@ public class MemoryStorageTest extends Test {
                       Id id = null;
                       
                       public void receiveResult(Object o) {
-                        if (o.equals(new Boolean(false))) {
+                        if (o.equals(Boolean.FALSE)) {
                           stepDone(FAILURE, "Delete of Id " + id + " failed");
                           return;
                         }
@@ -816,7 +820,8 @@ public class MemoryStorageTest extends Test {
   
   public void start() {
     testVariableLength();
-  try{  Thread.sleep(20000);}catch(InterruptedException ie){;}
+  try{  Thread.sleep(20000);}catch(InterruptedException ie){
+  }
   }
 
   public static void main(String[] args) throws IOException {

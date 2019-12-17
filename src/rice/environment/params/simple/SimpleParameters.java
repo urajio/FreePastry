@@ -36,12 +36,17 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.environment.params.simple;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
 import rice.environment.params.ParameterChangeListener;
 import rice.environment.params.Parameters;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.*;
 
 /**
  * This class represents a generic Java process launching program which reads in
@@ -97,24 +102,24 @@ public class SimpleParameters implements Parameters {
     }
     this.properties = new MyProperties();
     this.defaults = new MyProperties();
-    this.changeListeners = new HashSet<ParameterChangeListener>();
+    this.changeListeners = new HashSet<>();
 
-    for (int ctr = 0; ctr < orderedDefaults.length; ctr++) {
-      try {        
-        ClassLoader loader = this.getClass().getClassLoader();
-        // some VMs report the bootstrap classloader via null-return
-        if (loader == null)
-          loader = ClassLoader.getSystemClassLoader();
-        this.defaults.load(loader.getResource(
-            orderedDefaults[ctr] + FILENAME_EXTENSION).openStream());
-      } catch (Exception ioe) {
-        String errorString = "Warning, couldn't load param file:"
-          + (orderedDefaults[ctr] + FILENAME_EXTENSION);
+      for (String orderedDefault : orderedDefaults) {
+          try {
+              ClassLoader loader = this.getClass().getClassLoader();
+              // some VMs report the bootstrap classloader via null-return
+              if (loader == null)
+                  loader = ClassLoader.getSystemClassLoader();
+              this.defaults.load(loader.getResource(
+                      orderedDefault + FILENAME_EXTENSION).openStream());
+          } catch (Exception ioe) {
+              String errorString = "Warning, couldn't load param file:"
+                      + (orderedDefault + FILENAME_EXTENSION);
 //        System.err.println(errorString);
 //        ioe.printStackTrace(System.err);
-        throw new ParamsNotPresentException(errorString,ioe);
+              throw new ParamsNotPresentException(errorString, ioe);
+          }
       }
-    }
 
     if (this.configFileName != null) {
       File f = new File(this.configFileName);
@@ -141,8 +146,7 @@ public class SimpleParameters implements Parameters {
     return properties.keys();
   }
 
-  protected InetSocketAddress parseInetSocketAddress(String name)
-      throws UnknownHostException {
+  protected InetSocketAddress parseInetSocketAddress(String name) {
     String host = name.substring(0, name.indexOf(":"));
     String port = name.substring(name.indexOf(":") + 1);
 
@@ -256,7 +260,7 @@ public class SimpleParameters implements Parameters {
   }
 
   public boolean getBoolean(String name) {
-    return (new Boolean(getProperty(name))).booleanValue();
+    return Boolean.valueOf(getProperty(name));
   }
 
   public InetAddress getInetAddress(String name) throws UnknownHostException {
@@ -274,14 +278,14 @@ public class SimpleParameters implements Parameters {
       return new InetSocketAddress[0];
       
     String[] addresses = getString(name).split(ARRAY_SPACER);
-    List<InetSocketAddress> result = new LinkedList<InetSocketAddress>();
+    List<InetSocketAddress> result = new LinkedList<>();
 
-    for (int i = 0; i < addresses.length; i++) {
-      InetSocketAddress address = parseInetSocketAddress(addresses[i]);
+      for (String s : addresses) {
+          InetSocketAddress address = parseInetSocketAddress(s);
 
-      if (address != null)
-        result.add(address);
-    }
+          if (address != null)
+              result.add(address);
+      }
 
     return (InetSocketAddress[]) result.toArray(new InetSocketAddress[0]);
   }
@@ -329,11 +333,10 @@ public class SimpleParameters implements Parameters {
   }
 
   public void setInetSocketAddressArray(String name, InetSocketAddress[] value) {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     for (int i = 0; i < value.length; i++) {
-      buffer.append(value[i].getAddress().getHostAddress() + ":"
-          + value[i].getPort());
+      buffer.append(value[i].getAddress().getHostAddress()).append(":").append(value[i].getPort());
       if (i < value.length - 1)
         buffer.append(ARRAY_SPACER);
     }
@@ -346,7 +349,7 @@ public class SimpleParameters implements Parameters {
   }
 
   public void setStringArray(String name, String[] value) {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     for (int i = 0; i < value.length; i++) {
       buffer.append(value[i]);
@@ -388,9 +391,7 @@ public class SimpleParameters implements Parameters {
   }
 
   private void fireChangeEvent(String name, String val) {
-    Iterator<ParameterChangeListener> i = changeListeners.iterator();
-    while (i.hasNext()) {
-      ParameterChangeListener p = (ParameterChangeListener) i.next();
+    for (ParameterChangeListener p : changeListeners) {
       p.parameterChange(name, val);
     }
   }

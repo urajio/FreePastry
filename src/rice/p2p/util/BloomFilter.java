@@ -37,14 +37,14 @@ advised of the possibility of such damage.
 
 package rice.p2p.util;
 
-import java.io.*;
-import java.math.*;
-import java.util.*;
-
 import rice.environment.random.RandomSource;
 import rice.environment.random.simple.SimpleRandomSource;
-import rice.p2p.commonapi.Endpoint;
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
+import java.io.*;
+import java.util.BitSet;
+import java.util.Random;
 
 /**
  * @(#) BloomFilter.java
@@ -169,7 +169,7 @@ public class BloomFilter implements Serializable {
    * @return The internal bit set as a string
    */
   public String getBitSet() {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     buffer.append("[BloomFilter ");
     for (int i=0; i<length; i++)
       if (set.get(i)) 
@@ -186,8 +186,8 @@ public class BloomFilter implements Serializable {
     buf.writeInt(length);
     
     buf.writeInt(parameters.length);
-    for(int i = 0; i < parameters.length; i++) {
-      buf.writeInt(parameters[i]);
+    for (int parameter : parameters) {
+      buf.writeInt(parameter);
     }
     
     int numBits = set.length();
@@ -251,14 +251,14 @@ public class BloomFilter implements Serializable {
         }      
         public ByteArrayOutputStream getBaos() {return baos;}
         public int bytesRemaining() {throw new RuntimeException("Not Implemented.");}      
-        public void writeUTF(String str) throws IOException {throw new RuntimeException("Not Implemented.");}
-        public void writeShort(short v) throws IOException {throw new RuntimeException("Not Implemented.");}
-        public void writeLong(long v) throws IOException {throw new RuntimeException("Not Implemented.");}
-        public void writeFloat(float v) throws IOException {throw new RuntimeException("Not Implemented.");}
-        public void writeDouble(double v) throws IOException {throw new RuntimeException("Not Implemented.");}
-        public void writeChar(char v) throws IOException {throw new RuntimeException("Not Implemented.");}
-        public void writeBoolean(boolean v) throws IOException {throw new RuntimeException("Not Implemented.");}
-        public void write(byte[] b, int off, int len) throws IOException {throw new RuntimeException("Not Implemented.");}        
+        public void writeUTF(String str) {throw new RuntimeException("Not Implemented.");}
+        public void writeShort(short v) {throw new RuntimeException("Not Implemented.");}
+        public void writeLong(long v) {throw new RuntimeException("Not Implemented.");}
+        public void writeFloat(float v) {throw new RuntimeException("Not Implemented.");}
+        public void writeDouble(double v) {throw new RuntimeException("Not Implemented.");}
+        public void writeChar(char v) {throw new RuntimeException("Not Implemented.");}
+        public void writeBoolean(boolean v) {throw new RuntimeException("Not Implemented.");}
+        public void write(byte[] b, int off, int len) {throw new RuntimeException("Not Implemented.");}
       };
       
       a.serialize(obuf);
@@ -273,16 +273,16 @@ public class BloomFilter implements Serializable {
           return dis.readByte();
         }
         public int bytesRemaining() {throw new RuntimeException("Not Implemented.");}
-        public String readUTF() throws IOException {throw new RuntimeException("Not Implemented.");}
-        public short readShort() throws IOException {throw new RuntimeException("Not Implemented.");}
-        public short peakShort() throws IOException {throw new RuntimeException("Not Implemented.");}
-        public long readLong() throws IOException {throw new RuntimeException("Not Implemented.");}
-        public float readFloat() throws IOException {throw new RuntimeException("Not Implemented.");}
-        public double readDouble() throws IOException {throw new RuntimeException("Not Implemented.");}
-        public char readChar() throws IOException {throw new RuntimeException("Not Implemented.");}      
-        public boolean readBoolean() throws IOException {throw new RuntimeException("Not Implemented.");}
-        public int read(byte[] b) throws IOException {throw new RuntimeException("Not Implemented.");}
-        public int read(byte[] b, int off, int len) throws IOException {throw new RuntimeException("Not Implemented.");}
+        public String readUTF() {throw new RuntimeException("Not Implemented.");}
+        public short readShort() {throw new RuntimeException("Not Implemented.");}
+        public short peakShort() {throw new RuntimeException("Not Implemented.");}
+        public long readLong() {throw new RuntimeException("Not Implemented.");}
+        public float readFloat() {throw new RuntimeException("Not Implemented.");}
+        public double readDouble() {throw new RuntimeException("Not Implemented.");}
+        public char readChar() {throw new RuntimeException("Not Implemented.");}
+        public boolean readBoolean() {throw new RuntimeException("Not Implemented.");}
+        public int read(byte[] b) {throw new RuntimeException("Not Implemented.");}
+        public int read(byte[] b, int off, int len) {throw new RuntimeException("Not Implemented.");}
       };
 
       BloomFilter b = new BloomFilter(buf);

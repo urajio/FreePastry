@@ -41,9 +41,6 @@ package org.mpisws.p2p.transport.liveness;
 
 import java.util.Map;
 
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.sourceroute.SourceRoute;
-
 /**
  * Expands the Transport Layer to include pings and liveness checks.
  * 
@@ -52,7 +49,7 @@ import org.mpisws.p2p.transport.sourceroute.SourceRoute;
  */
 public interface LivenessProvider<Identifier> extends LivenessTypes {
   
-  public int getLiveness(Identifier i, Map<String, Object> options);
+  int getLiveness(Identifier i, Map<String, Object> options);
   
   /**
    * Returns whether a new notification will occur.
@@ -65,10 +62,10 @@ public interface LivenessProvider<Identifier> extends LivenessTypes {
    * @return true if there will be an update (either a ping, or a change in liveness)
    * false if there won't be an update due to bandwidth concerns
    */
-  public boolean checkLiveness(Identifier i, Map<String, Object> options);
+  boolean checkLiveness(Identifier i, Map<String, Object> options);
   
-  public void addLivenessListener(LivenessListener<Identifier> name);
-  public boolean removeLivenessListener(LivenessListener<Identifier> name);
+  void addLivenessListener(LivenessListener<Identifier> name);
+  boolean removeLivenessListener(LivenessListener<Identifier> name);
   
   /**
    * Force layer to clear the existing state related to the Identifier.  Usually 
@@ -76,5 +73,5 @@ public interface LivenessProvider<Identifier> extends LivenessTypes {
    * 
    * @param i
    */
-  public void clearState(Identifier i);
+  void clearState(Identifier i);
 }

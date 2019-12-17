@@ -36,9 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport;
 
-import java.util.Map;
-
 import rice.Destructable;
+
+import java.util.Map;
 
 /**
  * The transport layer does provides the minimum functionality to provide communication
@@ -88,7 +88,7 @@ public interface TransportLayer<Identifier, MessageType> extends Destructable {
    * @param options options on how to open the socket (don't source route, encrypt etc) (may not be respected if layer cannot provide service)
    * @return an object to cancel opening the socket if it takes to long, or is no longer relevant
    */
-  public SocketRequestHandle<Identifier> openSocket(Identifier i, SocketCallback<Identifier> deliverSocketToMe, Map<String, Object> options);
+  SocketRequestHandle<Identifier> openSocket(Identifier i, SocketCallback<Identifier> deliverSocketToMe, Map<String, Object> options);
   
   /**
    * Send the message to the identifier
@@ -99,14 +99,14 @@ public interface TransportLayer<Identifier, MessageType> extends Destructable {
    * @param deliverAckToMe layer dependent notification when the message is sent (can indicate placed on the wire, point-to-point acknowledgment, or end-to-end acknowledgement)
    * @return ability to cancel the message if no longer relevant
    */
-  public MessageRequestHandle<Identifier, MessageType> sendMessage(Identifier i, MessageType m, MessageCallback<Identifier, MessageType> deliverAckToMe, Map<String, Object> options);
+  MessageRequestHandle<Identifier, MessageType> sendMessage(Identifier i, MessageType m, MessageCallback<Identifier, MessageType> deliverAckToMe, Map<String, Object> options);
   
   /**
    * The local node.
    * 
    * @return The local node.
    */
-  public Identifier getLocalIdentifier();
+  Identifier getLocalIdentifier();
   
   /**
    * Toggle accepting new sockets.  Useful in flow control if overwhelmed by incoming sockets.
@@ -114,7 +114,7 @@ public interface TransportLayer<Identifier, MessageType> extends Destructable {
    * 
    * @param b 
    */
-  public void acceptSockets(boolean b);
+  void acceptSockets(boolean b);
   
   /**
    * Toggle accepting incoming messages.  Useful in flow control if overwhelmed by incoming sockets.
@@ -122,13 +122,13 @@ public interface TransportLayer<Identifier, MessageType> extends Destructable {
    * 
    * @param b 
    */
-  public void acceptMessages(boolean b);
+  void acceptMessages(boolean b);
   
   /**
    * Set the callback for incoming sockets/messages
    * @param callback the callback for incoming sockets/messages
    */
-  public void setCallback(TransportLayerCallback<Identifier, MessageType> callback);
+  void setCallback(TransportLayerCallback<Identifier, MessageType> callback);
   
   /**
    * To be notified of problems not related to an outgoing messaage/socket.  Or to be notified
@@ -136,5 +136,5 @@ public interface TransportLayer<Identifier, MessageType> extends Destructable {
    * 
    * @param handler to be notified of problems not related to a specific messaage/socket.
    */
-  public void setErrorHandler(ErrorHandler<Identifier> handler);  
+  void setErrorHandler(ErrorHandler<Identifier> handler);
 }

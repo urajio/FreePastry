@@ -36,17 +36,21 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.util;
 
-import java.io.*;
-import java.math.*;
-
-import java.security.*;
-import java.security.cert.*;
-import java.security.interfaces.*;
-import java.security.spec.*;
-import java.util.*;
-import java.util.zip.*;
 import javax.crypto.*;
-import javax.crypto.spec.*;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.*;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPrivateKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * This class contains a large number of static methods for performing
@@ -148,17 +152,17 @@ public class SecurityUtils {
   /**
    * The message digest used for doing hashing
    */
-  private static MessageDigest hash;
+  private static final MessageDigest hash;
   
   /**
    * The message digest used for doing apop
    */
-  private static MessageDigest apop;
+  private static final MessageDigest apop;
   
   /**
    * The message digest used for doing hmacing
    */
-  private static MessageDigest hmac1;
+  private static final MessageDigest hmac1;
   
   /**
    * The message digest used for doing hmacing
@@ -168,33 +172,33 @@ public class SecurityUtils {
   /**
    * The cipher used to encrypt/decrypt data using DES
    */
-  private static Cipher cipherSymmetric;
+  private static final Cipher cipherSymmetric;
 
   /**
    * The cipher used to encrypt/decrypt data using RSA
    */
-  private static Cipher cipherAsymmetric;
-  private static Cipher deprecatedCipherAsymmetric;
+  private static final Cipher cipherAsymmetric;
+  private static final Cipher deprecatedCipherAsymmetric;
 
   /**
    * The generator used to generate DES keys
    */
-  private static KeyGenerator generatorSymmetric;
+  private static final KeyGenerator generatorSymmetric;
 
   /**
    * The generator used to generate RSA keys
    */
-  private static KeyPairGenerator generatorAsymmetric;
+  private static final KeyPairGenerator generatorAsymmetric;
 
   /**
    * The generator used to decode RSA keys
    */
-  private static KeyFactory factoryAsymmetric;
+  private static final KeyFactory factoryAsymmetric;
 
   /**
    * The signature used for verification and signing data.
    */
-  private static Signature signature;
+  private static final Signature signature;
 
   /**
    * The RNG for generating DES IVs

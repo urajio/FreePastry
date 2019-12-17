@@ -40,5 +40,5 @@ advised of the possibility of such damage.
 package rice;
 
 public interface Destructable {
-  public void destroy();
+  void destroy();
 }

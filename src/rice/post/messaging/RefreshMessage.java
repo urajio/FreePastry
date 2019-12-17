@@ -36,9 +36,7 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.messaging;
 
-import java.io.*;
-
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.Message;
 
 /**
  * This is a message  reminding POST to refresh all data items stored

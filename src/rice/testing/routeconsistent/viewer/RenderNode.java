@@ -39,9 +39,8 @@ advised of the possibility of such damage.
  */
 package rice.testing.routeconsistent.viewer;
 
-import java.awt.Graphics;
+import java.awt.*;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -69,7 +68,7 @@ public class RenderNode {
   public RenderNode(Node node, boolean leftSide) {
     this.n = node;
     this.leftSide = leftSide;
-    squares = new LinkedList<Square>();
+    squares = new LinkedList<>();
   }
 
   public Square getSquare(int space, long time) {
@@ -78,21 +77,19 @@ public class RenderNode {
     if (space > right) return null;
     
     // linear search, could be much faster with binary search
-    Iterator<Square> i = squares.iterator();
-    while(i.hasNext()) {
-      Square s = (Square)i.next(); 
-      if (time > s.t2) continue;
-      if (time < s.time) continue;
-      if (s.left < s.right) { // typical case
-        if (space < s.left) continue;
-        if (space > s.right) continue;
-        return s;
-      } else { // wrapped case
-        // the user clicked in the middle of where we exist
-        if ((space > s.right) && (space < s.left)) continue;
-        return s;
-      } 
-    }
+      for (Square s : squares) {
+          if (time > s.t2) continue;
+          if (time < s.time) continue;
+          if (s.left < s.right) { // typical case
+              if (space < s.left) continue;
+              if (space > s.right) continue;
+              return s;
+          } else { // wrapped case
+              // the user clicked in the middle of where we exist
+              if ((space > s.right) && (space < s.left)) continue;
+              return s;
+          }
+      }
     return null;
   }
 
@@ -105,29 +102,27 @@ public class RenderNode {
       g.setColor(n.color);
     }
 //    System.out.println(nodeName+" numSq:"+squares.size());
-    Iterator<Square> i = squares.iterator();
-    while(i.hasNext()) {
-      Square s = (Square)i.next();
-      if ((renderType != ConsRenderer.PL_RENDER_NOT) || s.type < 3) {
-        if (renderType == ConsRenderer.PL_RENDER_LITE) {
-          if (s.type > 3) {
-            g.setColor(n.liteColor);
-          } else {
-            if (selected) {
-              g.setColor(n.selectedColor);            
-            } else {
-              g.setColor(n.color);            
-            }
+      for (Square s : squares) {
+          if ((renderType != ConsRenderer.PL_RENDER_NOT) || s.type < 3) {
+              if (renderType == ConsRenderer.PL_RENDER_LITE) {
+                  if (s.type > 3) {
+                      g.setColor(n.liteColor);
+                  } else {
+                      if (selected) {
+                          g.setColor(n.selectedColor);
+                      } else {
+                          g.setColor(n.color);
+                      }
+                  }
+              }
+              int x = (int) ((xOff + s.left) * xScale);
+              int w = (int) ((xOff + s.right) * xScale) - (int) ((xOff + s.left) * xScale);
+              int y = (int) ((yOff + s.time) * yScale);
+              int h = (int) ((yOff + s.t2) * yScale) - (int) ((yOff + s.time) * yScale);
+              //System.out.println("Space["+s.left+","+s.right+"] out:"+x+","+y+","+w+","+h);
+              g.fillRect(x, y, w, h);
           }
-        }
-        int x = (int)((xOff+s.left)*xScale);
-        int w = (int)((xOff+s.right)*xScale) - (int)((xOff+s.left)*xScale);
-        int y = (int)((yOff+s.time)*yScale);
-        int h = (int)((yOff+s.t2)*yScale)-(int)((yOff+s.time)*yScale);
-        //System.out.println("Space["+s.left+","+s.right+"] out:"+x+","+y+","+w+","+h);
-        g.fillRect(x,y,w,h);
       }
-    }    
     // draw setReady() line
     if (n.readyTime != 0) {
       g.setColor(Node.readyColor);
@@ -139,12 +134,10 @@ public class RenderNode {
   }
 
   public void move(long diff) {
-    Iterator<Square> i = squares.iterator();
-    while(i.hasNext()) {
-      Square s = (Square)i.next();
-      s.time+=diff;
-      s.t2+=diff;
-    }
+      for (Square s : squares) {
+          s.time += diff;
+          s.t2 += diff;
+      }
   }
 
   /**
@@ -177,21 +170,17 @@ public class RenderNode {
   }
   
   public Collection<Overlap> overlaps(RenderNode that) {
-    List<Overlap> l = new LinkedList<Overlap>();
+    List<Overlap> l = new LinkedList<>();
     if (this.left >= that.right) return l;
-    if (this.right <= that.left) return l;      
-    Iterator<Square> i = squares.iterator();
-    while(i.hasNext()) {
-      Square thisSquare = (Square)i.next(); 
-      Iterator<Square> i2 = that.squares.iterator();
-      while(i2.hasNext()) {
-        Square thatSquare = (Square)i2.next(); 
-        Overlap o = thisSquare.overlap(thatSquare);
-        if (o != null) {
-          l.add(o); 
-        }
+    if (this.right <= that.left) return l;
+      for (Square thisSquare : squares) {
+          for (Square thatSquare : that.squares) {
+              Overlap o = thisSquare.overlap(thatSquare);
+              if (o != null) {
+                  l.add(o);
+              }
+          }
       }
-    }
     return l;
   }
 

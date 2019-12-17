@@ -48,9 +48,10 @@ package rice.p2p.aggregation;
  * @author Andreas Haeberlen
  */
 
-import java.io.Serializable;
 import rice.Continuation;
 import rice.p2p.commonapi.Id;
+
+import java.io.Serializable;
 
 @SuppressWarnings("unchecked")
 public interface Aggregation {
@@ -68,7 +69,7 @@ public interface Aggregation {
    * 
    * @return the current handle object
    */
-  public Serializable getHandle();
+  Serializable getHandle();
 
   /**
    * Restores the handle object. This method should always be invoked
@@ -79,7 +80,7 @@ public interface Aggregation {
    * @param handle the handle object
    * @param command Command to be performed when the method completes.
    */
-  public void setHandle(Serializable handle, Continuation command);
+  void setHandle(Serializable handle, Continuation command);
 
   /**
    * Creates an aggregate that includes the most current object
@@ -89,7 +90,7 @@ public interface Aggregation {
    * @param id the key of the object to be made persistent.
    * @param command Command to be performed when the method completes.
    */
-  public void flush(Id id, Continuation command);
+  void flush(Id id, Continuation command);
 
   /**
    * Creates aggregates from all objects in the local object cache.
@@ -99,7 +100,7 @@ public interface Aggregation {
    *
    * @param command Command to be performed when the method completes.
    */
-  public void flush(Continuation command);
+  void flush(Continuation command);
 
   /**
    * Attempts to retrieve the most recent object that has been inserted 
@@ -112,7 +113,7 @@ public interface Aggregation {
    * @param id the key of the object to be retrieved
    * @param command Command to be performed when the method completes.
    */
-  public void rollback(Id id, Continuation command);
+  void rollback(Id id, Continuation command);
 
   /**
    * Deletes all local state, including the aggregate list and all
@@ -124,7 +125,7 @@ public interface Aggregation {
    *
    * @param command Command to be performed when the method completes.
    */
-  public void reset(Continuation command);
+  void reset(Continuation command);
   
 }
 

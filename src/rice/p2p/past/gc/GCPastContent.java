@@ -37,11 +37,7 @@ advised of the possibility of such damage.
 
 package rice.p2p.past.gc;
 
-import java.io.Serializable;
-
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.past.*;
+import rice.p2p.past.PastContent;
 
 /**
  * @(#) GCPastContent.java
@@ -64,7 +60,7 @@ public interface GCPastContent extends PastContent {
    *
    * @return The version number of this object
    */
-  public long getVersion();
+  long getVersion();
 
   /**
    * Produces a handle for this content object. The handle is retrieved and returned to the
@@ -73,7 +69,7 @@ public interface GCPastContent extends PastContent {
    * @param The local GCPast service which the content is on.
    * @return the handle
    */
-  public GCPastContentHandle getHandle(GCPast local, long expiration);
+  GCPastContentHandle getHandle(GCPast local, long expiration);
   
   /**
    * Returns the metadata which should be stored with this object.  Allows applications
@@ -82,7 +78,7 @@ public interface GCPastContent extends PastContent {
    * @param The local GCPast service which the content is on.
    * @return the handle
    */
-  public GCPastMetadata getMetadata(long expiration);
+  GCPastMetadata getMetadata(long expiration);
 
 }
 

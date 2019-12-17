@@ -36,7 +36,7 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.messaging;
 
-import java.io.*;
+import java.io.Serializable;
 
 /**
  * This class represents the abstraction of a class which
@@ -51,6 +51,6 @@ public interface SignedPostMessageWrapper extends Serializable {
    *
    * @return The contained SignedPostMessage.
    */
-  public SignedPostMessage getMessage();
+  SignedPostMessage getMessage();
   
 }

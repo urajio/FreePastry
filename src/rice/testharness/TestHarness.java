@@ -37,41 +37,19 @@ advised of the possibility of such damage.
 
 package rice.testharness;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintStream;
+import rice.environment.logging.Logger;
+import rice.p2p.commonapi.*;
+import rice.p2p.scribe.*;
+import rice.p2p.scribe.ScribePolicy.LimitedScribePolicy;
+import rice.pastry.PastryNode;
+import rice.pastry.commonapi.PastryIdFactory;
+import rice.testharness.messaging.*;
+
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.util.Hashtable;
 import java.util.Vector;
-
-import rice.environment.logging.Logger;
-import rice.p2p.commonapi.Application;
-import rice.p2p.commonapi.Endpoint;
-import rice.p2p.commonapi.Id;
-import rice.p2p.commonapi.IdFactory;
-import rice.p2p.commonapi.Message;
-import rice.p2p.commonapi.NodeHandle;
-import rice.p2p.commonapi.RouteMessage;
-import rice.p2p.scribe.Scribe;
-import rice.p2p.scribe.ScribeClient;
-import rice.p2p.scribe.ScribeContent;
-import rice.p2p.scribe.ScribeImpl;
-import rice.p2p.scribe.Topic;
-import rice.p2p.scribe.ScribePolicy.LimitedScribePolicy;
-import rice.pastry.PastryNode;
-import rice.pastry.commonapi.PastryIdFactory;
-import rice.testharness.messaging.CollectResultsMessage;
-import rice.testharness.messaging.CollectResultsResponseMessage;
-import rice.testharness.messaging.InitTestMessage;
-import rice.testharness.messaging.StartTestMessage;
-import rice.testharness.messaging.SubscribedMessage;
-import rice.testharness.messaging.UnsubscribedMessage;
 
 
 /**
@@ -294,7 +272,7 @@ public class TestHarness implements Application, ScribeClient {
   public void pauseRandom() {
     int time = 6000 + (int) (_pastryNode.getEnvironment().getRandomSource().nextDouble() * 4000);
 
-    try { Thread.currentThread().sleep(time); } catch (InterruptedException e) {System.out.println(e);}
+    try { Thread.sleep(time); } catch (InterruptedException e) {System.out.println(e);}
   }
 
   public void sendToAll(ScribeContent m) {

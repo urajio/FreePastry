@@ -76,7 +76,7 @@ public class UnifiedProcessor extends SimpleProcessor {
   @Override
   public Cancellable processBlockingIO(final WorkRequest workRequest) {    
     return process(new Executable<Object, Exception>() {
-      public Object execute() throws Exception {
+      public Object execute() {
         workRequest.run();
         return null;
       }      

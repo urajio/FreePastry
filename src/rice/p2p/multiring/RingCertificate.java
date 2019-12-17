@@ -37,18 +37,24 @@ advised of the possibility of such damage.
 
 package rice.p2p.multiring;
 
-import java.io.*;
-import java.net.*;
-import java.security.*;
-import java.util.*;
-import java.util.zip.*;
-
 import rice.environment.Environment;
-import rice.p2p.commonapi.*;
-import rice.p2p.multiring.*;
-import rice.p2p.util.*;
-import rice.pastry.commonapi.*;
-import rice.pastry.dist.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.util.SecurityUtils;
+import rice.p2p.util.XMLObjectInputStream;
+import rice.p2p.util.XMLObjectOutputStream;
+import rice.pastry.commonapi.PastryIdFactory;
+import rice.pastry.dist.DistPastryNodeFactory;
+
+import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.URL;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * @(#) RingCertificate.java
@@ -66,7 +72,7 @@ public class RingCertificate implements Serializable {
   private static final long serialVersionUID = 5915358246762577456L;
   
   // the static map of all RingCertificates available (id -> cert)
-  protected static HashMap<Id, RingCertificate> CERTIFICATES = new HashMap<Id, RingCertificate>();
+  protected static HashMap<Id, RingCertificate> CERTIFICATES = new HashMap<>();
   
   // load all certificates that con be found
   static {
@@ -180,11 +186,11 @@ public class RingCertificate implements Serializable {
     this.name = name;
     this.id = id;
     this.bootstraps = bootstraps;
-    this.port = new Integer(port);
+    this.port = port;
     this.key = key;
     this.logServer = logServer;
-    this.version = new Long(System.currentTimeMillis());
-    this.protocol = new Integer(protocol);
+    this.version = System.currentTimeMillis();
+    this.protocol = protocol;
   }
   
   /**
@@ -211,7 +217,7 @@ public class RingCertificate implements Serializable {
    * @return The protocol
    */
   public int getProtocol() {
-    return protocol.intValue();
+    return protocol;
   }
   
   /**
@@ -220,7 +226,7 @@ public class RingCertificate implements Serializable {
    * @return The version
    */
   public long getVersion() {
-    return version.longValue();
+    return version;
   }
   
   /**
@@ -238,7 +244,7 @@ public class RingCertificate implements Serializable {
    * @return The preferred port
    */
   public int getPort() {
-    return port.intValue();
+    return port;
   }
   
   /**
@@ -310,14 +316,9 @@ public class RingCertificate implements Serializable {
    * @param file The file to write to
    */
   private void writeToFile(File file) throws IOException {
-    ObjectOutputStream oos = null;
-    
-    try {
-      oos = new XMLObjectOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(file))));
+
+    try (ObjectOutputStream oos = new XMLObjectOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(file))))) {
       oos.writeObject(this);
-    } finally {
-      if (oos != null)
-        oos.close();
     }
   }
     
@@ -327,16 +328,11 @@ public class RingCertificate implements Serializable {
    * @param stream The file to write to
    */
   private static RingCertificate readFromStream(InputStream stream) throws IOException {
-    ObjectInputStream ois = null;
-    
-    try {
-      ois = new XMLObjectInputStream(new BufferedInputStream(new GZIPInputStream(stream)));
+
+    try (ObjectInputStream ois = new XMLObjectInputStream(new BufferedInputStream(new GZIPInputStream(stream)))) {
       return (RingCertificate) ois.readObject();
     } catch (ClassNotFoundException e) {
       throw new IOException(e.getMessage());
-    } finally {
-      if (ois != null)
-        ois.close();
     }
   }
   
@@ -459,7 +455,7 @@ public class RingCertificate implements Serializable {
    * @param string The string
    * @return The address
    */
-  private static InetSocketAddress toInetSocketAddress(String s) throws IOException {
+  private static InetSocketAddress toInetSocketAddress(String s) {
     String host = s.substring(0, s.indexOf(":"));
     int port = Integer.parseInt(s.substring(s.indexOf(":") + 1));
     
@@ -484,8 +480,7 @@ public class RingCertificate implements Serializable {
     
     
     if (s.toLowerCase().equals("global"))
-      for (int i=0; i<ringData.length; i++) 
-        ringData[i] = 0;
+      Arrays.fill(ringData, (byte) 0);
     
     return pif.buildId(ringData);
   }

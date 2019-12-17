@@ -37,7 +37,9 @@ advised of the possibility of such damage.
 
 package rice.p2p.replication;
 
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.IdRange;
+import rice.p2p.commonapi.IdSet;
+import rice.p2p.commonapi.NodeHandle;
 
 /**
  * @(#) ReplicationClient.java
@@ -60,7 +62,7 @@ public interface ReplicationClient {
    * @param hint A hint as to where to find the ids in the key set.  This
    *           is where the local node heard about the keys from.
    */
-  public void fetch(IdSet keySet, NodeHandle hint);
+  void fetch(IdSet keySet, NodeHandle hint);
   
   /**
    * This upcall is to notify the application of the range of keys for 
@@ -72,7 +74,7 @@ public interface ReplicationClient {
    * @param range the range of keys for which the local node is currently 
    *              responsible  
    */
-  public void setRange(IdRange range);
+  void setRange(IdRange range);
   
   /**
    * This upcall should return the set of keys that the application
@@ -81,7 +83,7 @@ public interface ReplicationClient {
    *
    * @param range the requested range
    */
-  public IdSet scan(IdRange range);
+  IdSet scan(IdRange range);
 }
 
 

@@ -36,10 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post;
 
-import rice.p2p.commonapi.rawserialization.*;
-import rice.pastry.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * This class represents the notion of an address, which

@@ -36,10 +36,8 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.log;
 
-import java.security.*;
-
-import rice.p2p.commonapi.*;
-import rice.post.storage.*;
+import rice.p2p.commonapi.Id;
+import rice.post.storage.ContentHashReference;
 
 /**
  * This class serves as a reference to a LogEntry

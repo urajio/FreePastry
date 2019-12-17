@@ -36,21 +36,19 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.message;
 
+import org.mpisws.p2p.transport.peerreview.commitment.Authenticator;
+import org.mpisws.p2p.transport.peerreview.commitment.AuthenticatorSerializer;
+import org.mpisws.p2p.transport.util.Serializer;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.commonapi.rawserialization.RawSerializable;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.mpisws.p2p.transport.peerreview.commitment.Authenticator;
-import org.mpisws.p2p.transport.peerreview.commitment.AuthenticatorSerializer;
-import org.mpisws.p2p.transport.util.Serializer;
-
-import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.p2p.commonapi.rawserialization.OutputBuffer;
-import rice.p2p.commonapi.rawserialization.RawSerializable;
-import rice.p2p.util.rawserialization.SimpleOutputBuffer;
 
 /**
  * Builds the message to a target size.
@@ -70,18 +68,18 @@ public class AuthPushMessage<Identifier extends RawSerializable> implements Peer
   }
 
   public static <I extends RawSerializable> AuthPushMessage<I> build(InputBuffer buf, Serializer<I> idSerializer, AuthenticatorSerializer authSerializer) throws IOException {
-    Map<I, List<Authenticator>> authenticators = new HashMap<I, List<Authenticator>>();
+    Map<I, List<Authenticator>> authenticators = new HashMap<>();
     int numIds = buf.readShort();
     for (int i = 0; i < numIds; i++) {
       I id = idSerializer.deserialize(buf);
       int numAuths = buf.readShort();
-      List<Authenticator> l = new ArrayList<Authenticator>();
+      List<Authenticator> l = new ArrayList<>();
       authenticators.put(id, l);
       for (int a = 0; a < numAuths; a++) {
         l.add(authSerializer.deserialize(buf));
       }
     }
-    return new AuthPushMessage<I>(authenticators);
+    return new AuthPushMessage<>(authenticators);
   }
   
   public void serialize(OutputBuffer buf) throws IOException {

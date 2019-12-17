@@ -37,19 +37,16 @@ advised of the possibility of such damage.
 
 package rice.p2p.scribe.maintenance;
 
-import java.util.Collection;
-import java.util.List;
-
 import rice.p2p.commonapi.Endpoint;
 import rice.p2p.commonapi.Id;
 import rice.p2p.commonapi.NodeHandle;
 import rice.p2p.scribe.BaseScribe;
-import rice.p2p.scribe.Scribe;
-import rice.p2p.scribe.ScribeClient;
-import rice.p2p.scribe.ScribeContent;
 import rice.p2p.scribe.ScribeMultiClient;
 import rice.p2p.scribe.Topic;
 import rice.p2p.scribe.rawserialization.RawScribeContent;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * This is an interface to scribe so that the MaintenacePolicy 
@@ -59,10 +56,10 @@ import rice.p2p.scribe.rawserialization.RawScribeContent;
  *
  */
 public interface MaintainableScribe extends BaseScribe {
-  public static final int MAINTENANCE_ID = Integer.MAX_VALUE;
+  int MAINTENANCE_ID = Integer.MAX_VALUE;
   
-  public Collection<Topic> getTopics();
-  public Endpoint getEndpoint();
+  Collection<Topic> getTopics();
+  Endpoint getEndpoint();
   
   /**
    * This returns the topics for which the parameter 'parent' is a Scribe tree
@@ -70,18 +67,18 @@ public interface MaintainableScribe extends BaseScribe {
    * 
    * @param parent null/localHandle for topics rooted by us
    */
-  public Collection<Topic> getTopicsByParent(NodeHandle parent);
+  Collection<Topic> getTopicsByParent(NodeHandle parent);
 
   /**
    * This returns the topics for which the parameter 'child' is a Scribe tree
    * child of the local node
    */
-  public Collection<Topic> getTopicsByChild(NodeHandle child);
+  Collection<Topic> getTopicsByChild(NodeHandle child);
   
-  public void subscribe(Collection<Topic> nodeWasParent, ScribeMultiClient client, RawScribeContent content, NodeHandle hint);
+  void subscribe(Collection<Topic> nodeWasParent, ScribeMultiClient client, RawScribeContent content, NodeHandle hint);
 
-  public void setParent(Topic topic, NodeHandle parent, List<Id> pathToRoot);
+  void setParent(Topic topic, NodeHandle parent, List<Id> pathToRoot);
   
-  public List<Id> getPathToRoot(Topic topic);
+  List<Id> getPathToRoot(Topic topic);
 
 }

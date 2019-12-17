@@ -36,11 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 
 package rice.p2p.commonapi;
-import java.io.*;
 
-import java.lang.Comparable;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
-import rice.p2p.commonapi.rawserialization.*;
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * @(#) Id.java This interface is an abstraction of an Id (or key) from the CommonAPI paper.
@@ -58,7 +58,7 @@ public interface Id extends Comparable<Id>, Serializable {
    * @param cw the clockwise id
    * @return true if this is between ccw (inclusive) and cw (exclusive), false otherwise
    */
-  public boolean isBetween(Id ccw, Id cw);
+  boolean isBetween(Id ccw, Id cw);
 
   /**
    * Checks to see if the Id nid is clockwise or counterclockwise from this, on the ring. An Id is
@@ -68,7 +68,7 @@ public interface Id extends Comparable<Id>, Serializable {
    * @param nid The id to compare to
    * @return true if clockwise, false otherwise.
    */
-  public boolean clockwise(Id nid);
+  boolean clockwise(Id nid);
 
   /**
    * Returns an Id corresponding to this Id plus a given distance
@@ -76,7 +76,7 @@ public interface Id extends Comparable<Id>, Serializable {
    * @param offset the distance to add
    * @return the new Id
    */
-  public Id addToId(Distance offset);
+  Id addToId(Distance offset);
 
   /**
    * Returns the shorter numerical distance on the ring between a pair of Ids.
@@ -84,7 +84,7 @@ public interface Id extends Comparable<Id>, Serializable {
    * @param nid the other node id.
    * @return the distance between this and nid.
    */
-  public Distance distanceFromId(Id nid);
+  Distance distanceFromId(Id nid);
 
   /**
    * Returns the longer numerical distance on the ring between a pair of Ids.
@@ -92,7 +92,7 @@ public interface Id extends Comparable<Id>, Serializable {
    * @param nid the other node id.
    * @return the distance between this and nid.
    */
-  public Distance longDistanceFromId(Id nid);
+  Distance longDistanceFromId(Id nid);
 
   /**
    * A class for representing and manipulating the distance between two Ids on the circle.
@@ -100,7 +100,7 @@ public interface Id extends Comparable<Id>, Serializable {
    * @version $Id$
    * @author amislove
    */
-  public static interface Distance extends Comparable<Distance>, Serializable {
+  interface Distance extends Comparable<Distance>, Serializable {
 
     /**
      * Shift operator. shift(-1,0) multiplies value of this by two, shift(1,0) divides by 2
@@ -109,7 +109,7 @@ public interface Id extends Comparable<Id>, Serializable {
      * @param fill value of bit shifted in (0 if fill == 0, 1 otherwise)
      * @return this
      */
-    public Distance shiftDistance(int cnt, int fill);
+    Distance shiftDistance(int cnt, int fill);
   }
 
   /**
@@ -117,37 +117,37 @@ public interface Id extends Comparable<Id>, Serializable {
    *
    * @return A byte[] representing this Id
    */
-  public byte[] toByteArray();
+  byte[] toByteArray();
   
   /**
    * Stores the byte[] value of this Id in the provided byte array
    *
    * @return A byte[] representing this Id
    */
-  public void toByteArray(byte[] array, int offset);
+  void toByteArray(byte[] array, int offset);
   
   /**
    * Returns the length of the byte[] representing this Id
    *
    * @return The length of the byte[] representing this Id
    */
-  public int getByteArrayLength();
+  int getByteArrayLength();
 
   /**
    * Returns a string representing the full length of this Id.
    *
    * @return A string with all of this Id
    */
-  public String toStringFull();
+  String toStringFull();
   
   /**
    * Serialize
    * @param buf
    * @throws IOException
    */
-  public void serialize(OutputBuffer buf) throws IOException;
+  void serialize(OutputBuffer buf) throws IOException;
 
-  public short getType();
+  short getType();
   
 }
 

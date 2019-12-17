@@ -37,14 +37,16 @@ advised of the possibility of such damage.
 
 package rice.p2p.past.gc.messaging;
 
-import java.io.IOException;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.past.gc.GCId;
+import rice.p2p.past.gc.GCIdSet;
+import rice.p2p.past.messaging.ContinuationMessage;
 
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.past.*;
-import rice.p2p.past.messaging.*;
-import rice.p2p.past.gc.*;
+import java.io.IOException;
 
 /**
  * @(#) GCRefreshMessage.java
@@ -110,29 +112,27 @@ public class GCRefreshMessage extends ContinuationMessage {
       super.serialize(buf, false);       
       Boolean[] array = (Boolean[])response;
       buf.writeInt(array.length);
-      for (int i = 0; i < array.length; i++) {
-        buf.writeBoolean(array[i].booleanValue()); 
+      for (Boolean aBoolean : array) {
+        buf.writeBoolean(aBoolean);
       }
     } else {
       super.serialize(buf, true);       
     }
 
     buf.writeInt(keys.length);
-    for (int i = 0; i < keys.length; i++) {
-      buf.writeShort(keys[i].getType());      
-      keys[i].serialize(buf);
+    for (GCId key : keys) {
+      buf.writeShort(key.getType());
+      key.serialize(buf);
     }
   }
   
   public static GCRefreshMessage build(InputBuffer buf, Endpoint endpoint) throws IOException {
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        return new GCRefreshMessage(buf, endpoint);
-      default:
-        throw new IOException("Unknown Version: "+version);        
-    }
-  }  
+      if (version == 0) {
+          return new GCRefreshMessage(buf, endpoint);
+      }
+      throw new IOException("Unknown Version: " + version);
+  }
   
   private GCRefreshMessage(InputBuffer buf, Endpoint endpoint) throws IOException {
     super(buf, endpoint);
@@ -141,7 +141,7 @@ public class GCRefreshMessage extends ContinuationMessage {
       int arrayLength = buf.readInt();      
       Boolean[] array = new Boolean[arrayLength];
       for (int i = 0; i < arrayLength; i++) {
-        array[i] = new Boolean(buf.readBoolean()); 
+        array[i] = buf.readBoolean();
       }
     }
     

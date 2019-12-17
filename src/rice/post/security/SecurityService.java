@@ -36,10 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.security;
 
-import java.util.*;
+import rice.Continuation;
 
-import rice.*;
-import rice.post.*;
+import java.util.Hashtable;
 
 /**
  * This class is a central repository for all of the SecurityModules which are
@@ -101,16 +100,15 @@ public class SecurityService {
    * @param command The command to call with the result
    */
   public void verify(PostCertificate certificate, Continuation command) {
-    Iterator i = modules.values().iterator();
 
-    while (i.hasNext()) {
-      SecurityModule module = (SecurityModule) i.next();
+      for (Object o : modules.values()) {
+          SecurityModule module = (SecurityModule) o;
 
-      if (module.canVerify(certificate)) {
-        module.verify(certificate, command);
-        return;
+          if (module.canVerify(certificate)) {
+              module.verify(certificate, command);
+              return;
+          }
       }
-    }
 
     command.receiveException(new SecurityException("Could not find the module to verify " + command.getClass().getName()));
   }

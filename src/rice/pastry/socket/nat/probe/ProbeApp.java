@@ -36,17 +36,10 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.socket.nat.probe;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-
 import org.mpisws.p2p.transport.multiaddress.AddressStrategy;
 import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
 import org.mpisws.p2p.transport.networkinfo.ProbeStrategy;
 import org.mpisws.p2p.transport.networkinfo.Prober;
-
 import rice.Continuation;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Cancellable;
@@ -61,6 +54,11 @@ import rice.pastry.socket.nat.rendezvous.RendezvousSocketNodeHandle;
 import rice.pastry.transport.PMessageNotification;
 import rice.pastry.transport.PMessageReceipt;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collection;
+
 public class ProbeApp extends PastryAppl implements ProbeStrategy {
   Prober prober;
   AddressStrategy addressStrategy;
@@ -73,13 +71,11 @@ public class ProbeApp extends PastryAppl implements ProbeStrategy {
     setDeserializer(new MessageDeserializer() {
       public rice.p2p.commonapi.Message deserialize(InputBuffer buf, short type,
           int priority, rice.p2p.commonapi.NodeHandle sender) throws IOException {
-        switch(type) {
-        case ProbeRequestMessage.TYPE:
-          return ProbeRequestMessage.build(buf, getAddress());
-        default:
-          throw new IllegalArgumentException("Unknown type: "+type);    
-        }
-      }    
+          if (type == ProbeRequestMessage.TYPE) {
+              return ProbeRequestMessage.build(buf, getAddress());
+          }
+          throw new IllegalArgumentException("Unknown type: " + type);
+      }
     });
   }
 
@@ -109,19 +105,18 @@ public class ProbeApp extends PastryAppl implements ProbeStrategy {
     // Step 1: find valid helpers
     
     // make a list of valid candidates
-    ArrayList<NodeHandle> valid = new ArrayList<NodeHandle>();
-    
-    Iterator<NodeHandle> candidates = thePastryNode.getLeafSet().iterator();
-    while(candidates.hasNext()) {
-      SocketNodeHandle nh = (SocketNodeHandle)candidates.next();
-      // don't pick self
-      if (!nh.equals(thePastryNode.getLocalHandle())) {
-        // if nh will send to addr's outermost address
-        if (addressStrategy.getAddress(nh.getAddress(), addr).equals(addr.getOutermostAddress())) {
-          valid.add(nh);
-        }
+    ArrayList<NodeHandle> valid = new ArrayList<>();
+
+      for (NodeHandle nodeHandle : thePastryNode.getLeafSet()) {
+          SocketNodeHandle nh = (SocketNodeHandle) nodeHandle;
+          // don't pick self
+          if (!nh.equals(thePastryNode.getLocalHandle())) {
+              // if nh will send to addr's outermost address
+              if (addressStrategy.getAddress(nh.getAddress(), addr).equals(addr.getOutermostAddress())) {
+                  valid.add(nh);
+              }
+          }
       }
-    }
     
     // if there are no valid nodes, use the other nodes
     if (valid.isEmpty()) {
@@ -147,15 +142,13 @@ public class ProbeApp extends PastryAppl implements ProbeStrategy {
   }
 
   public Collection<InetSocketAddress> getExternalAddresses() {
-    ArrayList<InetSocketAddress> ret = new ArrayList<InetSocketAddress>();
-    Iterator<NodeHandle> i = thePastryNode.getLeafSet().iterator();
-    while(i.hasNext()) {
-      NodeHandle nh = i.next();      
-      RendezvousSocketNodeHandle rsnh = (RendezvousSocketNodeHandle)nh;
-      if (rsnh.canContactDirect()) {
-        ret.add(rsnh.getInetSocketAddress());
-      }      
-    }
+    ArrayList<InetSocketAddress> ret = new ArrayList<>();
+      for (NodeHandle nh : thePastryNode.getLeafSet()) {
+          RendezvousSocketNodeHandle rsnh = (RendezvousSocketNodeHandle) nh;
+          if (rsnh.canContactDirect()) {
+              ret.add(rsnh.getInetSocketAddress());
+          }
+      }
 
     return ret;
   }

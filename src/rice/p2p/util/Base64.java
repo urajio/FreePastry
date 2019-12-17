@@ -628,9 +628,8 @@ public class Base64
         byte[] outBuff1 = new byte[3];
         int    count    = decode4to3( fourBytes, 0, outBuff1, 0 );
         byte[] outBuff2 = new byte[ count ];
-        
-        for( int i = 0; i < count; i++ )
-            outBuff2[i] = outBuff1[i];
+
+        System.arraycopy(outBuff1, 0, outBuff2, 0, count);
         
         return outBuff2;
     }
@@ -820,37 +819,21 @@ public class Base64
             bytes.length >= 4  && // Don't want to get ArrayIndexOutOfBounds exception
             java.util.zip.GZIPInputStream.GZIP_MAGIC == head ) 
             {
-                java.io.ByteArrayInputStream  bais = null;
-                java.util.zip.GZIPInputStream gzis = null;
-                java.io.ByteArrayOutputStream baos = null;
                 byte[] buffer = new byte[2048];
                 int    length = 0;
 
-                try
-                {
-                    baos = new java.io.ByteArrayOutputStream();
-                    bais = new java.io.ByteArrayInputStream( bytes );
-                    gzis = new java.util.zip.GZIPInputStream( bais );
+                try (java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream(); java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(bytes); java.util.zip.GZIPInputStream gzis = new java.util.zip.GZIPInputStream(bais)) {
 
-                    while( ( length = gzis.read( buffer ) ) >= 0 )
-                    {
-                        baos.write(buffer,0,length);
+                    while ((length = gzis.read(buffer)) >= 0) {
+                        baos.write(buffer, 0, length);
                     }   // end while: reading input
 
                     // No error? Get new bytes.
                     bytes = baos.toByteArray();
 
-                }   // end try
-                catch( java.io.IOException e )
-                {
+                } catch (java.io.IOException e) {
                     // Just return originally-decoded bytes
-                }   // end catch
-                finally
-                {
-                    try{ baos.close(); } catch( Exception e ){}
-                    try{ gzis.close(); } catch( Exception e ){}
-                    try{ bais.close(); } catch( Exception e ){}
-                }   // end finally
+                }
 
             }   // end if: gzipped
         }   // end if: bytes.length >= 2

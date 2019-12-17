@@ -37,13 +37,13 @@ advised of the possibility of such damage.
 
 package rice.p2p.scribe.messaging;
 
-import java.io.IOException;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.scribe.Topic;
 
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.scribe.*;
-import rice.p2p.scribe.rawserialization.ScribeContentDeserializer;
+import java.io.IOException;
 
 /**
  * @(#) UnsubscribeMessage.java
@@ -82,12 +82,10 @@ public class DropMessage extends ScribeMessage {
   
   public static DropMessage build(InputBuffer buf, Endpoint endpoint) throws IOException {
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        return new DropMessage(buf, endpoint);        
-      default:
-        throw new IOException("Unknown Version: "+version);
-    }
+      if (version == 0) {
+          return new DropMessage(buf, endpoint);
+      }
+      throw new IOException("Unknown Version: " + version);
   }
   
   /**

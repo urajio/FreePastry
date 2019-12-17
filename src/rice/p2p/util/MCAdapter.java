@@ -36,11 +36,8 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.util;
 
-import java.io.IOException;
-
 import org.mpisws.p2p.transport.MessageCallback;
 import org.mpisws.p2p.transport.MessageRequestHandle;
-
 import rice.p2p.commonapi.Message;
 import rice.p2p.commonapi.NodeHandle;
 import rice.p2p.commonapi.rawserialization.RawMessage;

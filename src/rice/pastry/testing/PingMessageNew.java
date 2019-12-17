@@ -37,10 +37,9 @@ advised of the possibility of such damage.
 
 package rice.pastry.testing;
 
-import rice.pastry.*;
-import rice.pastry.messaging.*;
-
-import java.util.*;
+import rice.pastry.Id;
+import rice.pastry.NodeHandle;
+import rice.pastry.messaging.Message;
 
 /**
  * PingMessageNew

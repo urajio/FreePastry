@@ -44,8 +44,8 @@ package org.mpisws.p2p.transport;
  * @param <Identifier>
  */
 public interface ListenableTransportLayer<Identifier> {
-  public void addTransportLayerListener(TransportLayerListener<Identifier> listener); 
-  public void removeTransportLayerListener(TransportLayerListener<Identifier> listener); 
+  void addTransportLayerListener(TransportLayerListener<Identifier> listener);
+  void removeTransportLayerListener(TransportLayerListener<Identifier> listener);
 
   /**
    * Example impl code

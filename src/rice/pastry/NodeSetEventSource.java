@@ -40,6 +40,6 @@ advised of the possibility of such damage.
 package rice.pastry;
 
 public interface NodeSetEventSource {
-  public void addNodeSetListener(NodeSetListener listener);
-  public void removeNodeSetListener(NodeSetListener listener);
+  void addNodeSetListener(NodeSetListener listener);
+  void removeNodeSetListener(NodeSetListener listener);
 }

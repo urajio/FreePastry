@@ -37,9 +37,11 @@ advised of the possibility of such damage.
 
 package rice.p2p.commonapi;
 
-import java.io.*;
+import rice.p2p.commonapi.rawserialization.MessageDeserializer;
+import rice.p2p.commonapi.rawserialization.RawMessage;
 
-import rice.p2p.commonapi.rawserialization.*;
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * @(#) RouteMessage.java
@@ -59,14 +61,14 @@ public interface RouteMessage extends Serializable {
    *
    * @return The destination Id
    */
-  public Id getDestinationId();
+  Id getDestinationId();
 
   /**
    * Returns the next hop handle for this message
    *
    * @return The next hop
    */
-  public NodeHandle getNextHopHandle();
+  NodeHandle getNextHopHandle();
 
   /**
    * Returns the enclosed message inside of this message
@@ -74,30 +76,30 @@ public interface RouteMessage extends Serializable {
    * @return The enclosed message
    * @deprecated use getMesage(MessageDeserializer)
    */
-  public Message getMessage();
+  Message getMessage();
   
-  public Message getMessage(MessageDeserializer md) throws IOException;
+  Message getMessage(MessageDeserializer md) throws IOException;
 
   /**
    * Sets the destination Id for this message
    *
    * @param id The destination Id
    */
-  public void setDestinationId(Id id);
+  void setDestinationId(Id id);
 
   /**
    * Sets the next hop handle for this message
    *
    * @param nextHop The next hop for this handle
    */
-  public void setNextHopHandle(NodeHandle nextHop);
+  void setNextHopHandle(NodeHandle nextHop);
 
   /**
    * Sets the internal message for this message
    *
    * @param message The internal message
    */
-  public void setMessage(Message message);
+  void setMessage(Message message);
   
   /**
    * Sets the internal message for this message
@@ -108,7 +110,7 @@ public interface RouteMessage extends Serializable {
    *
    * @param message The internal message
    */
-  public void setMessage(RawMessage message);
+  void setMessage(RawMessage message);
   
 }
 

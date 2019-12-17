@@ -62,7 +62,7 @@ public interface Application {
    *
    * @return Whether or not to forward the message further
    */
-  public boolean forward(RouteMessage message);
+  boolean forward(RouteMessage message);
 
   /**
    * This method is called on the application at the destination node
@@ -71,7 +71,7 @@ public interface Application {
    * @param id The destination id of the message
    * @param message The message being sent
    */
-  public void deliver(Id id, Message message);
+  void deliver(Id id, Message message);
 
   /**
    * This method is invoked to inform the application that the given node
@@ -81,7 +81,7 @@ public interface Application {
    * @param handle The handle that has joined/left
    * @param joined Whether the node has joined or left
    */
-  public void update(NodeHandle handle, boolean joined);
+  void update(NodeHandle handle, boolean joined);
   
 }
 

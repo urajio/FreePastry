@@ -38,14 +38,18 @@ package rice.pastry.testing;
 
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.pastry.*;
+import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
+import rice.pastry.PastryNodeFactory;
+import rice.pastry.dist.DistPastryNodeFactory;
 import rice.pastry.socket.SocketPastryNodeFactory;
-import rice.pastry.standard.*;
-import rice.pastry.dist.*;
+import rice.pastry.standard.IPNodeIdFactory;
 
-import java.util.*;
 import java.io.IOException;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.Vector;
 
 /**
  * A hello world example for pastry. This is the distributed driver.
@@ -118,33 +122,32 @@ public class DistHelloWorld {
       }
     }
 
-    NodeHandle bshandle = ((SocketPastryNodeFactory) factory).getNodeHandle(addr);
-    return bshandle;
+    return ((SocketPastryNodeFactory) factory).getNodeHandle(addr);
   }
 
   /**
    * process command line args,
    */
-  private static void doIinitstuff(String args[], Environment env) {
+  private static void doIinitstuff(String[] args, Environment env) {
 
     // process command line arguments    
-    
-    for (int i = 0; i < args.length; i++) {
-      if (args[i].equals("-help")) {
-        System.out
-            .println("Usage: DistHelloWorld [-msgs m] [-nodes n] [-port p] [-bootstrap bshost[:bsport]]");
-        System.out
-            .println("                     [-protocol (rmi|wire)] [-verbose|-silent|-verbosity v] [-help]");
-        System.out.println("");
-        System.out
-            .println("  Ports p and bsport refer to RMI registry  or Socket port numbers (default = 5009).");
-        System.out
-            .println("  Without -bootstrap bshost[:bsport], only localhost:p is used for bootstrap.");
-        System.out
-            .println("  Default verbosity is 8, -verbose is 1, and -silent is 10 (error msgs only).");
-        System.exit(1);
+
+      for (String arg : args) {
+          if (arg.equals("-help")) {
+              System.out
+                      .println("Usage: DistHelloWorld [-msgs m] [-nodes n] [-port p] [-bootstrap bshost[:bsport]]");
+              System.out
+                      .println("                     [-protocol (rmi|wire)] [-verbose|-silent|-verbosity v] [-help]");
+              System.out.println("");
+              System.out
+                      .println("  Ports p and bsport refer to RMI registry  or Socket port numbers (default = 5009).");
+              System.out
+                      .println("  Without -bootstrap bshost[:bsport], only localhost:p is used for bootstrap.");
+              System.out
+                      .println("  Default verbosity is 8, -verbose is 1, and -silent is 10 (error msgs only).");
+              System.exit(1);
+          }
       }
-    }
 
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("-msgs") && i + 1 < args.length)
@@ -250,7 +253,7 @@ public class DistHelloWorld {
    * bootstrap. Default verbosity is 8, -verbose is 1, and -silent is 10 (error
    * msgs only).
    */
-  public static void main(String args[]) throws IOException {
+  public static void main(String[] args) throws IOException {
     
     
     Environment env = new Environment();

@@ -36,9 +36,8 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.testharness.messaging;
 
-import rice.p2p.commonapi.*;
-import rice.p2p.scribe.*;
-import rice.testharness.*;
+import rice.p2p.commonapi.Message;
+import rice.p2p.scribe.ScribeContent;
 
 /**
  * An abstract class representing any message in the

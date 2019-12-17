@@ -37,10 +37,7 @@ advised of the possibility of such damage.
 
 package rice.p2p.scribe;
 
-import java.util.Collection;
-
-import rice.*;
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.NodeHandle;
 
 /**
  * @(#) ScribeClient.java
@@ -62,7 +59,7 @@ public interface ScribeClient {
    * @param content The content which was anycasted
    * @return Whether or not the anycast should continue, true if we will accept the anycast
    */
-  public boolean anycast(Topic topic, ScribeContent content);
+  boolean anycast(Topic topic, ScribeContent content);
 
   /**
    * This method is invoked when a message is delivered for a topic this
@@ -71,7 +68,7 @@ public interface ScribeClient {
    * @param topic The topic the message was published to
    * @param content The content which was published
    */
-  public void deliver(Topic topic, ScribeContent content);
+  void deliver(Topic topic, ScribeContent content);
 
   /**
    * Informs this client that a child was added to a topic in
@@ -80,7 +77,7 @@ public interface ScribeClient {
    * @param topic The topic to unsubscribe from
    * @param child The child that was added
    */
-  public void childAdded(Topic topic, NodeHandle child);
+  void childAdded(Topic topic, NodeHandle child);
 
   /**
    * Informs this client that a child was removed from a topic in
@@ -89,7 +86,7 @@ public interface ScribeClient {
    * @param topic The topic to unsubscribe from
    * @param child The child that was removed
    */
-  public void childRemoved(Topic topic, NodeHandle child);
+  void childRemoved(Topic topic, NodeHandle child);
   
   /**
    * Informs the client that a subscribe on the given topic failed
@@ -98,6 +95,6 @@ public interface ScribeClient {
    *
    * @param topic The topic which the subscribe failed on
    */
-  public void subscribeFailed(Topic topic);
+  void subscribeFailed(Topic topic);
 }
 

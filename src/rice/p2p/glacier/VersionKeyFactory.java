@@ -35,15 +35,18 @@ advised of the possibility of such damage.
 
 *******************************************************************************/ 
 package rice.p2p.glacier;
-import java.util.*;
-import java.util.StringTokenizer;
 
 import rice.environment.random.RandomSource;
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.commonapi.IdRange;
+import rice.p2p.commonapi.IdSet;
+import rice.p2p.commonapi.NodeHandleSet;
 import rice.p2p.multiring.MultiringIdFactory;
 import rice.p2p.multiring.RingId;
-import rice.pastry.Id;
+
+import java.util.Random;
 import java.util.SortedMap;
+import java.util.StringTokenizer;
 
 
 /**
@@ -127,7 +130,7 @@ public class VersionKeyFactory implements IdFactory {
     String versionS = stok.nextToken();
     RingId key = FACTORY.buildRingId(rice.pastry.Id.build(keyRingS), rice.pastry.Id.build(keyNodeS));
 
-    return new VersionKey(key, Long.valueOf(versionS).longValue());
+    return new VersionKey(key, Long.parseLong(versionS));
   }
 
   public rice.p2p.commonapi.Id buildIdFromToString(char[] chars, int offset, int length) {

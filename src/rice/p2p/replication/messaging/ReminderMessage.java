@@ -37,11 +37,8 @@ advised of the possibility of such damage.
 
 package rice.p2p.replication.messaging;
 
-import java.io.IOException;
-
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.replication.*;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
 /**
  * @(#) ReminderMessage.java
@@ -69,7 +66,7 @@ public class ReminderMessage extends ReplicationMessage {
     return TYPE;
   }
   
-  public void serialize(OutputBuffer buf) throws IOException {
+  public void serialize(OutputBuffer buf) {
     throw new RuntimeException("serialize() not supported in MaintenanceMessage"); 
   }  
 }

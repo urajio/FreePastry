@@ -36,44 +36,25 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.sourceroute.manager;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.exception.NodeIsFaultyException;
 import org.mpisws.p2p.transport.liveness.LivenessListener;
 import org.mpisws.p2p.transport.liveness.LivenessProvider;
 import org.mpisws.p2p.transport.liveness.PingListener;
-import org.mpisws.p2p.transport.liveness.Pinger;
 import org.mpisws.p2p.transport.proximity.ProximityListener;
 import org.mpisws.p2p.transport.proximity.ProximityProvider;
 import org.mpisws.p2p.transport.sourceroute.SourceRoute;
 import org.mpisws.p2p.transport.sourceroute.SourceRouteFactory;
-import org.mpisws.p2p.transport.sourceroute.manager.SourceRouteManagerImpl.AddressManager.PendingMessage;
 import org.mpisws.p2p.transport.util.MessageRequestHandleImpl;
 import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
-
-import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
 import rice.p2p.commonapi.Cancellable;
-import rice.p2p.util.TimerWeakHashMap;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 /**
  * This class adapts a SourceRoute transport layer back to an Identifier
@@ -103,11 +84,11 @@ public class SourceRouteManagerImpl<Identifier> implements
   Environment environment;
   Logger logger;
   Identifier localAddress;
-  Map<Identifier, AddressManager> addressManagers;
+  final Map<Identifier, AddressManager> addressManagers;
   private TransportLayerCallback<Identifier, ByteBuffer> callback;  
   private ErrorHandler<Identifier> errorHandler;
-  Set<AddressManager> hardLinks;
-  List<LivenessListener<Identifier>> livenessListeners;
+  final Set<AddressManager> hardLinks;
+  final List<LivenessListener<Identifier>> livenessListeners;
   List<PingListener<Identifier>> pingListeners;
   SourceRouteFactory<Identifier> srFactory;
   
@@ -136,13 +117,13 @@ public class SourceRouteManagerImpl<Identifier> implements
     livenessProvider.addLivenessListener(this);
     //    addressManagers = new TimerWeakHashMap<Identifier, AddressManager>(environment.getSelectorManager().getTimer(),30000);
     
-    addressManagers = new HashMap<Identifier, AddressManager>();
+    addressManagers = new HashMap<>();
     Parameters p = environment.getParameters();
     PING_THROTTLE = p.getLong("pastry_socket_srm_ping_throttle");
     NUM_SOURCE_ROUTE_ATTEMPTS = p.getInt("pastry_socket_srm_num_source_route_attempts");
-    hardLinks = new HashSet<AddressManager>();
-    livenessListeners = new ArrayList<LivenessListener<Identifier>>();
-    pingListeners = new ArrayList<PingListener<Identifier>>();
+    hardLinks = new HashSet<>();
+    livenessListeners = new ArrayList<>();
+    pingListeners = new ArrayList<>();
   }
   
   /**
@@ -340,7 +321,7 @@ public class SourceRouteManagerImpl<Identifier> implements
     
     public static final int LIVENESS_UNKNOWN = -1;
     
-    HashSet<SourceRoute<Identifier>> routes = new HashSet<SourceRoute<Identifier>>();
+    HashSet<SourceRoute<Identifier>> routes = new HashSet<>();
     
     /**
      * Constructor, given an address and whether or not it should attempt to
@@ -351,8 +332,8 @@ public class SourceRouteManagerImpl<Identifier> implements
      */
     public AddressManager(Identifier address) {
       this.address = address;
-      this.pendingMessages = new LinkedList<PendingMessage>();
-      this.pendingSockets = new LinkedList<PendingSocket>();
+      this.pendingMessages = new LinkedList<>();
+      this.pendingSockets = new LinkedList<>();
       
       if (logger.level <= Logger.FINE) logger.log("new AddressManager("+address+")");      
       clearLivenessState();
@@ -366,7 +347,7 @@ public class SourceRouteManagerImpl<Identifier> implements
     
     public void clearLivenessState() {
 //      synchronized(routes) {
-      ArrayList<SourceRoute<Identifier>> temp = new ArrayList<SourceRoute<Identifier>>(routes);
+      ArrayList<SourceRoute<Identifier>> temp = new ArrayList<>(routes);
       routes.clear();
 //      }
       
@@ -379,14 +360,14 @@ public class SourceRouteManagerImpl<Identifier> implements
       if (!pendingMessages.isEmpty() || !pendingSockets.isEmpty()) {
         Exception reason = new NodeIsFaultyException(this.address, "State cleared. for "+this);
         
-        ArrayList<PendingSocket> temp3 = new ArrayList<PendingSocket>(pendingSockets); 
+        ArrayList<PendingSocket> temp3 = new ArrayList<>(pendingSockets);
         pendingSockets.clear();
         for (PendingSocket foo : temp3) {
           if (logger.level <= Logger.FINE) logger.log(this+".clearLivenessState()1 "+foo);
           foo.fail(reason);
         }
         
-        ArrayList<PendingMessage> temp2 = new ArrayList<PendingMessage>(pendingMessages); 
+        ArrayList<PendingMessage> temp2 = new ArrayList<>(pendingMessages);
         pendingMessages.clear();
         for (PendingMessage foo : temp2) {
           if (logger.level <= Logger.FINE) logger.log(this+".clearLivenessState()2 "+foo);
@@ -411,7 +392,7 @@ public class SourceRouteManagerImpl<Identifier> implements
       }
 
       public void receiveResult(SocketRequestHandle<SourceRoute<Identifier>> cancellable, P2PSocket<SourceRoute<Identifier>> sock) {
-        deliverSocketToMe.receiveResult(this, new SourceRouteManagerP2PSocket<Identifier>(sock, logger, errorHandler, environment));
+        deliverSocketToMe.receiveResult(this, new SourceRouteManagerP2PSocket<>(sock, logger, errorHandler, environment));
       }
       
       public void receiveException(SocketRequestHandle<SourceRoute<Identifier>> s, Exception ex) {
@@ -553,7 +534,7 @@ public class SourceRouteManagerImpl<Identifier> implements
       }
       
       final MessageRequestHandleImpl<Identifier, ByteBuffer> handle 
-        = new MessageRequestHandleImpl<Identifier, ByteBuffer>(address, message, options);
+        = new MessageRequestHandleImpl<>(address, message, options);
       handle.setSubCancellable(tl.sendMessage(best, message, new MessageCallback<SourceRoute<Identifier>, ByteBuffer>(){
         public void ack(MessageRequestHandle<SourceRoute<Identifier>, ByteBuffer> msg) {
           if (handle.getSubCancellable() != null && msg != handle.getSubCancellable()) throw new RuntimeException("msg != cancellable.getSubCancellable() (indicates a bug in the code) msg:"+msg+" sub:"+handle.getSubCancellable());
@@ -597,14 +578,14 @@ public class SourceRouteManagerImpl<Identifier> implements
         addHardLink(this);
         return pending;
       } else {
-        final SocketRequestHandleImpl<Identifier> handle = 
-          new SocketRequestHandleImpl<Identifier>(address, options, logger);
+        final SocketRequestHandleImpl<Identifier> handle =
+                new SocketRequestHandleImpl<>(address, options, logger);
         
         handle.setSubCancellable(tl.openSocket(best, new SocketCallback<SourceRoute<Identifier>>(){        
           public void receiveResult(
               SocketRequestHandle<SourceRoute<Identifier>> cancellable, 
               P2PSocket<SourceRoute<Identifier>> sock) {
-            deliverSocketToMe.receiveResult(handle, new SourceRouteManagerP2PSocket<Identifier>(sock, logger, errorHandler, environment));
+            deliverSocketToMe.receiveResult(handle, new SourceRouteManagerP2PSocket<>(sock, logger, errorHandler, environment));
           }        
           public void receiveException(SocketRequestHandle<SourceRoute<Identifier>> s, Exception ex) {
             deliverSocketToMe.receiveException(handle, ex);
@@ -647,12 +628,11 @@ public class SourceRouteManagerImpl<Identifier> implements
      * Method which suggests a ping to the remote node.
      */
     public boolean checkLiveness(Map<String, Object> options) {
-      long now = environment.getTimeSource().currentTimeMillis();
-//      if (now < this.updated+CHECK_LIVENESS_THROTTLE) {
+      //      if (now < this.updated+CHECK_LIVENESS_THROTTLE) {
 //        return false;
 //      }
         
-      this.updated = now;
+      this.updated = environment.getTimeSource().currentTimeMillis();
       
       switch (liveness) {
         case LIVENESS_DEAD_FOREVER:
@@ -778,7 +758,7 @@ public class SourceRouteManagerImpl<Identifier> implements
         SourceRoute<Identifier> newBest = null;
         
         // must wrap it in another collection to prevent a ConcurrentModificationException
-        for (SourceRoute<Identifier> route : new ArrayList<SourceRoute<Identifier>>(this.routes)) {
+        for (SourceRoute<Identifier> route : new ArrayList<>(this.routes)) {
           // assert the strategy did the right thing
           if (!route.getLastHop().equals(address)) {
             if (logger.level <= Logger.SEVERE) logger.log("SRStrategy "+strategy+" is broken.  It returned "+route+" as a route to "+address);
@@ -1043,7 +1023,7 @@ public class SourceRouteManagerImpl<Identifier> implements
     if (logger.level <= Logger.FINER) logger.log("notifyLivenessListeners("+i+","+liveness+")");
     List<LivenessListener<Identifier>> temp;
     synchronized(livenessListeners) {
-      temp = new ArrayList<LivenessListener<Identifier>>(livenessListeners);
+      temp = new ArrayList<>(livenessListeners);
     }
     for (LivenessListener<Identifier> listener : temp) {
       listener.livenessChanged(i, liveness, options);
@@ -1073,7 +1053,7 @@ public class SourceRouteManagerImpl<Identifier> implements
 //  }
 
   public void incomingSocket(P2PSocket<SourceRoute<Identifier>> s) throws IOException {
-    callback.incomingSocket(new SourceRouteManagerP2PSocket<Identifier>(s, logger, errorHandler, environment));
+    callback.incomingSocket(new SourceRouteManagerP2PSocket<>(s, logger, errorHandler, environment));
   }
 
   public void messageReceived(SourceRoute<Identifier> i, ByteBuffer m, Map<String, Object> options) throws IOException {
@@ -1093,7 +1073,7 @@ public class SourceRouteManagerImpl<Identifier> implements
 //    getAddressManager(i.getLastHop()).markProximity(i, rtt, options);
 //  }
 
-  Collection<ProximityListener<Identifier>> listeners = new ArrayList<ProximityListener<Identifier>>();
+  final Collection<ProximityListener<Identifier>> listeners = new ArrayList<>();
   public void addProximityListener(ProximityListener<Identifier> listener) {
     synchronized(listeners) {
       listeners.add(listener);
@@ -1113,7 +1093,7 @@ public class SourceRouteManagerImpl<Identifier> implements
   public void notifyProximityListeners(Identifier i, int prox, Map<String, Object> options) {
     Collection<ProximityListener<Identifier>> temp;
     synchronized(listeners) {
-      temp = new ArrayList<ProximityListener<Identifier>>(listeners);
+      temp = new ArrayList<>(listeners);
     }
     for (ProximityListener<Identifier> p : temp) {
       p.proximityChanged(i, prox, options);

@@ -36,16 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.testing.routeconsistent;
 
+import rice.pastry.Id;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import rice.pastry.Id;
 
 
 public class Replayer {
@@ -73,7 +72,7 @@ public class Replayer {
   }
   
   public static List<InetSocketAddress> getAddr(String s) throws UnknownHostException {
-    ArrayList<InetSocketAddress> ret = new ArrayList<InetSocketAddress>();    
+    ArrayList<InetSocketAddress> ret = new ArrayList<>();
     Pattern inetSAddrPattern = Pattern.compile("/([0-9.]+):([0-9]+)");
     Matcher matcher = inetSAddrPattern.matcher(s);    
     while(matcher.find()) {

@@ -56,7 +56,7 @@ public interface TimeSource extends Destructable {
   /**
    * @return the current time in millis
    */
-  public long currentTimeMillis();
+  long currentTimeMillis();
   
   /**
    * block for this many millis
@@ -64,7 +64,7 @@ public interface TimeSource extends Destructable {
    * @param delay the amount of time to sleep
    * @throws InterruptedException 
    */
-  public void sleep(long delay) throws InterruptedException;
+  void sleep(long delay) throws InterruptedException;
 
   /**
    * This method has the same syntax as lock.wait(timeToWait), but works in the simulator.

@@ -36,18 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post;
 
-import java.security.*;
-
-import rice.*; 
-
+import rice.Continuation;
 import rice.environment.Environment;
-import rice.p2p.commonapi.*;
-
-import rice.post.log.*;
-import rice.post.messaging.*;
+import rice.p2p.commonapi.NodeHandle;
+import rice.post.messaging.NotificationMessage;
 import rice.post.rawserialization.NotificationMessageDeserializer;
-import rice.post.storage.*;
-import rice.post.security.*;
+import rice.post.storage.StorageService;
+
+import java.security.PublicKey;
 
 /**
  * This interface represents the Post service layer.
@@ -65,21 +61,21 @@ public interface Post {
    *
    * @return The PostEntityAddress of the local user.
    */
-  public PostEntityAddress getEntityAddress();
+  PostEntityAddress getEntityAddress();
   
   /**
    * Returns the certificate authority's public key.
    *
    * @return The CA's public key
    */
-  public PublicKey getCAPublicKey();
+  PublicKey getCAPublicKey();
 
   /**
    * Shortcut which returns the PostLog of the local user.
    *
    * @return The PostLog belonging to the this entity,
    */
-  public void getPostLog(Continuation command);
+  void getPostLog(Continuation command);
   
   /**
    * Shortcut which returns the PostLog of the local user.
@@ -87,7 +83,7 @@ public interface Post {
    *
    * @return The PostLog belonging to the this entity,
    */
-  public void getAndVerifyPostLog(Continuation command);
+  void getAndVerifyPostLog(Continuation command);
   
   /**
    * Returns and verifies the PostLog of the named entity
@@ -95,33 +91,33 @@ public interface Post {
    * @return The PostLog belonging to the given entity, eg. to acquire
    * another user's public key.
    */
-  public void getPostLog(PostEntityAddress entity, Continuation command);
+  void getPostLog(PostEntityAddress entity, Continuation command);
   
   /**
    * This method returns the local storage service.
    *
    * @return The storage service.
    */
-  public StorageService getStorageService();   
+  StorageService getStorageService();
   
   /**
    * Registers a client with this Post 
    *
    * @param client The client to add
    */
-  public void addClient(PostClient client);
+  void addClient(PostClient client);
 
   /**
    * Removes a client from this PostService.
    *
    * @param client The client to remove
    */
-  public void removeClient(PostClient client);
+  void removeClient(PostClient client);
   
   /**
    * This method announce's the local user's presence via the scribe tree
    */
-  public void announcePresence();
+  void announcePresence();
 
   /**
    * Sends a notification message with destination specified by the members
@@ -138,7 +134,7 @@ public interface Post {
    * are encapsulated inside the message object.
    * @param command The command to execute once done
    */
-  public void sendNotification(NotificationMessage message, Continuation command);
+  void sendNotification(NotificationMessage message, Continuation command);
 
   /**
    * Sends a notification message with destination specified by the members
@@ -155,7 +151,7 @@ public interface Post {
    * are encapsulated inside the message object.
    * @param command The command to execute once done
    */
-  public void sendNotificationDirect(NodeHandle handle, NotificationMessage message, Continuation command);
+  void sendNotificationDirect(NodeHandle handle, NotificationMessage message, Continuation command);
 
   /**
    * This method causes the local POST service to subscribe to the specified address, and
@@ -166,7 +162,7 @@ public interface Post {
    * @param address The address to join
    * @param key The shared key to use (or null, if unencrypted)
    */
-  public void joinGroup(PostGroupAddress address, byte[] key);
+  void joinGroup(PostGroupAddress address, byte[] key);
 
   /**
    * This method multicasts the provided notification message to the destination
@@ -176,18 +172,18 @@ public interface Post {
    * @param message The message to send
    * @param command The command to execute once done
    */
-  public void sendGroup(NotificationMessage message, Continuation command);
+  void sendGroup(NotificationMessage message, Continuation command);
   
   /**
    * Get the rice.environment.Environment.
    * 
    * @return the environment
    */
-  public Environment getEnvironment();
+  Environment getEnvironment();
   
-  public NotificationMessageDeserializer getNotificationMessageDeserializer();
+  NotificationMessageDeserializer getNotificationMessageDeserializer();
   
-  public void setNotificationMessageDeserializer(
-      NotificationMessageDeserializer notificationMessageDeserializer);
+  void setNotificationMessageDeserializer(
+          NotificationMessageDeserializer notificationMessageDeserializer);
 
 }

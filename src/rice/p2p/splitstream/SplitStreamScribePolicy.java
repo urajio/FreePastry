@@ -36,14 +36,18 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.splitstream;
 
-import java.util.*;
-
-import rice.p2p.commonapi.*;
-import rice.p2p.scribe.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.scribe.Scribe;
+import rice.p2p.scribe.ScribeClient;
+import rice.p2p.scribe.ScribeContent;
 import rice.p2p.scribe.ScribePolicy.DefaultScribePolicy;
-import rice.p2p.scribe.messaging.*;
+import rice.p2p.scribe.Topic;
+import rice.p2p.scribe.messaging.AnycastMessage;
+import rice.p2p.scribe.messaging.ScribeMessage;
+import rice.p2p.scribe.messaging.SubscribeMessage;
 
-import rice.pastry.routing.RoutingTable;
+import java.util.*;
 
 /**
  * This class represents SplitStream's policy for Scribe, which only allows children
@@ -87,7 +91,7 @@ public class SplitStreamScribePolicy extends DefaultScribePolicy /*implements Sc
     DEFAULT_MAXIMUM_CHILDREN = scribe.getEnvironment().getParameters().getInt("p2p_splitStream_policy_default_maximum_children");
     this.scribe = scribe;
     this.splitStream = splitStream;
-    this.policy = new Hashtable<ChannelId, Integer>();
+    this.policy = new Hashtable<>();
   }
 
   /**
@@ -102,7 +106,7 @@ public class SplitStreamScribePolicy extends DefaultScribePolicy /*implements Sc
     if (max == null) {
       return DEFAULT_MAXIMUM_CHILDREN;
     } else {
-      return max.intValue();
+      return max;
     }
   }
 
@@ -113,7 +117,7 @@ public class SplitStreamScribePolicy extends DefaultScribePolicy /*implements Sc
    * @param children The new maximum bandwidth for this channel
    */
   public void setMaxChildren(ChannelId id, int children) {
-    policy.put(id, new Integer(children));
+    policy.put(id, children);
   }
 
   /**
@@ -308,13 +312,10 @@ public class SplitStreamScribePolicy extends DefaultScribePolicy /*implements Sc
   private Channel getChannel(Topic topic) {
     Channel[] channels = splitStream.getChannels();
 
-    for (int i=0; i<channels.length; i++) {
-      Channel channel = channels[i];
+    for (Channel channel : channels) {
       Stripe[] stripes = channel.getStripes();
 
-      for (int j=0; j<stripes.length; j++) {
-        Stripe stripe = stripes[j];
-
+      for (Stripe stripe : stripes) {
         if (stripe.getStripeId().getId().equals(topic.getId())) {
           return channel;
         }
@@ -334,8 +335,8 @@ public class SplitStreamScribePolicy extends DefaultScribePolicy /*implements Sc
     int total = 0;
     Stripe[] stripes = channel.getStripes();
 
-    for (int j=0; j<stripes.length; j++) {
-      total += scribe.getChildren(new Topic(stripes[j].getStripeId().getId())).length;
+    for (Stripe stripe : stripes) {
+      total += scribe.getChildren(new Topic(stripe.getStripeId().getId())).length;
     }
 
     return total;
@@ -361,23 +362,23 @@ public class SplitStreamScribePolicy extends DefaultScribePolicy /*implements Sc
     Topic tp;
 
     /* find all candidate stripes */
-    for(int i = 0; i < stripes.length; i++){
-      tp = new Topic(stripes[i].getStripeId().getId());
-      if (!channel.getPrimaryStripe().getStripeId().getId().equals(stripes[i].getStripeId().getId()) &&
-          !this.scribe.isRoot(tp) &&
-          (scribe.getChildren(tp).length > 0)) {
-        candidateStripes.add(stripes[i].getStripeId().getId());
+    for (Stripe value : stripes) {
+      tp = new Topic(value.getStripeId().getId());
+      if (!channel.getPrimaryStripe().getStripeId().getId().equals(value.getStripeId().getId()) &&
+              !this.scribe.isRoot(tp) &&
+              (scribe.getChildren(tp).length > 0)) {
+        candidateStripes.add(value.getStripeId().getId());
       }
     }
 
     /* if there are no candidates, find somewhere where i am the root*/
     if(candidateStripes.size() == 0) {
-      for(int i = 0; i < stripes.length; i++){
-        tp = new Topic(stripes[i].getStripeId().getId());
-        if ((! channel.getPrimaryStripe().getStripeId().getId().equals(stripes[i].getStripeId().getId())) &&
-            (scribe.getChildren(tp).length > 0) &&
-            (! stripes[i].getStripeId().getId().equals(stripeId))) {
-          candidateStripes.add(stripes[i].getStripeId().getId());
+      for (Stripe stripe : stripes) {
+        tp = new Topic(stripe.getStripeId().getId());
+        if ((!channel.getPrimaryStripe().getStripeId().getId().equals(stripe.getStripeId().getId())) &&
+                (scribe.getChildren(tp).length > 0) &&
+                (!stripe.getStripeId().getId().equals(stripeId))) {
+          candidateStripes.add(stripe.getStripeId().getId());
         }
       }
     }
@@ -422,11 +423,10 @@ public class SplitStreamScribePolicy extends DefaultScribePolicy /*implements Sc
 
     /* find all potential victims */
     Vector victims = new Vector();
-    for(int j = 0; j < children.length; j++){
-      NodeHandle c = (NodeHandle)children[j];
-      int match = getPrefixMatch(stripeId, c.getId(), channel.getStripeBase());
-      if(match < minPrefixMatch){
-        victims.addElement(c);
+    for (NodeHandle child : children) {
+      int match = getPrefixMatch(stripeId, ((NodeHandle) child).getId(), channel.getStripeBase());
+      if (match < minPrefixMatch) {
+        victims.addElement((NodeHandle) child);
       }
     }
 

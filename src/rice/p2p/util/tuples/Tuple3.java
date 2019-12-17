@@ -87,15 +87,14 @@ public class Tuple3<A,B,C> {
         if (!this.b.equals(that.b)) return false;
       }
       
-      if (this.c == null) { 
-        if (that.c != null) return false;        
+      if (this.c == null) {
+        return that.c == null;
       } else {
         if (that.c == null) return false;
         // we know this.a && that.a != null
-        if (!this.c.equals(that.c)) return false;
+        return this.c.equals(that.c);
       }
-      
-      return true;
+
     }
     return false;
   }

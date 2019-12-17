@@ -36,11 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.commonapi;
 
-import java.io.IOException;
-
 import rice.p2p.commonapi.Id;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 
+import java.io.IOException;
+
 public interface IdFactory {
-  public Id build(InputBuffer buf) throws IOException;
+  Id build(InputBuffer buf) throws IOException;
 }

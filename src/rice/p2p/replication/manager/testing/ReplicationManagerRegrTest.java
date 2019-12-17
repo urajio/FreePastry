@@ -36,16 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.replication.manager.testing;
 
-import java.io.*;
-
 import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.params.Parameters;
-import rice.environment.params.simple.SimpleParameters;
-import rice.environment.time.simulated.DirectTimeSource;
 import rice.p2p.commonapi.*;
 import rice.p2p.commonapi.testing.CommonAPITest;
-import rice.p2p.replication.manager.*;
+import rice.p2p.replication.manager.ReplicationManagerClient;
+import rice.p2p.replication.manager.ReplicationManagerImpl;
+
+import java.io.IOException;
 
 /**
  * @(#) ReplicationRegrTest.java Provides regression testing for the replication manager service using distributed
@@ -93,7 +92,7 @@ public class ReplicationManagerRegrTest extends CommonAPITest {
    *
    * @param args DESCRIBE THE PARAMETER
    */
-  public static void main(String args[]) throws IOException {
+  public static void main(String[] args) throws IOException {
     Environment env = parseArgs(args);
     Parameters param = env.getParameters();
 //    param.setString("loglevel","ALL");
@@ -404,12 +403,12 @@ public class ReplicationManagerRegrTest extends CommonAPITest {
     
     public void fetch(Id id, NodeHandle hint, Continuation command) {
       set.addId(id);
-      command.receiveResult(new Boolean(true));
+      command.receiveResult(Boolean.TRUE);
     }
     
     public void remove(Id id, Continuation command) {
       set.removeId(id);
-      command.receiveResult(new Boolean(true));
+      command.receiveResult(Boolean.TRUE);
     }
     
     public IdSet scan(IdRange range) {

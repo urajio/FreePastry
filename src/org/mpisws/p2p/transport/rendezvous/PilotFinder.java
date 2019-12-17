@@ -54,5 +54,5 @@ public interface PilotFinder<HighIdentifier> {
    * @param i
    * @return
    */
-  public HighIdentifier findPilot(HighIdentifier i);
+  HighIdentifier findPilot(HighIdentifier i);
 }

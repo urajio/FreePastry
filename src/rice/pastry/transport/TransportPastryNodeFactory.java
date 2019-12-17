@@ -36,41 +36,24 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.transport;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-
 import rice.Continuation;
 import rice.environment.Environment;
-import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
-import rice.environment.random.RandomSource;
 import rice.p2p.commonapi.Cancellable;
-import rice.p2p.commonapi.CancellableTask;
-import rice.pastry.Id;
-import rice.pastry.NodeHandle;
-import rice.pastry.NodeHandleFactory;
-import rice.pastry.PastryNode;
-import rice.pastry.PastryNodeFactory;
-import rice.pastry.ReadyStrategy;
+import rice.pastry.*;
 import rice.pastry.boot.Bootstrapper;
 import rice.pastry.join.JoinProtocol;
 import rice.pastry.leafset.LeafSet;
 import rice.pastry.leafset.LeafSetProtocol;
 import rice.pastry.messaging.MessageDispatch;
 import rice.pastry.pns.PNSApplication;
-import rice.pastry.routing.RouteSet;
 import rice.pastry.routing.RouteSetProtocol;
 import rice.pastry.routing.RouterStrategy;
 import rice.pastry.routing.RoutingTable;
-import rice.pastry.standard.ConsistentJoinProtocol;
-import rice.pastry.standard.PeriodicLeafSetProtocol;
-import rice.pastry.standard.ProximityNeighborSelector;
-import rice.pastry.standard.RapidRerouter;
-import rice.pastry.standard.StandardJoinProtocol;
-import rice.pastry.standard.StandardLeafSetProtocol;
-import rice.pastry.standard.StandardRouteSetProtocol;
-import rice.pastry.standard.StandardRouter;
+import rice.pastry.standard.*;
+
+import java.io.IOException;
+import java.util.Collection;
 
 @SuppressWarnings("unchecked")
 public abstract class TransportPastryNodeFactory extends PastryNodeFactory {
@@ -182,8 +165,7 @@ public abstract class TransportPastryNodeFactory extends PastryNodeFactory {
   }
   
   protected TLDeserializer getTLDeserializer(NodeHandleFactory handleFactory, PastryNode pn) {
-    TLDeserializer deserializer = new TLDeserializer(handleFactory, pn.getEnvironment());
-    return deserializer;
+    return new TLDeserializer(handleFactory, pn.getEnvironment());
   }
 
   /**
@@ -208,10 +190,10 @@ public abstract class TransportPastryNodeFactory extends PastryNodeFactory {
   }
     
   protected abstract NodeHandle getLocalHandle(PastryNode pn, 
-      NodeHandleFactory handleFactory) throws IOException;
+      NodeHandleFactory handleFactory);
   protected abstract NodeHandleAdapter getNodeHandleAdapter(PastryNode pn, 
       NodeHandleFactory handleFactory, TLDeserializer deserializer) throws IOException;
-  protected abstract NodeHandleFactory getNodeHandleFactory(PastryNode pn) throws IOException;
+  protected abstract NodeHandleFactory getNodeHandleFactory(PastryNode pn);
   protected abstract Bootstrapper getBootstrapper(PastryNode pn, 
       NodeHandleAdapter tl, 
       NodeHandleFactory handleFactory,

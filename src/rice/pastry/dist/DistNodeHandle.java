@@ -37,13 +37,11 @@ advised of the possibility of such damage.
 
 package rice.pastry.dist;
 
-import rice.pastry.*;
-import rice.pastry.messaging.*;
+import rice.pastry.Id;
 import rice.pastry.socket.TransportLayerNodeHandle;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.net.InetSocketAddress;
+import java.util.Observer;
 
 /**
  * Abstract class for handles to "real" remote nodes. This class abstracts out

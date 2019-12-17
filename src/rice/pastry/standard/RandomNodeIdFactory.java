@@ -38,10 +38,11 @@ package rice.pastry.standard;
 
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.environment.random.RandomSource;
-import rice.pastry.*;
+import rice.pastry.Id;
+import rice.pastry.NodeIdFactory;
 
-import java.security.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Constructs random node ids by SHA'ing consecutive numbers, with random
@@ -80,7 +81,7 @@ public class RandomNodeIdFactory implements NodeIdFactory {
     //byte raw[] = new byte[NodeId.nodeIdBitLength >> 3];
     //rng.nextBytes(raw);
 
-    byte raw[] = new byte[8];
+    byte[] raw = new byte[8];
     long tmp = ++next;
     for (int i = 0; i < 8; i++) {
       raw[i] = (byte) (tmp & 0xff);
@@ -99,9 +100,7 @@ public class RandomNodeIdFactory implements NodeIdFactory {
     md.update(raw);
     byte[] digest = md.digest();
 
-    Id nodeId = Id.build(digest);
-
-    return nodeId;
+    return Id.build(digest);
   }
 
 }

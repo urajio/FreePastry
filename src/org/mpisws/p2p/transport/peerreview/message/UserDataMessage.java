@@ -36,22 +36,18 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.message;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
 import org.mpisws.p2p.transport.peerreview.history.HashProvider;
 import org.mpisws.p2p.transport.peerreview.history.logentry.EvtRecv;
 import org.mpisws.p2p.transport.peerreview.infostore.Evidence;
 import org.mpisws.p2p.transport.util.Serializer;
-
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.p2p.commonapi.rawserialization.RawSerializable;
 import rice.p2p.util.MathUtils;
-import rice.p2p.util.rawserialization.SimpleInputBuffer;
 import rice.p2p.util.rawserialization.SimpleOutputBuffer;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * 
@@ -105,8 +101,7 @@ public class UserDataMessage<Handle extends RawSerializable> implements PeerRevi
   }
 
   public byte getRelevantCode() {
-    byte relevantCode = (relevantLen == payload.length) ? (byte)0xFF : (byte)relevantLen;
-    return relevantCode;
+    return (relevantLen == payload.length) ? (byte)0xFF : (byte)relevantLen;
   }
   
   public void serialize(OutputBuffer buf) throws IOException {
@@ -143,7 +138,7 @@ public class UserDataMessage<Handle extends RawSerializable> implements PeerRevi
       len = msg.length;
     }
     
-    return new UserDataMessage<H>(seq, handle, hash, sig, ByteBuffer.wrap(msg), len);
+    return new UserDataMessage<>(seq, handle, hash, sig, ByteBuffer.wrap(msg), len);
   }
 
   public long getTopSeq() {
@@ -172,9 +167,9 @@ public class UserDataMessage<Handle extends RawSerializable> implements PeerRevi
   
   public EvtRecv<Handle> getReceiveEvent(HashProvider hasher) {
     if (getRelevantLen() < getPayload().remaining()) {
-      return new EvtRecv<Handle>(getSenderHandle(), getTopSeq(), getPayload(), getRelevantLen(), hasher);
+      return new EvtRecv<>(getSenderHandle(), getTopSeq(), getPayload(), getRelevantLen(), hasher);
     } else {
-      return new EvtRecv<Handle>(getSenderHandle(), getTopSeq(), getPayload());
+      return new EvtRecv<>(getSenderHandle(), getTopSeq(), getPayload());
     }
   }
 

@@ -36,22 +36,16 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.pki.x509;
 
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
+import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-
-import javax.crypto.spec.SecretKeySpec;
-
-import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
 public class KeySerializerImpl implements KeySerializer {
 
@@ -79,12 +73,17 @@ public class KeySerializerImpl implements KeySerializer {
     buf.read(encoded);
     
     KeySpec spec = null;
-    if(format.equals("PKCS#8") || format.equals("PKCS8")) {
-      spec = new PKCS8EncodedKeySpec(encoded);
-    } else if(format.equals("X.509") || format.equals("X509")) {
-      spec = new X509EncodedKeySpec(encoded);
-    } else if(format.equals("RAW")) {
-      return new SecretKeySpec(encoded, algorithm);
+    switch (format) {
+      case "PKCS#8":
+      case "PKCS8":
+        spec = new PKCS8EncodedKeySpec(encoded);
+        break;
+      case "X.509":
+      case "X509":
+        spec = new X509EncodedKeySpec(encoded);
+        break;
+      case "RAW":
+        return new SecretKeySpec(encoded, algorithm);
     }
     if (spec == null) {
       throw new IOException("Unknown key type. Type: "+keyType+" Format:"+format+" Algorithm:"+algorithm);

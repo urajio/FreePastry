@@ -37,11 +37,14 @@ advised of the possibility of such damage.
 
 package rice.p2p.util.testing;
 
+import rice.p2p.util.XMLObjectInputStream;
+import rice.p2p.util.XMLObjectOutputStream;
+
 import java.io.*;
 import java.lang.reflect.Array;
-import java.util.*;
-import java.util.zip.*;
-import rice.p2p.util.*;
+import java.util.Arrays;
+import java.util.Hashtable;
+import java.util.Vector;
 
 @SuppressWarnings("unchecked")
 public class XMLObjectStreamUnit {
@@ -288,7 +291,7 @@ public class XMLObjectStreamUnit {
   protected void testHashtable() {
     try {
       Hashtable table = new Hashtable();
-      Integer i = new Integer(1020);
+      Integer i = 1020;
       table.put("monkey", i);
       table.put("cat", i);
       table.put(i, i);
@@ -318,11 +321,11 @@ public class XMLObjectStreamUnit {
   
   protected void testMultipleObjects() {
     try {
-      xoos.writeObject(new Integer(28));
+      xoos.writeObject(28);
       xoos.writeObject(new Vector());
       flip();
       
-      if (! (xois.readObject().equals(new Integer(28)) || xois.readObject().equals(new Vector())))
+      if (! (xois.readObject().equals(28) || xois.readObject().equals(new Vector())))
         throw new IOException("Objects are not equal!");
       
       reset();
@@ -390,11 +393,11 @@ public class XMLObjectStreamUnit {
           return hashCode;
         }
         
-        private void readObject(ObjectInputStream oos) throws IOException, ClassNotFoundException {
+        private void readObject(ObjectInputStream oos) {
           hashCode = 100;
         }
         
-        private void writeObject(ObjectOutputStream oos) throws IOException {
+        private void writeObject(ObjectOutputStream oos) {
         }
       };
       
@@ -419,7 +422,7 @@ public class XMLObjectStreamUnit {
     try {
       try {
         Object object = new Serializable() {
-          private void writeObject(ObjectOutputStream oos) throws IOException {
+          private void writeObject(ObjectOutputStream oos) {
           }
         };
         
@@ -442,7 +445,7 @@ public class XMLObjectStreamUnit {
   
   protected void testUnshared() {
     try {
-      Object object = new Integer(3);
+      Object object = 3;
       
       xoos.writeObject(object);
       xoos.writeUnshared(object);
@@ -643,7 +646,7 @@ public class XMLObjectStreamUnit {
       flip();
       TestSerialPersistentFields object2 = (TestSerialPersistentFields) xois.readObject();
       
-      if (! (object2.getNum1().equals(new Integer(1)) && (object2.getNum2() == null)))
+      if (! (object2.getNum1().equals(1) && (object2.getNum2() == null)))
         throw new IOException("Object did not have correct nums " + object2.getNum1() + " " + object2.getNum2());
       
       reset();
@@ -694,8 +697,8 @@ public class XMLObjectStreamUnit {
     testShort((short) 0);
     testMultiplePrimitives();
 
-    test(new Integer(5)); 
-    test(new Long(2837L));
+    test(5);
+    test(2837L);
     test(new Vector());
     test("monkey");
     test("");
@@ -738,7 +741,7 @@ public class XMLObjectStreamUnit {
       return bytes;
     }
     
-    private void readObject(ObjectInputStream oos) throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream oos) throws IOException {
       bytes = new byte[5];
       oos.read(bytes, 0, 5);
     }
@@ -773,7 +776,7 @@ public class XMLObjectStreamUnit {
     public TestSubExternalizable(Object o) {
     }
     
-    private TestSubExternalizable() {
+    public TestSubExternalizable() {
     }
     
     public void writeExternal(ObjectOutput o) throws IOException {
@@ -786,11 +789,11 @@ public class XMLObjectStreamUnit {
       num = i.readInt();
     }
     
-    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream ois) {
       throw new IllegalArgumentException("READ OBJECT SHOULD NOT BE CALLED!");
     }
     
-    private void writeObject(ObjectOutputStream oos) throws IOException {
+    private void writeObject(ObjectOutputStream oos) {
       throw new IllegalArgumentException("WRITE OBJECT SHOULD NOT BE CALLED!");
     }
   }
@@ -827,7 +830,7 @@ public class XMLObjectStreamUnit {
     }
     
     public int getNum2() {
-      return num2.intValue();
+      return num2;
     }
     
   }
@@ -877,9 +880,9 @@ public class XMLObjectStreamUnit {
   
   public static class TestSerialPersistentFields implements Serializable {
     
-    private Integer num1 = new Integer(1);
+    private Integer num1 = 1;
     
-    private Integer num2 = new Integer(2);
+    private Integer num2 = 2;
     
     private static final ObjectStreamField[] serialPersistentFields = {new ObjectStreamField("num1", Integer.class)};
     

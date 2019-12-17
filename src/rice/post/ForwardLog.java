@@ -36,16 +36,10 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post;
 
-import java.io.*;
-import java.security.*;
-import java.security.cert.*;
-
-import rice.*;
-import rice.Continuation.*;
-import rice.p2p.commonapi.*;
-import rice.post.log.*;
-import rice.post.storage.*;
-import rice.post.security.*;
+import rice.Continuation;
+import rice.Continuation.StandardContinuation;
+import rice.p2p.commonapi.Id;
+import rice.post.log.Log;
 
 /**
  * This class represents the log of forwarding addresses for a given user.

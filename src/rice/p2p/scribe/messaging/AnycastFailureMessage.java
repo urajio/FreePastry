@@ -37,19 +37,19 @@ advised of the possibility of such damage.
 
 package rice.p2p.scribe.messaging;
 
-import java.io.IOException;
-import java.util.*;
-
-// import rice.replay.*;
-import rice.pastry.PastryNode;
-import rice.*;
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.NodeHandle;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
-import rice.p2p.scribe.*;
+import rice.p2p.scribe.ScribeContent;
+import rice.p2p.scribe.Topic;
 import rice.p2p.scribe.rawserialization.JavaSerializedScribeContent;
 import rice.p2p.scribe.rawserialization.RawScribeContent;
 import rice.p2p.scribe.rawserialization.ScribeContentDeserializer;
+
+import java.io.IOException;
+
+// import rice.replay.*;
 
 /**
  * @(#) AnycastMessage.java The anycast message.
@@ -119,12 +119,10 @@ public class AnycastFailureMessage extends ScribeMessage {
    
   public static AnycastFailureMessage build(InputBuffer buf, Endpoint endpoint, ScribeContentDeserializer scd) throws IOException {
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        return new AnycastFailureMessage(buf, endpoint, scd);
-      default:
-        throw new IOException("Unknown Version: "+version);
-    }
+      if (version == 0) {
+          return new AnycastFailureMessage(buf, endpoint, scd);
+      }
+      throw new IOException("Unknown Version: " + version);
   }
   
   /**

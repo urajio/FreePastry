@@ -38,10 +38,7 @@ package rice.pastry.testing;
 
 import rice.environment.Environment;
 import rice.environment.random.RandomSource;
-import rice.pastry.*;
-
-import java.io.IOException;
-import java.util.*;
+import rice.pastry.Id;
 
 /**
  * NodeIdUnit tests the NodeId class.
@@ -57,7 +54,7 @@ public class NodeIdUnit {
   private RandomSource rng;
 
   public Id createNodeId() {
-    byte raw[] = new byte[Id.IdBitLength >> 3];
+    byte[] raw = new byte[Id.IdBitLength >> 3];
 
     rng.nextBytes(raw);
 
@@ -65,7 +62,7 @@ public class NodeIdUnit {
 
     System.out.println("created node " + nodeId);
 
-    byte copy[] = new byte[raw.length];
+    byte[] copy = new byte[raw.length];
 
     nodeId.blit(copy);
 
@@ -298,7 +295,7 @@ public class NodeIdUnit {
     System.out.println("nid=" + nid);
 
     for (int b = 2; b < 7; b++)
-      for (int row = nid.IdBitLength / b - 1; row >= 0; row--)
+      for (int row = Id.IdBitLength / b - 1; row >= 0; row--)
         for (int col = 0; col < (1 << b); col++) {
           Id domainFirst = nid.getDomainPrefix(row, col, 0, b);
           Id domainLast = nid.getDomainPrefix(row, col, -1, b);
@@ -307,7 +304,7 @@ public class NodeIdUnit {
           boolean equal = domainFirst.equals(domainLast);
           if ((cmp == 0) != equal)
             System.out.println("ERROR, compareTo=" + cmp + " equal=" + equal);
-          if (cmp == 1)
+          if (cmp > 0)
             System.out.println("ERROR, compareTo=" + cmp);
         }
 
@@ -329,7 +326,7 @@ public class NodeIdUnit {
     domainPrefixTest();
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     NodeIdUnit niu = new NodeIdUnit();
   }
 }

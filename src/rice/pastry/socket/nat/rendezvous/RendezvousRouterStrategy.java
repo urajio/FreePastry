@@ -36,20 +36,18 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.socket.nat.rendezvous;
 
-import java.net.NoRouteToHostException;
-import java.util.Iterator;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.identity.IdentityImpl;
 import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
 import org.mpisws.p2p.transport.priority.PriorityTransportLayer;
 import org.mpisws.p2p.transport.util.OptionsFactory;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.pastry.NodeHandle;
 import rice.pastry.routing.RouteMessage;
 import rice.pastry.routing.RouterStrategy;
+
+import java.util.Iterator;
+import java.util.Map;
 
 public class RendezvousRouterStrategy implements RouterStrategy {
 

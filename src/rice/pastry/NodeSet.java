@@ -36,11 +36,16 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry;
 
-import java.util.*;
-import java.io.*;
-
 import rice.environment.random.RandomSource;
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Vector;
 
 /**
  * Represents an ordered set of NodeHandles. *
@@ -59,13 +64,13 @@ public class NodeSet implements NodeSetI, Serializable {
   /**
    * of NodeHandle
    */
-  private Vector<NodeHandle> set;
+  private final Vector<NodeHandle> set;
 
   /**
    * Constructor.
    */
   public NodeSet() {
-    set = new Vector<NodeHandle>();
+    set = new Vector<>();
   }
 
   /**
@@ -420,11 +425,9 @@ public class NodeSet implements NodeSetI, Serializable {
   
   public void serialize(OutputBuffer buf) throws IOException {
     buf.writeShort((short)set.size());
-    Iterator<NodeHandle> i = set.iterator();
-    while(i.hasNext()) {
-      NodeHandle nh = (NodeHandle)i.next();
-      nh.serialize(buf);
-    }
+      for (NodeHandle nh : set) {
+          nh.serialize(buf);
+      }
   }  
   
   public short getType() {

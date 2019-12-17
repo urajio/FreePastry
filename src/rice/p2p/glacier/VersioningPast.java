@@ -36,8 +36,8 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.glacier;
 
-import rice.*;
-import rice.p2p.commonapi.*;
+import rice.Continuation;
+import rice.p2p.commonapi.Id;
 
 /**
  * @(#) VersioningPast.java
@@ -62,7 +62,7 @@ public interface VersioningPast {
    @ @param version the requested version
    * @param command Command to be performed when the result is received
    */
-  public void lookup(Id id, long version, Continuation command);
+  void lookup(Id id, long version, Continuation command);
 
   /**
    * Retrieves the handles of up to max replicas of the object stored
@@ -82,7 +82,7 @@ public interface VersioningPast {
    * @param max the maximal number of replicas requested
    * @param command Command to be performed when the result is received 
    */
-  public void lookupHandles(Id id, long version, int num, Continuation command);
+  void lookupHandles(Id id, long version, int num, Continuation command);
 
   /**
    * Updates the objects stored under the provided keys id to expire no
@@ -104,7 +104,7 @@ public interface VersioningPast {
    * @param expiration The time to extend the lifetime to
    * @param command Command to be performed when the result is received
    */
-  public void refresh(Id[] ids, long[] versions, long[] expirations, Continuation command);
+  void refresh(Id[] ids, long[] versions, long[] expirations, Continuation command);
   
 }
 

@@ -36,22 +36,19 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.security.ca;
 
-import java.io.*;
-import java.net.*;
-import java.util.zip.*;
-import java.security.*;
-
-import java.util.*;
-
 import rice.environment.Environment;
-import rice.p2p.commonapi.*;
-import rice.p2p.multiring.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.multiring.MultiringIdFactory;
+import rice.p2p.util.SecurityUtils;
+import rice.p2p.util.XMLObjectInputStream;
+import rice.pastry.commonapi.PastryIdFactory;
+import rice.post.PostUserAddress;
+import rice.post.security.PostCertificate;
 
-import rice.post.*;
-import rice.post.security.*;
-
-import rice.pastry.commonapi.*;
-import rice.p2p.util.*;
+import java.io.*;
+import java.security.KeyPair;
+import java.util.zip.GZIPInputStream;
 
 /**
  * This class starts generates a new certificate for the given username using

@@ -36,10 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.glacier.v2;
 
-import rice.p2p.past.*;
-import rice.p2p.past.gc.*;
-import rice.p2p.past.gc.rawserialization.RawGCPastContentHandle;
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.past.gc.GCPastContentHandle;
 
 public class DebugContentHandle implements GCPastContentHandle {
   protected Id myId;

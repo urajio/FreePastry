@@ -36,31 +36,20 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.authpush;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Map.Entry;
-
 import org.mpisws.p2p.transport.peerreview.PeerReview;
-import org.mpisws.p2p.transport.peerreview.PeerReviewCallback;
-import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
 import org.mpisws.p2p.transport.peerreview.commitment.Authenticator;
 import org.mpisws.p2p.transport.peerreview.commitment.AuthenticatorStore;
 import org.mpisws.p2p.transport.peerreview.evidence.EvidenceTransferProtocol;
 import org.mpisws.p2p.transport.peerreview.identity.IdentityTransport;
 import org.mpisws.p2p.transport.peerreview.infostore.PeerInfoStore;
 import org.mpisws.p2p.transport.peerreview.message.AuthPushMessage;
-
 import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.rawserialization.RawSerializable;
-import rice.p2p.util.rawserialization.SimpleOutputBuffer;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * This protocol collects authenticators from incoming messages and, once in a
@@ -151,14 +140,10 @@ public class AuthenticatorPushProtocolImpl<Handle extends RawSerializable, Ident
      * into a single datagram). We invert the list here.
      */
 
-    Map<Handle, Map<Identifier, List<Authenticator>>> witnesses = new HashMap<Handle, Map<Identifier, List<Authenticator>>>();
+    Map<Handle, Map<Identifier, List<Authenticator>>> witnesses = new HashMap<>();
     for (Entry<Identifier, Collection<Handle>> entry : subjectsToWitnesses.entrySet()) {
       for (Handle witness : entry.getValue()) {
-        Map<Identifier, List<Authenticator>> m = witnesses.get(witness);
-        if (m == null) {
-          m = new HashMap<Identifier, List<Authenticator>>();
-          witnesses.put(witness, m);
-        }
+        Map<Identifier, List<Authenticator>> m = witnesses.computeIfAbsent(witness, k -> new HashMap<>());
         m.put(entry.getKey(), authOutStore.getAuthenticators(entry.getKey()));
       }
     }
@@ -170,13 +155,8 @@ public class AuthenticatorPushProtocolImpl<Handle extends RawSerializable, Ident
      * The messages are datagrams, so we ask the transport layer for the MSS and
      * split the messages where appropriate.
      */
-    try {
-      for (Entry<Handle, Map<Identifier, List<Authenticator>>> e : witnesses
-          .entrySet()) {
-        sendAuthenticators(e.getKey(), e.getValue());
-      }
-    } catch (IOException ioe) {
-      throw new RuntimeException("Error sending authenticators.", ioe);
+    for (Entry<Handle, Map<Identifier, List<Authenticator>>> e : witnesses.entrySet()) {
+      sendAuthenticators(e.getKey(), e.getValue());
     }
 
     /* Once all the messages are sent, we don't need the authenticators any more */
@@ -192,7 +172,7 @@ public class AuthenticatorPushProtocolImpl<Handle extends RawSerializable, Ident
    * @param h
    * @param authenticators
    */
-  protected void sendAuthenticators(Handle h, Map<Identifier, List<Authenticator>> authenticators) throws IOException {
+  protected void sendAuthenticators(Handle h, Map<Identifier, List<Authenticator>> authenticators) {
     if (probabilistic) {
       for (Entry<Identifier, List<Authenticator>> e : authenticators.entrySet()) {
         /*
@@ -208,7 +188,7 @@ public class AuthenticatorPushProtocolImpl<Handle extends RawSerializable, Ident
       }
     }
 
-    peerreview.transmit(h, new AuthPushMessage<Identifier>(authenticators), null, null);
+    peerreview.transmit(h, new AuthPushMessage<>(authenticators), null, null);
   }
   
   /**

@@ -37,7 +37,7 @@ advised of the possibility of such damage.
 
 package rice.pastry;
 
-import java.net.*;
+import java.net.InetSocketAddress;
 
 /**
  * Represents a listener to pastry network activity.  This interface will notify
@@ -79,49 +79,49 @@ public interface NetworkListener {
   /**
    * TCP traffic (not source-routed)
    */
-  public static int TYPE_TCP    = 0x00;
+  int TYPE_TCP    = 0x00;
   /**
    * UDP traffic (not source-routed)
    */
-  public static int TYPE_UDP    = 0x01;
+  int TYPE_UDP    = 0x01;
   /**
    * TCP traffic source-routed (you are an intermediate hop, not the source nor destination)
    */
-  public static int TYPE_SR_TCP = 0x10;
+  int TYPE_SR_TCP = 0x10;
   /**
    * UDP traffic source-routed (you are an intermediate hop, not the source nor destination)
    */
-  public static int TYPE_SR_UDP = 0x11;
+  int TYPE_SR_UDP = 0x11;
   
   /**
    * Local node opened a socket for normal FreePastry traffic.
    */
-  public static int REASON_NORMAL = 0;
+  int REASON_NORMAL = 0;
   /**
    * Local node opened a socket for source routing.
    */
-  public static int REASON_SR = 1;
+  int REASON_SR = 1;
   /**
    * Local node opened a to acquire bootstrap information.
    */
-  public static int REASON_BOOTSTRAP = 2;
+  int REASON_BOOTSTRAP = 2;
   
   /**
    * Remote node opened a socket for normal FreePastry traffic.
    */
-  public static int REASON_ACC_NORMAL = 3;
+  int REASON_ACC_NORMAL = 3;
   /**
    * Remote node opened a socket for source routing.
    */
-  public static int REASON_ACC_SR = 4;
+  int REASON_ACC_SR = 4;
   /**
    * Remote node opened a to acquire bootstrap information.
    */
-  public static int REASON_ACC_BOOTSTRAP = 5;
+  int REASON_ACC_BOOTSTRAP = 5;
   /**
    * Local node opened an application level socket.
    */
-  public static int REASON_APP_SOCKET_NORMAL = 6;
+  int REASON_APP_SOCKET_NORMAL = 6;
   
   /**
    * Called when a socket is opened.
@@ -129,13 +129,13 @@ public interface NetworkListener {
    * @param addr the address the socket was opened to
    * @param reason see above
    */
-  public void channelOpened(InetSocketAddress addr, int reason);
+  void channelOpened(InetSocketAddress addr, int reason);
   /**
    * Called when a socket is closed.
    * 
    * @param addr the address the socket was opened to
    */
-  public void channelClosed(InetSocketAddress addr);
+  void channelClosed(InetSocketAddress addr);
 
   /**
    * called when data is sent.
@@ -146,7 +146,7 @@ public interface NetworkListener {
    * @param size the size of the message
    * @param wireType UDP/TCP
    */
-  public void dataSent(int msgAddress, short msgType, InetSocketAddress socketAddress, int size, int wireType);
+  void dataSent(int msgAddress, short msgType, InetSocketAddress socketAddress, int size, int wireType);
   
   /**
    * called when data is received.
@@ -157,7 +157,7 @@ public interface NetworkListener {
    * @param size the size of the message
    * @param wireType UDP/TCP
    */
-  public void dataReceived(int msgAddress, short msgType, InetSocketAddress socketAddress, int size, int wireType);
+  void dataReceived(int msgAddress, short msgType, InetSocketAddress socketAddress, int size, int wireType);
    
 }
 

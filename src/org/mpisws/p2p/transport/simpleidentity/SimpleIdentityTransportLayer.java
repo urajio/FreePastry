@@ -36,28 +36,18 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.simpleidentity;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.ClosedChannelException;
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.util.InsufficientBytesException;
 import org.mpisws.p2p.transport.util.SocketInputBuffer;
 import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
 import org.mpisws.p2p.transport.util.SocketWrapperSocket;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.util.rawserialization.SimpleOutputBuffer;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 /**
  * The purpose of this layer is to identify the opener of a TCP connection, because the 
@@ -104,7 +94,7 @@ public class SimpleIdentityTransportLayer<Identifier, MessageType> implements
     this.serializer = serializer;
     this.localIdStrategy = localIdStrategy;
     if (this.localIdStrategy == null) {
-      this.localIdStrategy = new DefaultLocalIdentifierStrategy<Identifier>(tl.getLocalIdentifier());
+      this.localIdStrategy = new DefaultLocalIdentifierStrategy<>(tl.getLocalIdentifier());
     }
   }
   
@@ -122,7 +112,7 @@ public class SimpleIdentityTransportLayer<Identifier, MessageType> implements
 
   public SocketRequestHandle<Identifier> openSocket(Identifier i,
       final SocketCallback<Identifier> deliverSocketToMe, Map<String, Object> options) {
-    final SocketRequestHandleImpl<Identifier> ret = new SocketRequestHandleImpl<Identifier>(i,options,logger);
+    final SocketRequestHandleImpl<Identifier> ret = new SocketRequestHandleImpl<>(i, options, logger);
     ret.setSubCancellable(tl.openSocket(i, new SocketCallback<Identifier>() {
       public void receiveResult(SocketRequestHandle<Identifier> cancellable,
           P2PSocket<Identifier> sock) {
@@ -141,7 +131,7 @@ public class SimpleIdentityTransportLayer<Identifier, MessageType> implements
                 return;
               }
               // done
-              deliverSocketToMe.receiveResult(ret, new SocketWrapperSocket<Identifier, Identifier>(socket.getIdentifier(),socket,logger,errorHandler,socket.getOptions()));
+              deliverSocketToMe.receiveResult(ret, new SocketWrapperSocket<>(socket.getIdentifier(), socket, logger, errorHandler, socket.getOptions()));
             }
             public void receiveException(P2PSocket<Identifier> socket,
                 Exception ioe) {
@@ -189,7 +179,7 @@ public class SimpleIdentityTransportLayer<Identifier, MessageType> implements
           boolean canRead, boolean canWrite) throws IOException {
         try {
           Identifier remoteIdentifier = serializer.deserialize(sib, socket.getIdentifier(), socket.getOptions());
-          callback.incomingSocket(new SocketWrapperSocket<Identifier, Identifier>(remoteIdentifier,socket,logger,errorHandler,socket.getOptions()));
+          callback.incomingSocket(new SocketWrapperSocket<>(remoteIdentifier, socket, logger, errorHandler, socket.getOptions()));
         } catch (InsufficientBytesException ibe) {
           socket.register(true, false, this);          
         } // throw the rest        

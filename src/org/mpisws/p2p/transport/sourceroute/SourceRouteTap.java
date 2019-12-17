@@ -36,9 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.sourceroute;
 
-import java.nio.ByteBuffer;
-
 import org.mpisws.p2p.transport.P2PSocket;
+
+import java.nio.ByteBuffer;
 
 /**
  * Notified of messages sent to intermediate nodes.
@@ -52,7 +52,7 @@ public interface SourceRouteTap {
    * @param m
    * @param path
    */
-  public void receivedMessage(ByteBuffer m, SourceRoute path);
+  void receivedMessage(ByteBuffer m, SourceRoute path);
   
   /**
    * 
@@ -60,7 +60,7 @@ public interface SourceRouteTap {
    * @param a
    * @param b
    */
-  public void socketOpened(SourceRoute path, P2PSocket a, P2PSocket b);
+  void socketOpened(SourceRoute path, P2PSocket a, P2PSocket b);
   
   /**
    * 
@@ -68,7 +68,7 @@ public interface SourceRouteTap {
    * @param a
    * @param b
    */
-  public void socketClosed(SourceRoute path, P2PSocket a, P2PSocket b);
+  void socketClosed(SourceRoute path, P2PSocket a, P2PSocket b);
 
   /**
    * We are the intermediate node for some bytes from Socket a to Socket b
@@ -77,6 +77,6 @@ public interface SourceRouteTap {
    * @param a
    * @param b
    */
-  public void receivedBytes(ByteBuffer m, SourceRoute path, P2PSocket a, P2PSocket b);
+  void receivedBytes(ByteBuffer m, SourceRoute path, P2PSocket a, P2PSocket b);
   
 }

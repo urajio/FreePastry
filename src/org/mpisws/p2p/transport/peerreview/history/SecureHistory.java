@@ -36,24 +36,21 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.history;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
 import org.mpisws.p2p.transport.peerreview.audit.LogSnippet;
 
-import rice.p2p.commonapi.rawserialization.OutputBuffer;
-import rice.p2p.util.RandomAccessFileIOBuffer;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public interface SecureHistory extends PeerReviewConstants {
-  public long getNumEntries();
-  public long getBaseSeq();
-  public long getLastSeq();
+  long getNumEntries();
+  long getBaseSeq();
+  long getLastSeq();
   
   /**
    *  Returns the node hash and the sequence number of the most recent log entry 
    */
-  public HashSeq getTopLevelEntry();
+  HashSeq getTopLevelEntry();
   
   /**
    * Appends a new entry to the log. If 'storeFullEntry' is false, only the hash of the
@@ -64,14 +61,14 @@ public interface SecureHistory extends PeerReviewConstants {
    * 
    * @throws IOException 
    */
-  public void appendEntry(short type, boolean storeFullEntry, ByteBuffer ... entry) throws IOException;
+  void appendEntry(short type, boolean storeFullEntry, ByteBuffer... entry) throws IOException;
   
   /**
    * Append a new hashed entry to the log. Unlike appendEntry(), this only keeps
    * the content type, sequence number, and hash values. No entry is made in
    * the data file. 
    */
-  public void appendHash(short type, byte[] hash) throws IOException;
+  void appendHash(short type, byte[] hash) throws IOException;
 
   /**
    * Sets the next sequence number to be used. The PeerReview library typically
@@ -79,16 +76,16 @@ public interface SecureHistory extends PeerReviewConstants {
    * and Y a sequence number. The sequence numbers need not be contigious
    * (and usually aren't) 
    */
-  public boolean setNextSeq(long nextSeq); 
+  boolean setNextSeq(long nextSeq);
 
   /**
    * The destructor.  Closes the file handles.
    * @throws IOException 
    */
-  public void close() throws IOException;
+  void close() throws IOException;
  
   
-  public long findSeq(long seq) throws IOException;// { return findSeqOrHigher(seq, false); };
+  long findSeq(long seq) throws IOException;// { return findSeqOrHigher(seq, false); };
 
   /**
    * Look up a given sequence number, or the first sequence number that is 
@@ -96,7 +93,7 @@ public interface SecureHistory extends PeerReviewConstants {
    * the corresponding record in the index file, or -1 if no matching
    * record was found. 
    */
-  public long findSeqOrHigher(long seq, boolean allowHigher) throws IOException;
+  long findSeqOrHigher(long seq, boolean allowHigher) throws IOException;
 
   /** 
    * Serialize a given range of entries, and write the result to the specified file.
@@ -115,7 +112,7 @@ public interface SecureHistory extends PeerReviewConstants {
    * Note that the idxFrom and idxTo arguments are record numbers, NOT sequence numbers.
    * Use findSeqOrHigher() to get these if only sequence numbers are known. 
    */
-  public LogSnippet serializeRange(long idxFrom, long idxTo, HashPolicy hashPolicy) throws IOException;
+  LogSnippet serializeRange(long idxFrom, long idxTo, HashPolicy hashPolicy) throws IOException;
 //  public boolean serializeRange(long idxFrom, long idxTo, HashPolicy hashPolicy, OutputBuffer outfile) throws IOException;
 
   /**
@@ -123,26 +120,26 @@ public interface SecureHistory extends PeerReviewConstants {
    *  
    *  @param idx the index you are interested in
    */
-  public IndexEntry statEntry(long idx) throws IOException;
+  IndexEntry statEntry(long idx) throws IOException;
 
   /**
    *  Get the content of a log entry, specified by its record number 
    */
-  public byte[] getEntry(long idx, int maxSizeToRead) throws IOException;
-  public byte[] getEntry(IndexEntry ie, int maxSizeToRead) throws IOException;
+  byte[] getEntry(long idx, int maxSizeToRead) throws IOException;
+  byte[] getEntry(IndexEntry ie, int maxSizeToRead) throws IOException;
 
   /**
    * If the log already contains an entry in 'hashed' form and we learn the actual
    * contents later, this function is called. 
    */
-  public boolean upgradeHashedEntry(int idx, ByteBuffer entry) throws IOException;
+  boolean upgradeHashedEntry(int idx, ByteBuffer entry) throws IOException;
   
   /** 
    * Find the most recent entry whose type is in the specified set. Useful e.g. for
    * locating the last CHECKPOINT or INIT entry. 
    */
-  public long findLastEntry(short[] types, long maxSeq) throws IOException;
+  long findLastEntry(short[] types, long maxSeq) throws IOException;
   
-  public void appendSnippetToHistory(LogSnippet snippet) throws IOException;
+  void appendSnippetToHistory(LogSnippet snippet) throws IOException;
 
 }

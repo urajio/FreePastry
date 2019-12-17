@@ -37,7 +37,7 @@ advised of the possibility of such damage.
 
 package rice.p2p.commonapi;
 
-import java.io.*;
+import java.io.Serializable;
 
 /**
  * @(#) Message.java
@@ -53,14 +53,14 @@ import java.io.*;
 public interface Message extends Serializable {
   
   // different priority levels
-  public static final int MAX_PRIORITY = -15;
-  public static final int HIGH_PRIORITY = -10;
-  public static final int MEDIUM_HIGH_PRIORITY = -5;
-  public static final int MEDIUM_PRIORITY = 0;
-  public static final int MEDIUM_LOW_PRIORITY = 5;
-  public static final int LOW_PRIORITY = 10;
-  public static final int LOWEST_PRIORITY = 15;
-  public static final int DEFAULT_PRIORITY = MEDIUM_PRIORITY;
+  int MAX_PRIORITY = -15;
+  int HIGH_PRIORITY = -10;
+  int MEDIUM_HIGH_PRIORITY = -5;
+  int MEDIUM_PRIORITY = 0;
+  int MEDIUM_LOW_PRIORITY = 5;
+  int LOW_PRIORITY = 10;
+  int LOWEST_PRIORITY = 15;
+  int DEFAULT_PRIORITY = MEDIUM_PRIORITY;
 
   /**
    * Method which should return the priority level of this message.  The messages
@@ -73,7 +73,7 @@ public interface Message extends Serializable {
    *
    * @return This message's priority
    */
-  public int getPriority();
+  int getPriority();
   
 }
 

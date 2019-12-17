@@ -39,16 +39,17 @@ advised of the possibility of such damage.
  */
 package rice.environment.processing.simple;
 
-import java.util.*;
-
 import rice.environment.processing.WorkRequest;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author Jeff Hoye
  */
 @SuppressWarnings("unchecked")
 public class WorkQueue {
-  List<WorkRequest> q = new LinkedList<WorkRequest>();
+  List<WorkRequest> q = new LinkedList<>();
   /* A negative capacity, is equivalent to infinted capacity */
   int capacity = -1;
 

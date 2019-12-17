@@ -36,46 +36,28 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.testing.transportlayer.peerreview;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.nio.ByteBuffer;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.security.cert.X509Certificate;
-import java.util.Map;
-import java.util.SortedSet;
-
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayerCallback;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.peerreview.IdentifierExtractor;
 import org.mpisws.p2p.transport.peerreview.PeerReview;
 import org.mpisws.p2p.transport.peerreview.PeerReviewCallback;
 import org.mpisws.p2p.transport.peerreview.audit.EvidenceTool;
-import org.mpisws.p2p.transport.peerreview.commitment.Authenticator;
-import org.mpisws.p2p.transport.peerreview.commitment.AuthenticatorSerializer;
-import org.mpisws.p2p.transport.peerreview.commitment.AuthenticatorSerializerImpl;
-import org.mpisws.p2p.transport.peerreview.commitment.AuthenticatorStore;
-import org.mpisws.p2p.transport.peerreview.commitment.AuthenticatorStoreImpl;
+import org.mpisws.p2p.transport.peerreview.commitment.*;
 import org.mpisws.p2p.transport.peerreview.history.SecureHistory;
 import org.mpisws.p2p.transport.peerreview.history.SecureHistoryFactory;
-import org.mpisws.p2p.transport.peerreview.identity.UnknownCertificateException;
 import org.mpisws.p2p.transport.peerreview.infostore.Evidence;
 import org.mpisws.p2p.transport.peerreview.message.PeerReviewMessage;
-import org.mpisws.p2p.transport.peerreview.message.UserDataMessage;
 import org.mpisws.p2p.transport.peerreview.replay.VerifierFactory;
 import org.mpisws.p2p.transport.util.Serializer;
-
 import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.random.RandomSource;
 import rice.p2p.commonapi.Cancellable;
+
+import java.net.InetAddress;
+import java.nio.ByteBuffer;
+import java.security.cert.X509Certificate;
+import java.util.Map;
+import java.util.SortedSet;
 
 
 public class AuthenticatorStoreTest {
@@ -223,14 +205,13 @@ public class AuthenticatorStoreTest {
       
     }
 
-    public void incomingSocket(P2PSocket<MyInetSocketAddress> s)
-        throws IOException {
+    public void incomingSocket(P2PSocket<MyInetSocketAddress> s) {
       // TODO Auto-generated method stub
       
     }
 
     public void messageReceived(MyInetSocketAddress i, ByteBuffer m,
-        Map<String, Object> options) throws IOException {
+        Map<String, Object> options) {
       // TODO Auto-generated method stub
       
     }
@@ -258,9 +239,7 @@ public class AuthenticatorStoreTest {
     }
 
     public void verify(MyInetSocketAddress id, byte[] msg, int moff, int mlen,
-        byte[] signature, int soff, int slen) throws InvalidKeyException,
-        NoSuchAlgorithmException, NoSuchProviderException, SignatureException,
-        UnknownCertificateException {
+        byte[] signature, int soff, int slen) {
       // TODO Auto-generated method stub
       
     }
@@ -392,7 +371,7 @@ public class AuthenticatorStoreTest {
       return null;
     }
 
-    public void init(String dirname) throws IOException {
+    public void init(String dirname) {
       // TODO Auto-generated method stub
       
     }

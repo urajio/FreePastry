@@ -36,14 +36,13 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.storage;
 
-import java.io.*;
-import java.security.*;
-import java.util.*;
-
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.p2p.past.*;
-import rice.p2p.past.gc.*;
+import rice.p2p.past.PastContent;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * This class is used internally by the storage package to
@@ -92,7 +91,7 @@ class SecureData extends StorageServiceData {
    * @return null, if the operation is not allowed; else, the new
    * object to be stored on the local node.
    */
-  public PastContent checkInsert(rice.p2p.commonapi.Id id, PastContent existingContent) throws PastException {
+  public PastContent checkInsert(rice.p2p.commonapi.Id id, PastContent existingContent) {
     if (existingContent == null) {
       return this;
     } else {

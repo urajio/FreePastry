@@ -37,9 +37,10 @@ advised of the possibility of such damage.
 
 package rice.p2p.util;
 
-import java.io.*;
-import java.security.*;
-import java.util.*;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.PrivateKey;
 
 /**
 * @(#) EncryptedInputStream.java
@@ -131,7 +132,7 @@ public class EncryptedInputStream extends InputStream {
    *             <code>-1</code> if there is no more data because the end of
    *             the stream has been reached.
    */
-  public int read(byte b[], int off, int len) throws IOException {
+  public int read(byte[] b, int off, int len) throws IOException {
     if ((buffer != null) && (bufferLength < buffer.length)) {
       int l = (len > available() ? available() : len);
       System.arraycopy(buffer, bufferLength, b, off, l);
@@ -165,7 +166,7 @@ public class EncryptedInputStream extends InputStream {
    *             without blocking.
    * @exception  IOException  if an I/O error occurs.
    */
-  public int available() throws IOException {
+  public int available() {
     if (buffer == null)
       return 0;
     else
