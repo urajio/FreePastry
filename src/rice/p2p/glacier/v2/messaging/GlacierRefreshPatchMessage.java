@@ -36,12 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.glacier.v2.messaging;
 
-import java.io.IOException;
-
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.p2p.glacier.VersionKey;
+
+import java.io.IOException;
 
 public class GlacierRefreshPatchMessage extends GlacierMessage {
   public static final short TYPE = 10;
@@ -93,30 +95,28 @@ public class GlacierRefreshPatchMessage extends GlacierMessage {
     super.serialize(buf); 
     
     buf.writeInt(lifetimes.length);
-    for (int i = 0; i < lifetimes.length; i++) {
-      buf.writeLong(lifetimes[i]); 
+    for (long lifetime : lifetimes) {
+      buf.writeLong(lifetime);
     }
     
     buf.writeInt(keys.length);
-    for (int i = 0; i < keys.length; i++) {
-      keys[i].serialize(buf); 
+    for (VersionKey key : keys) {
+      key.serialize(buf);
     }
     
     buf.writeInt(signatures.length);
-    for (int i = 0; i < signatures.length; i++) {
-      buf.writeInt(signatures[i].length);
-      buf.write(signatures[i], 0, signatures[i].length);
+    for (byte[] signature : signatures) {
+      buf.writeInt(signature.length);
+      buf.write(signature, 0, signature.length);
     }    
   }
 
   public static GlacierRefreshPatchMessage build(InputBuffer buf, Endpoint endpoint) throws IOException {
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        return new GlacierRefreshPatchMessage(buf, endpoint);
-      default:
-        throw new IOException("Unknown Version: "+version);
-    }
+      if (version == 0) {
+          return new GlacierRefreshPatchMessage(buf, endpoint);
+      }
+      throw new IOException("Unknown Version: " + version);
   }
     
   private GlacierRefreshPatchMessage(InputBuffer buf, Endpoint endpoint) throws IOException {

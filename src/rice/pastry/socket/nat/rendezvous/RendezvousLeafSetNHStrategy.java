@@ -36,17 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.socket.nat.rendezvous;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
 import org.mpisws.p2p.transport.sourceroute.manager.simple.NextHopStrategy;
-
-import rice.pastry.NodeHandle;
 import rice.pastry.leafset.LeafSet;
-import rice.pastry.socket.SocketNodeHandle;
+
+import java.util.Collection;
+import java.util.HashSet;
 
 public class RendezvousLeafSetNHStrategy implements NextHopStrategy<MultiInetSocketAddress>{
   LeafSet ls;
@@ -61,16 +56,14 @@ public class RendezvousLeafSetNHStrategy implements NextHopStrategy<MultiInetSoc
   
   public Collection<MultiInetSocketAddress> getNextHops(MultiInetSocketAddress destination) {
     if (ls == null) return null;
-    
-    Collection<MultiInetSocketAddress> ret = walkLeafSet(destination, 8);
-    
+
     // don't include the direct route
 //    ret.remove(destination);
-    return ret;
+    return walkLeafSet(destination, 8);
   }
   
   private Collection<MultiInetSocketAddress> walkLeafSet(MultiInetSocketAddress destination, int numRequested) {
-    Collection<MultiInetSocketAddress> result = new HashSet<MultiInetSocketAddress>();
+    Collection<MultiInetSocketAddress> result = new HashSet<>();
     LeafSet leafset = ls;
     for (int i = 1; i < leafset.maxSize()/2; i++) {      
       RendezvousSocketNodeHandle snh = (RendezvousSocketNodeHandle)leafset.get(-i);

@@ -39,12 +39,15 @@ advised of the possibility of such damage.
  */
 package rice.p2p.past.rawserialization;
 
-import java.io.*;
-
 import rice.p2p.commonapi.Endpoint;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.p2p.past.*;
+import rice.p2p.past.ContentHashPastContentHandle;
+import rice.p2p.past.PastContentHandle;
 import rice.p2p.util.rawserialization.JavaDeserializer;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 public class JavaPastContentHandleDeserializer implements
     PastContentHandleDeserializer {
@@ -59,8 +62,7 @@ public class JavaPastContentHandleDeserializer implements
 
         try {
           Object o = ois.readObject();
-          PastContentHandle ret = (PastContentHandle)o;
-          return ret;
+          return (PastContentHandle)o;
         } catch (ClassNotFoundException e) {
           throw new RuntimeException("Unknown class type in message - cant deserialize.", e);
         }            

@@ -36,23 +36,7 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.filetransfer;
 
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.ClosedChannelException;
-
 import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
@@ -62,9 +46,11 @@ import rice.p2p.commonapi.appsocket.AppSocket;
 import rice.p2p.commonapi.appsocket.AppSocketReceiver;
 import rice.p2p.util.MathUtils;
 import rice.p2p.util.SortedLinkedList;
-import rice.p2p.util.rawserialization.SimpleInputBuffer;
-import rice.p2p.util.rawserialization.SimpleOutputBuffer;
 import rice.selector.SelectorManager;
+
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 /**
  * TODO: implement read, write
@@ -163,7 +149,7 @@ public class FileTransferImpl implements FileTransfer, AppSocketReceiver {
     this.callback = callback;
     this.fileAllocater = fileAllocater;
     if (this.fileAllocater == null) this.fileAllocater = new TempFileAllocationStrategy();    
-    this.queue = new SortedLinkedList<MessageWrapper>();
+    this.queue = new SortedLinkedList<>();
     this.selectorManager = env.getSelectorManager();
     this.logger = env.getLogManager().getLogger(FileTransferImpl.class, null);
     this.processor = p;
@@ -199,21 +185,21 @@ public class FileTransferImpl implements FileTransfer, AppSocketReceiver {
     Iterable<MessageWrapper> dropMe;
     synchronized(queue) {
       failed = true;
-      dropMe = new ArrayList<MessageWrapper>(queue);
+      dropMe = new ArrayList<>(queue);
     }    
     for (MessageWrapper foo : dropMe) {
       foo.drop();
     }
-    for (DataReader r : new ArrayList<DataReader>(incomingData.values())) {
+    for (DataReader r : new ArrayList<>(incomingData.values())) {
       notifyListenersTransferFailed(r, true);
     }
-    for (ReceiptImpl r : new ArrayList<ReceiptImpl>(outgoingData.values())) {
+    for (ReceiptImpl r : new ArrayList<>(outgoingData.values())) {
       r.failed();
     }
   }
   
   int seq = Integer.MIN_VALUE;
-  SortedLinkedList<MessageWrapper> queue; // messages we want to send
+  final SortedLinkedList<MessageWrapper> queue; // messages we want to send
   MessageWrapper messageThatIsBeingWritten = null;
   boolean registered = false;
   
@@ -295,8 +281,7 @@ public class FileTransferImpl implements FileTransfer, AppSocketReceiver {
    */
   private boolean haveMessageToSend() {
     synchronized(queue) {
-      if (messageThatIsBeingWritten == null && queue.isEmpty()) return false; 
-      return true;
+      return messageThatIsBeingWritten != null || !queue.isEmpty();
     }
   }
 
@@ -313,7 +298,7 @@ public class FileTransferImpl implements FileTransfer, AppSocketReceiver {
     return true;
   }
 
-  ArrayList<FileTransferListener> listeners = new ArrayList<FileTransferListener>();
+  final ArrayList<FileTransferListener> listeners = new ArrayList<>();
   public void addListener(FileTransferListener listener) {
     synchronized(listeners) {
       listeners.add(listener);
@@ -328,7 +313,7 @@ public class FileTransferImpl implements FileTransfer, AppSocketReceiver {
   
   public Iterable<FileTransferListener> getListeners() {
     synchronized(listeners) {
-      return new ArrayList<FileTransferListener>(listeners);
+      return new ArrayList<>(listeners);
     }
   }
   
@@ -409,16 +394,14 @@ public class FileTransferImpl implements FileTransfer, AppSocketReceiver {
     if (f == null || !f.exists() || f.isDirectory()) throw new IllegalArgumentException("File f must be non-null, exist, and must not be a directory. "+f);
     byte[] metadata = new byte[metadataBB.remaining()];
     metadataBB.get(metadata);
-    FileReceiptImpl ret = new FileReceiptImpl(f,metadata,priority,offset,length,getUid(),c);
-    return ret;
+    return new FileReceiptImpl(f,metadata,priority,offset,length,getUid(),c);
   }
 
   public BBReceipt sendMsg(ByteBuffer bb, byte priority,
       Continuation<BBReceipt, Exception> c) {
     if (bb == null) throw new IllegalArgumentException("ByteBuffer bb must be non-null");
-    BBReceiptImpl ret = new BBReceiptImpl(bb,priority,getUid(),c);
-//    logger.log("sendMsg("+ret+")");
-    return ret;
+    //    logger.log("sendMsg("+ret+")");
+    return new BBReceiptImpl(bb,priority,getUid(),c);
   }
   
   protected synchronized int getUid() {
@@ -478,7 +461,7 @@ public class FileTransferImpl implements FileTransfer, AppSocketReceiver {
     abstract public void notifyReceiverCancelled();
   }
   
-  Map<Integer, ReceiptImpl> outgoingData = new HashMap<Integer, ReceiptImpl>();
+  Map<Integer, ReceiptImpl> outgoingData = new HashMap<>();
 
   
 
@@ -514,7 +497,7 @@ public class FileTransferImpl implements FileTransfer, AppSocketReceiver {
       this.msg = bb;
       initialPosition = msg.position();
       this.msgBytes = bb.array();
-      msgList = new LinkedList<ByteBuffer>(); 
+      msgList = new LinkedList<>();
       chunkBuffer = ByteBuffer.wrap(msgBytes);
       chunkBuffer.position(msg.position());
       chunkBuffer.limit(msg.limit());
@@ -624,8 +607,8 @@ public class FileTransferImpl implements FileTransfer, AppSocketReceiver {
     Continuation<FileReceipt, Exception> deliverAckToMe;
     
 //    LinkedList<ByteBuffer> msgList; 
-    List<MessageWrapperImpl> outstanding = new ArrayList<MessageWrapperImpl>();// = new MessageWrapper
-    List<WorkRequest<Object>> outstandingWRs = new ArrayList<WorkRequest<Object>>();
+    List<MessageWrapperImpl> outstanding = new ArrayList<>();// = new MessageWrapper
+    List<WorkRequest<Object>> outstandingWRs = new ArrayList<>();
     int wrapperSeq = Integer.MIN_VALUE;    
 //    final ByteBuffer chunk;
 //    byte[] chunkBytes;
@@ -662,7 +645,7 @@ public class FileTransferImpl implements FileTransfer, AppSocketReceiver {
       this.length = length;
 
       
-      ArrayList<ByteBuffer> msgList = new ArrayList<ByteBuffer>(); 
+      ArrayList<ByteBuffer> msgList = new ArrayList<>();
 //      long chunkSize = length;
 //      if (length > CHUNK_SIZE) chunkSize = CHUNK_SIZE;
 //      chunkBytes = new byte[(int)chunkSize]; 
@@ -748,7 +731,7 @@ public class FileTransferImpl implements FileTransfer, AppSocketReceiver {
             }
             
 //            logger.log("enqueuing "+seq);
-            ArrayList<ByteBuffer> foo = new ArrayList<ByteBuffer>();
+            ArrayList<ByteBuffer> foo = new ArrayList<>();
             foo.add(ByteBuffer.wrap(chunkBytes));
             enqueue(new MessageWrapperImpl(FileReceiptImpl.this,seq,foo));
             return null;
@@ -904,7 +887,7 @@ public class FileTransferImpl implements FileTransfer, AppSocketReceiver {
       processor.processBlockingIO(new WorkRequest<Object>(c,environment.getSelectorManager()) {
 
         @Override
-        public Object doWork() throws Exception {
+        public Object doWork() {
           // do nothing, just used to call the above continuation after flushing out any existing stuff in the processor
           return null;
         }
@@ -960,12 +943,8 @@ public class FileTransferImpl implements FileTransfer, AppSocketReceiver {
 
     public boolean cancel() {
       if (this.equals(messageThatIsBeingWritten)) {
-        if (!started) {
-          // TODO: can still cancel the message, but have to have special behavior when the socket calls us back 
-          return true;
-        } else {
-          return false;
-        }
+        // TODO: can still cancel the message, but have to have special behavior when the socket calls us back
+        return !started;
       }
       synchronized(queue) {
         return queue.remove(this);
@@ -1316,7 +1295,7 @@ public class FileTransferImpl implements FileTransfer, AppSocketReceiver {
   }
 
   
-  Map<Integer, DataReader> incomingData = new HashMap<Integer, DataReader>();
+  Map<Integer, DataReader> incomingData = new HashMap<>();
   public void addIncomingMessage(int uid, int size) {
     if (incomingData.containsKey(uid)) throw new IllegalArgumentException("DataReader with uid "+uid+" already exists! "+incomingData.get(uid)+" "+size);
     BBDataReader bbdr = new BBDataReader(uid, size);
@@ -1333,8 +1312,8 @@ public class FileTransferImpl implements FileTransfer, AppSocketReceiver {
   }
 
   interface DataReader extends Reader, Receipt {
-    public boolean read(AppSocket socket, int size) throws IOException;
-    public void cancelled(DataReader reader);
+    boolean read(AppSocket socket, int size) throws IOException;
+    void cancelled(DataReader reader);
   }
   
   public class BBDataReader implements DataReader, BBReceipt {
@@ -1499,7 +1478,7 @@ public class FileTransferImpl implements FileTransfer, AppSocketReceiver {
           decrementFileChunksInMemory();
           if (cancelled) return;
           // notify listeners
-          long myPtr = myPtrL.longValue();
+          long myPtr = myPtrL;
           notifyListenersReceiveFileProgress(FileDataReader.this, myPtr-offset, length);
 //          logger.logException("Stack trace "+this, new Exception("Stack Trace"));
           if (myPtr == offset+length) FileDataReader.this.complete();

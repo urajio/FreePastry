@@ -51,9 +51,9 @@ import rice.pastry.direct.TestRecord;
 public class PingTestRecord extends TestRecord {
   private int nIndex;
 
-  private int nHops[];
+  private int[] nHops;
 
-  private double fProb[];
+  private double[] fProb;
 
   private double fHops;
 

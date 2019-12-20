@@ -79,17 +79,17 @@ class AggregateDescriptor {
   
   public int objectsAliveAt(long pointInTime) {
     int result = 0;
-    for (int i=0; i<objects.length; i++)
-      if (objects[i].isAliveAt(pointInTime))
-        result ++;
+    for (ObjectDescriptor object : objects)
+      if (object.isAliveAt(pointInTime))
+        result++;
     return result;
   }
   
   public int bytesAliveAt(long pointInTime) {
     int result = 0;
-    for (int i=0; i<objects.length; i++)
-      if (objects[i].isAliveAt(pointInTime))
-        result += objects[i].size;
+    for (ObjectDescriptor object : objects)
+      if (object.isAliveAt(pointInTime))
+        result += object.size;
     return result;
   }
 }  

@@ -45,13 +45,16 @@ package rice.persistence;
  *
  * @version $Id$
  */
-import java.io.*;
-import java.util.*;
 
-import rice.*;
-import rice.Continuation.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.util.*;
+import rice.Continuation;
+import rice.Continuation.StandardContinuation;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.commonapi.IdRange;
+import rice.p2p.commonapi.IdSet;
+
+import java.io.Serializable;
+import java.util.SortedMap;
 
 /**
  * This class provides both persistent and caching services to

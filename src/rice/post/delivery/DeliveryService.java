@@ -36,24 +36,32 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.delivery;
 
-import java.util.*;
-import java.math.*;
-import java.io.*;
-
-import rice.*;
-import rice.Continuation.*;
+import rice.Continuation;
+import rice.Continuation.ErrorContinuation;
+import rice.Continuation.ListenerContinuation;
+import rice.Continuation.StandardContinuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.commonapi.NodeHandle;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.p2p.past.*;
-import rice.p2p.past.gc.*;
+import rice.p2p.past.Past;
+import rice.p2p.past.PastContent;
+import rice.p2p.past.gc.GCPast;
 import rice.p2p.past.rawserialization.PastContentDeserializer;
-import rice.p2p.scribe.*;
+import rice.p2p.scribe.Scribe;
+import rice.p2p.scribe.ScribeClient;
+import rice.p2p.scribe.ScribeContent;
+import rice.p2p.scribe.Topic;
+import rice.post.PostEntityAddress;
+import rice.post.PostImpl;
+import rice.post.messaging.PresenceMessage;
+import rice.post.messaging.SignedPostMessage;
 
-import rice.post.*;
-import rice.post.messaging.*;
-import rice.post.security.*;
+import java.io.IOException;
+import java.util.HashSet;
 
 /**
  * This class encapsulates the logic for the delivery of notification messages
@@ -194,11 +202,11 @@ public class DeliveryService implements ScribeClient {
   public void check(Id id, Continuation command) {
     if (logger.level <= Logger.FINER) logger.log( "Checking for existence of message with id " + id);
     if (cache.contains(id)) {
-      command.receiveResult(new Boolean(false));
+      command.receiveResult(Boolean.FALSE);
     } else {
       delivered.lookup(id, new StandardContinuation(command) {
         public void receiveResult(Object o) {
-          parent.receiveResult(new Boolean(o == null));
+          parent.receiveResult(o == null);
         }
       });
     }
@@ -278,22 +286,22 @@ public class DeliveryService implements ScribeClient {
         pending.getGroups(new StandardContinuation(this) {
           public void receiveResult(Object o) {
             PostEntityAddress[] addresses = (PostEntityAddress[]) o;
-            
-            for (int i=0; i<addresses.length; i++) 
-              scribe.subscribe(new Topic(addresses[i].getAddress()), DeliveryService.this, null);
+
+            for (PostEntityAddress address : addresses)
+              scribe.subscribe(new Topic(address.getAddress()), DeliveryService.this, null);
             
             Topic[] topics = scribe.getTopics(DeliveryService.this);
-            
-            for (int i=0; i<topics.length; i++) {
+
+            for (Topic topic : topics) {
               boolean found = false;
-              
-              for (int j=0; j<addresses.length && !found; j++) {
-                if (addresses[j].getAddress().equals(topics[i].getId()))
+
+              for (int j = 0; j < addresses.length && !found; j++) {
+                if (addresses[j].getAddress().equals(topic.getId()))
                   found = true;
               }
-              
-              if (! found) 
-                scribe.unsubscribe(topics[i], DeliveryService.this);
+
+              if (!found)
+                scribe.unsubscribe(topic, DeliveryService.this);
             }
           }
         });

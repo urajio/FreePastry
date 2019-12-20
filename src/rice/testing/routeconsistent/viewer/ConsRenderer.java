@@ -39,15 +39,15 @@ advised of the possibility of such damage.
  */
 package rice.testing.routeconsistent.viewer;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.text.*;
-import java.util.*;
+import java.text.Format;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.*;
 import java.util.prefs.Preferences;
-
-import javax.swing.*;
 
 /**
  * @author Jeff Hoye
@@ -56,13 +56,13 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
   long startTime = Long.MAX_VALUE;
   long endTime = 0;
   
-  HashSet<Node> selected = new HashSet<Node>();
+  HashSet<Node> selected = new HashSet<>();
 
   
   /**
    * String nodeName -> List of Square, ordered by time
    */
-  Hashtable<String, Node> nodes = new Hashtable<String, Node>();
+  Hashtable<String, Node> nodes = new Hashtable<>();
   
   /**
    * True if nodeList is stale.  In other words, a new 
@@ -73,18 +73,18 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
   
   JeffReader reader = null;
   
-  public static final int maxRingSpaceValue = Integer.valueOf("FFFFFF", 16).intValue();
+  public static final int maxRingSpaceValue = Integer.valueOf("FFFFFF", 16);
 
   JLabel statusBar;
   
-  HashSet<LeafSet> leafSets = new HashSet<LeafSet>();
-  HashSet<Overlap> overlaps = new HashSet<Overlap>();
+  HashSet<LeafSet> leafSets = new HashSet<>();
+  HashSet<Overlap> overlaps = new HashSet<>();
   
   public String selectedString = "";
   
   File lsdir;
   
-  public ConsRenderer(JLabel statusBar, File lsdir) throws Exception {
+  public ConsRenderer(JLabel statusBar, File lsdir) {
     this.lsdir = lsdir;
     this.statusBar = statusBar; 
 //    System.out.println("maxRingSpaceValue = "+maxRingSpaceValue);
@@ -117,11 +117,9 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
           } else if (e.getButton() == MouseEvent.BUTTON3) {
             // don't know what this was for
             if (e.isAltDown() && e.isControlDown()) {
-              Iterator<Node> i = nodes.values().iterator();
-              while(i.hasNext()) {
-                Node n = (Node)i.next(); 
+              for (Node n : nodes.values()) {
                 if (n.t1 < d.absTime) {
-                  n.move(d.absTime,false,ConsRenderer.this); 
+                  n.move(d.absTime, false, ConsRenderer.this);
                 }
               }  
               recalcBounds();
@@ -131,7 +129,7 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
           } else if (e.getButton() == MouseEvent.BUTTON2) {
             System.out.println("removing");
             Details det = new Details(e.getX(), e.getY());
-            ArrayList<Node> reverseList = new ArrayList<Node>(selected.size());
+            ArrayList<Node> reverseList = new ArrayList<>(selected.size());
   //          reverseList.
             Iterator<Node> i = selected.iterator();
             while(i.hasNext()) {
@@ -164,10 +162,8 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
   }
   
   private void moveSelected(Details d, boolean allOnSameComputer) {
-    Iterator<Node> i = selected.iterator();
-    while(i.hasNext()) {
-      Node n = (Node)i.next(); 
-      n.move(d.absTime, allOnSameComputer, ConsRenderer.this);            
+    for (Node n : selected) {
+      n.move(d.absTime, allOnSameComputer, ConsRenderer.this);
     }
     recalcBounds();
   }
@@ -178,12 +174,10 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
   
   private void toggleSelect(Details d) {
     List<SuperSquare> squares = getSquares(d.space, d.absTime);
-    String s = d.toString();    
-    Iterator<SuperSquare> i = squares.iterator();
-    while(i.hasNext()) {
-      SuperSquare ss = (SuperSquare)i.next(); 
+    String s = d.toString();
+    for (SuperSquare ss : squares) {
       if (selected.contains(ss.node)) {
-        selected.remove(ss.node); 
+        selected.remove(ss.node);
       } else {
         selected.add(ss.node);
       }
@@ -197,10 +191,8 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
     String s = d.toString();
     selectNone();
     selectedString = " N:"+squares.size();
-    Iterator<SuperSquare> i = squares.iterator();
-    while(i.hasNext()) {
-      SuperSquare ss = (SuperSquare)i.next(); 
-      selectedString+=",<font color=\""+ss.node.htmlColor()+"\">\u2588</font>"+ss.toString();  
+    for (SuperSquare ss : squares) {
+      selectedString += ",<font color=\"" + ss.node.htmlColor() + "\">\u2588</font>" + ss.toString();
       selected.add(ss.node);
     }
         
@@ -210,9 +202,7 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
     if (showLeafSet) {
       //System.out.println("finding leafsets");
       // build leafsets
-      Iterator<Node> i2 = selected.iterator();
-      while(i2.hasNext()) {
-        Node n = (Node)i2.next(); 
+      for (Node n : selected) {
         LeafSet o = getLeafSet(n.nodeName, d.absTime);
         if (o != null) {
           leafSets.add(o);
@@ -235,8 +225,8 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
       
       long lastTime = 0;
       long time = 0;
-      ArrayList<String> leftSide = new ArrayList<String>();
-      ArrayList<String> rightSide = new ArrayList<String>();
+      ArrayList<String> leftSide = new ArrayList<>();
+      ArrayList<String> rightSide = new ArrayList<>();
       String owner = null;
       while (st.ttype != StreamTokenizer.TT_EOF) {
         lastTime = time;
@@ -352,7 +342,7 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
     }
 
     public int getIntVal(String node) {
-      return Integer.valueOf(node.substring(2), 16).intValue();
+      return Integer.valueOf(node.substring(2), 16);
     }
     
     public void renderSelf(Graphics g, double xScale, double yScale, int xOff, long yOff, int maxX, int maxY, boolean selected) {
@@ -387,8 +377,7 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
       }
       // render owner
       g.setColor(Color.RED);
-      int x = ownerX;
-      g.drawLine(x, y-10, x, y+10);
+      g.drawLine(ownerX, y-10, ownerX, y+10);
     }
     
   }
@@ -398,11 +387,9 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
     synchronized(this) {
       startTime = Long.MAX_VALUE;      
       endTime = 0;
-      Iterator<Node> i = nodes.values().iterator();
-      while(i.hasNext()) {
-        Node n = (Node)i.next();
-        if (n.t1 < startTime) startTime = n.t1; 
-        if (n.t2 > endTime) endTime = n.t2; 
+      for (Node n : nodes.values()) {
+        if (n.t1 < startTime) startTime = n.t1;
+        if (n.t2 > endTime) endTime = n.t2;
       }
     }
   }
@@ -425,26 +412,22 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
    * @return
    */
   public List<SuperSquare> getSquares(int space, long time, Collection<Node> nodes) {
-    ArrayList<SuperSquare> ret = new ArrayList<SuperSquare>();
-    
-    Iterator<Node> i = nodes.iterator();
-    while(i.hasNext()) {
-      Node n = (Node)i.next();
+    ArrayList<SuperSquare> ret = new ArrayList<>();
+
+    for (Node n : nodes) {
       Square s = n.getSquare(space, time);
       if (s != null) {
-        ret.add(new SuperSquare(n,s));
+        ret.add(new SuperSquare(n, s));
       }
     }
-    Collections.sort(ret, new Comparator<SuperSquare>() {
+    ret.sort(new Comparator<SuperSquare>() {
       public boolean equals(Object arg0) {
         return false;
       }
 
       public int compare(SuperSquare a0, SuperSquare a1) {
-        SuperSquare s1 = (SuperSquare)a0;
-        SuperSquare s2 = (SuperSquare)a1;
-        
-        return s1.node.nodeName.compareTo(s2.node.nodeName);
+
+        return ((SuperSquare) a0).node.nodeName.compareTo(((SuperSquare) a1).node.nodeName);
       }
     });
     return ret;
@@ -566,13 +549,13 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
     }
   }
 
-  HashMap<String, List<Node>> nodesByFile = new HashMap<String, List<Node>>();
+  HashMap<String, List<Node>> nodesByFile = new HashMap<>();
   
   private void addToNodesByFileName(Node s) {
 //    System.out.println("addToNodesByFileName("+s.fileName+")");
     List<Node> l = nodesByFile.get(s.fileName);
     if (l == null) {
-      l = new ArrayList<Node>();
+      l = new ArrayList<>();
       nodesByFile.put(s.fileName,l);
     }
     l.add(s);    
@@ -643,28 +626,20 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
     synchronized(this) {
 //      System.out.println("paintComponent.synch");
 //      System.out.println("Time:["+startTime+","+endTime+"]F:"+timeFactor+" Space:["+0+","+maxRingSpaceValue+"]F:"+spaceFactor+" NumNodes:"+nodes.size());
-      Iterator<String> i = nodes.keySet().iterator();
-      while(i.hasNext()) {
-        String nodeName = (String)i.next(); 
-        Node n = (Node)nodes.get(nodeName);
+      for (String nodeName : nodes.keySet()) {
+        Node n = (Node) nodes.get(nodeName);
         if (!selected.contains(n)) {
           n.renderSelf(g, spaceFactor, timeFactor, -renderStartSpace, -renderStartTime, size.width, size.height, false, prelifeRenderType);
         }
       }
-      Iterator<Node> i2 = selected.iterator(); 
-      while(i2.hasNext()) {
-        Node n = (Node)i2.next(); 
+      for (Node n : selected) {
         n.renderSelf(g, spaceFactor, timeFactor, -renderStartSpace, -renderStartTime, size.width, size.height, true, prelifeRenderType);
       }
-      Iterator<LeafSet> i3 = leafSets.iterator(); 
-      while(i3.hasNext()) {
-        LeafSet l = (LeafSet)i3.next(); 
+      for (LeafSet l : leafSets) {
         l.renderSelf(g, spaceFactor, timeFactor, -renderStartSpace, -renderStartTime, size.width, size.height, true);
       }
       if (renderOverlaps) {
-        Iterator<Overlap> i4 = overlaps.iterator();
-        while(i4.hasNext()) {
-          Overlap o = (Overlap)i4.next(); 
+        for (Overlap o : overlaps) {
           o.renderSelf(g, spaceFactor, timeFactor, -renderStartSpace, -renderStartTime, size.width, size.height);
         }
       }
@@ -761,7 +736,7 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
           public void actionPerformed(ActionEvent e) {
             synchronized(ret) {
               ret.dir = (String)dirChooser.getSelectedItem();
-              ret.val = new Integer(integerChooser.getValue().toString()).intValue();
+              ret.val = new Integer(integerChooser.getValue().toString());
               prefs.put("dirname",ret.dir);
               prefs.putInt("runnum",ret.val);
               ret.done = true;
@@ -918,12 +893,10 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
             cr.selectNone();
             String s = d.toString();
             cr.selectedString = "";
-            Iterator<Node> i = cr.nodes.values().iterator();
-            while(i.hasNext()) {              
-              Node n = (Node)i.next();
+            for (Node n : cr.nodes.values()) {
               if (n.t1 <= d.absTime) {
-                cr.selectedString+=",<font color=\""+n.htmlColor()+"\">\u2588</font>"+n.toString();  
-                cr.selected.add(n);                
+                cr.selectedString += ",<font color=\"" + n.htmlColor() + "\">\u2588</font>" + n.toString();
+                cr.selected.add(n);
               }
             }            
             cr.setClickState(MouseEvent.BUTTON1, null);
@@ -941,12 +914,10 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
             cr.selectNone();
             String s = d.toString();
             cr.selectedString = "";
-            Iterator<Node> i = cr.nodes.values().iterator();
-            while(i.hasNext()) {              
-              Node n = (Node)i.next();
+            for (Node n : cr.nodes.values()) {
               if (n.t2 >= d.absTime) {
-                cr.selectedString+=",<font color=\""+n.htmlColor()+"\">\u2588</font>"+n.toString();  
-                cr.selected.add(n);                
+                cr.selectedString += ",<font color=\"" + n.htmlColor() + "\">\u2588</font>" + n.toString();
+                cr.selected.add(n);
               }
             }            
             cr.setClickState(MouseEvent.BUTTON1, null);            
@@ -1033,10 +1004,10 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
     
   }
 
-  HashMap<String,Long> offsets = new HashMap<String,Long>();
-  List<String> delme = new ArrayList<String>();
+  HashMap<String,Long> offsets = new HashMap<>();
+  List<String> delme = new ArrayList<>();
   
-  protected void saveOffsets() throws FileNotFoundException, IOException {
+  protected void saveOffsets() throws IOException {
     for(String s: delme) {
       offsets.remove(s); 
     }
@@ -1064,7 +1035,7 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
           Node n = (Node)nodes.get(s);
           Long l = offsets.get(s);
 //          try {
-            n.shift(l.longValue(), false, this);
+            n.shift(l, false, this);
 //          } catch (NullPointerException npe) {
 //            System.err.println(s+":"+n);
 //            npe.printStackTrace(); 
@@ -1089,10 +1060,8 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
   
   protected void setSelectedLabel() {
     selectedString = " N:"+selected.size();
-    Iterator<Node> i = selected.iterator();
-    while(i.hasNext()) {
-      Node n = (Node)i.next(); 
-      selectedString+=",<font color=\""+n.htmlColor()+"\">\u2588</font>"+n.toString();  
+    for (Node n : selected) {
+      selectedString += ",<font color=\"" + n.htmlColor() + "\">\u2588</font>" + n.toString();
       selected.add(n);
     }
     setText(selectedString);    
@@ -1132,7 +1101,7 @@ public class ConsRenderer extends JPanel implements SquareConsumer, NodeConsumer
   }
 
   public interface Clicker {
-    public void click(Details d); 
+    void click(Details d);
   }
   
   public static final int PL_RENDER_NORMAL = 0;

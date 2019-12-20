@@ -36,30 +36,20 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.socket.nat.rendezvous;
 
-import java.net.InetSocketAddress;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.MessageCallback;
 import org.mpisws.p2p.transport.MessageRequestHandle;
 import org.mpisws.p2p.transport.exception.NodeIsFaultyException;
 import org.mpisws.p2p.transport.liveness.LivenessListener;
 import org.mpisws.p2p.transport.priority.PriorityTransportLayer;
-import org.mpisws.p2p.transport.rendezvous.RendezvousContact;
 import org.mpisws.p2p.transport.rendezvous.RendezvousStrategy;
 import org.mpisws.p2p.transport.rendezvous.RendezvousTransportLayer;
 import org.mpisws.p2p.transport.rendezvous.RendezvousTransportLayerImpl;
 import org.mpisws.p2p.transport.util.MessageRequestHandleImpl;
 import org.mpisws.p2p.transport.util.OptionsFactory;
 import org.mpisws.p2p.transport.wire.WireTransportLayer;
-
 import rice.Continuation;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Cancellable;
-import rice.p2p.commonapi.Id;
-import rice.p2p.commonapi.MessageReceipt;
 import rice.p2p.commonapi.NodeHandle;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.MessageDeserializer;
@@ -70,10 +60,14 @@ import rice.pastry.leafset.LeafSet;
 import rice.pastry.messaging.Message;
 import rice.pastry.routing.RouteMessage;
 import rice.pastry.routing.RouteMessageNotification;
-import rice.pastry.socket.SocketNodeHandle;
 import rice.pastry.transport.PMessageNotification;
 import rice.pastry.transport.PMessageReceipt;
 import rice.selector.SelectorManager;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 /**
  * TODO: make not abstract
@@ -324,8 +318,8 @@ public class RendezvousApp extends PastryAppl implements RendezvousStrategy<Rend
 //      if (true) throw new RuntimeException("Not Implemented.");
       RendezvousSocketNodeHandle pilot = (RendezvousSocketNodeHandle)options.get(RendezvousTransportLayerImpl.OPTION_USE_PILOT);
       if (logger.level <= Logger.FINER) logger.log("sendMessage("+i+","+m+","+deliverAckToMe+","+options+") sending via "+pilot);      
-      final MessageRequestHandleImpl<RendezvousSocketNodeHandle, ByteBuffer> ret = 
-        new MessageRequestHandleImpl<RendezvousSocketNodeHandle, ByteBuffer>(i,m,options);
+      final MessageRequestHandleImpl<RendezvousSocketNodeHandle, ByteBuffer> ret =
+              new MessageRequestHandleImpl<>(i, m, options);
       ret.setSubCancellable(thePastryNode.send(pilot, new PilotForwardMsg(getAddress(),msg,i), new PMessageNotification(){      
         public void sent(PMessageReceipt msg) {
           if (deliverAckToMe != null) deliverAckToMe.ack(ret);

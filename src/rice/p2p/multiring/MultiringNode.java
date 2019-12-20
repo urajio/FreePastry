@@ -37,19 +37,18 @@ advised of the possibility of such damage.
 
 package rice.p2p.multiring;
 
-import java.io.IOException;
-import java.util.*;
-
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.multiring.messaging.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.RawMessage;
+import rice.p2p.multiring.messaging.RingMessage;
 import rice.p2p.scribe.*;
 import rice.p2p.scribe.rawserialization.ScribeContentDeserializer;
+
+import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * @(#) MultiringNode.java
@@ -118,15 +117,14 @@ public class MultiringNode implements Node, ScribeClient {
     this.environment = node.getEnvironment();
     this.logger = environment.getLogManager().getLogger(MultiringNode.class, null);
     this.ringId = ringId;
-    this.endpoints = new Hashtable<String, Endpoint>();
+    this.endpoints = new Hashtable<>();
     this.scribe = new ScribeImpl(this, "Multiring");
     scribe.setContentDeserializer(new ScribeContentDeserializer() {
       
       public ScribeContent deserializeScribeContent(InputBuffer buf, Endpoint endpoint, short type) throws IOException {
-        switch (type) {
-          case RingMessage.TYPE:
-            return new RingMessage(buf, endpoint, endpoints);
-        }
+          if (type == RingMessage.TYPE) {
+              return new RingMessage(buf, endpoint, endpoints);
+          }
         throw new IllegalArgumentException("Invalid type:"+type);
       }
     

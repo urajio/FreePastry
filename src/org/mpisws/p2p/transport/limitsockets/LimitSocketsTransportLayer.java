@@ -36,32 +36,18 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.limitsockets;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.ClosedChannelException;
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.util.DefaultErrorHandler;
 import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
 import org.mpisws.p2p.transport.util.SocketWrapperSocket;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.selector.Timer;
 import rice.selector.TimerTask;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 /**
  * Automatically closes sockets based on LRU.
@@ -74,7 +60,7 @@ import rice.selector.TimerTask;
 public class LimitSocketsTransportLayer<Identifier, MessageType> implements TransportLayer<Identifier, MessageType>, TransportLayerCallback<Identifier, MessageType> {
   int MAX_SOCKETS;
   protected TransportLayer<Identifier, MessageType> tl;
-  protected LinkedHashMap<LSSocket, LSSocket> cache;
+  protected final LinkedHashMap<LSSocket, LSSocket> cache;
   protected Logger logger;
   protected TransportLayerCallback<Identifier, MessageType> callback;
   protected Timer timer;
@@ -86,10 +72,10 @@ public class LimitSocketsTransportLayer<Identifier, MessageType> implements Tran
     this.tl = tl;
     this.logger = env.getLogManager().getLogger(LimitSocketsTransportLayer.class, null);
     this.timer = env.getSelectorManager().getTimer();
-    this.cache = new LinkedHashMap<LSSocket, LSSocket>(MAX_SOCKETS,0.75f,true);
+    this.cache = new LinkedHashMap<>(MAX_SOCKETS, 0.75f, true);
     this.handler = handler;
     if (this.handler == null) {
-      this.handler = new DefaultErrorHandler<Identifier>(logger);
+      this.handler = new DefaultErrorHandler<>(logger);
     }
     
     tl.setCallback(this);
@@ -141,7 +127,7 @@ public class LimitSocketsTransportLayer<Identifier, MessageType> implements Tran
   }
 
   protected void closeIfNecessary() {
-    Collection<LSSocket> closeMe = new ArrayList<LSSocket>();
+    Collection<LSSocket> closeMe = new ArrayList<>();
     synchronized(cache) {
       while (cache.size() > MAX_SOCKETS) {
         Iterator<LSSocket> i = cache.keySet().iterator();

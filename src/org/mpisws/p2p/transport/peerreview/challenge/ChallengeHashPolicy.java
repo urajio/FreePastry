@@ -36,14 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.challenge;
 
-import java.io.IOException;
-
 import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
 import org.mpisws.p2p.transport.peerreview.history.HashPolicy;
-import org.mpisws.p2p.transport.peerreview.history.logentry.EvtSend;
 import org.mpisws.p2p.transport.util.Serializer;
-
 import rice.p2p.util.rawserialization.SimpleInputBuffer;
+
+import java.io.IOException;
 
 public class ChallengeHashPolicy<Identifier> implements HashPolicy, PeerReviewConstants {
   byte flags;

@@ -37,14 +37,17 @@ advised of the possibility of such damage.
 package rice.pastry.testing;
 
 import rice.environment.Environment;
-import rice.pastry.*;
-import rice.pastry.dist.*;
+import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
+import rice.pastry.dist.DistPastryNodeFactory;
 import rice.pastry.socket.SocketPastryNodeFactory;
-import rice.pastry.standard.*;
+import rice.pastry.standard.IPNodeIdFactory;
 
-import java.util.*;
 import java.io.IOException;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.Collections;
 
 /**
  * a regression test suite for pastry with "distributed" nodes. All nodes are on
@@ -125,16 +128,16 @@ public class DistPastryRegrTest extends PastryRegrTest {
    * process command line args, set the RMI security manager, and start the RMI
    * registry. Standard gunk that has to be done for all Dist apps.
    */
-  private static void doInitstuff(String args[]) {
+  private static void doInitstuff(String[] args) {
     // process command line arguments
 
-    for (int i = 0; i < args.length; i++) {
-      if (args[i].equals("-help")) {
-        System.out
-            .println("Usage: DistPastryRegrTest [-port p] [-protocol (rmi|wire|socket)] [-nodes n] [-bootstrap host[:port]] [-help]");
-        System.exit(1);
+      for (String arg : args) {
+          if (arg.equals("-help")) {
+              System.out
+                      .println("Usage: DistPastryRegrTest [-port p] [-protocol (rmi|wire|socket)] [-nodes n] [-bootstrap host[:port]] [-help]");
+              System.exit(1);
+          }
       }
-    }
 
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("-port") && i + 1 < args.length) {
@@ -230,7 +233,7 @@ public class DistPastryRegrTest extends PastryRegrTest {
    * [-bootstrap host[:port]] [-help]
    */
 
-  public static void main(String args[]) throws IOException {
+  public static void main(String[] args) throws IOException {
     doInitstuff(args);
     DistPastryRegrTest pt = new DistPastryRegrTest(new Environment());
     mainfunc(pt, args, numnodes /* n */, 1 /* d */, 1/* k */, 20/* m */, 4/* conc */);

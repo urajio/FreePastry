@@ -36,17 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview;
 
-import java.io.IOException;
-import java.util.Collection;
-
 import org.mpisws.p2p.transport.peerreview.identity.IdentityTransportCallback;
 import org.mpisws.p2p.transport.peerreview.infostore.StatusChangeListener;
-import org.mpisws.p2p.transport.peerreview.message.PeerReviewMessage;
 import org.mpisws.p2p.transport.peerreview.replay.Verifier;
-
 import rice.Destructable;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
+import java.io.IOException;
+import java.util.Collection;
 
 /**
  * Callback interface that all PeerReview-enabled applications must implement. 
@@ -56,7 +54,7 @@ import rice.p2p.commonapi.rawserialization.OutputBuffer;
 public interface PeerReviewCallback<Handle, Identifier> extends Destructable, IdentityTransportCallback<Handle, Identifier>, 
       StatusChangeListener<Identifier> {
   // PeerReviewCallback() : IdentityTransportCallback() {};
-  public void init();
+  void init();
   void storeCheckpoint(OutputBuffer buffer) throws IOException;
   /**
    * Return false if the checkpoint is bogus.
@@ -68,6 +66,6 @@ public interface PeerReviewCallback<Handle, Identifier> extends Destructable, Id
   boolean loadCheckpoint(InputBuffer buffer) throws IOException;
   void getWitnesses(Identifier subject, WitnessListener<Handle, Identifier> callback);
 //  PeerReviewCallback getReplayInstance(ReplayWrapper replayWrapper);
-  public Collection<Handle> getMyWitnessedNodes();
+Collection<Handle> getMyWitnessedNodes();
   PeerReviewCallback<Handle, Identifier> getReplayInstance(Verifier<Handle> v);
 }

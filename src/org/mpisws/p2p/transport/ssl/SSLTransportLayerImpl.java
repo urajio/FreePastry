@@ -36,42 +36,21 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.ssl;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.Socket;
-import java.security.KeyPair;
-import java.security.KeyStore;
-import java.security.KeyStoreSpi;
-import java.security.NoSuchAlgorithmException;
-import java.security.Principal;
-import java.security.PrivateKey;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Map;
+import org.mpisws.p2p.transport.*;
+import org.mpisws.p2p.transport.util.DefaultErrorHandler;
+import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
+import rice.Continuation;
+import rice.environment.Environment;
+import rice.environment.logging.Logger;
 
-import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509KeyManager;
-import javax.net.ssl.X509TrustManager;
-
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
-import org.mpisws.p2p.transport.util.DefaultErrorHandler;
-import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
-
-import rice.Continuation;
-import rice.environment.Environment;
-import rice.environment.logging.Logger;
+import java.io.IOException;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.util.Map;
 
 /**
  * Does not encrypt UDP messages
@@ -106,13 +85,13 @@ public class SSLTransportLayerImpl<Identifier, MessageType> implements SSLTransp
    * @param env
    * @throws Exception
    */
-  public SSLTransportLayerImpl(TransportLayer<Identifier, MessageType> tl, KeyStore keyStore, KeyStore trustStore, int clientAuth, Environment env) throws IOException {
+  public SSLTransportLayerImpl(TransportLayer<Identifier, MessageType> tl, KeyStore keyStore, KeyStore trustStore, int clientAuth, Environment env) {
     if (clientAuth != CLIENT_AUTH_NONE && clientAuth != CLIENT_AUTH_REQUIRED) throw new IllegalArgumentException("clientAuth type:"+clientAuth+" not supported.");
     
     this.environment = env;
     this.logger = env.getLogManager().getLogger(SSLTransportLayerImpl.class, null);
     this.tl = tl;
-    errorHandler = new DefaultErrorHandler<Identifier>(logger, Logger.WARNING);
+    errorHandler = new DefaultErrorHandler<>(logger, Logger.WARNING);
     this.clientAuth = clientAuth;
 
     try {
@@ -140,7 +119,7 @@ public class SSLTransportLayerImpl<Identifier, MessageType> implements SSLTransp
   
   public SocketRequestHandle<Identifier> openSocket(Identifier i,
       final SocketCallback<Identifier> deliverSocketToMe, Map<String, Object> options) {
-    final SocketRequestHandleImpl<Identifier> ret = new SocketRequestHandleImpl<Identifier>(i,options,logger);
+    final SocketRequestHandleImpl<Identifier> ret = new SocketRequestHandleImpl<>(i, options, logger);
     ret.setSubCancellable(tl.openSocket(i, new SocketCallback<Identifier>() {
 
       public void receiveException(SocketRequestHandle<Identifier> s,
@@ -168,7 +147,7 @@ public class SSLTransportLayerImpl<Identifier, MessageType> implements SSLTransp
   /**
    * TODO: support resuming
    */
-  public void incomingSocket(final P2PSocket<Identifier> s) throws IOException {
+  public void incomingSocket(final P2PSocket<Identifier> s) {
     if (logger.level <= Logger.FINE) logger.log("incomingSocket("+s+")");
     getSocketManager(this,s,new Continuation<SSLSocketManager<Identifier>, Exception>() {
 
@@ -224,7 +203,7 @@ public class SSLTransportLayerImpl<Identifier, MessageType> implements SSLTransp
   protected SSLSocketManager<Identifier> getSocketManager(SSLTransportLayerImpl<Identifier, ?> sslTL,
       P2PSocket<Identifier> s,
       Continuation<SSLSocketManager<Identifier>, Exception> c, boolean server, boolean useClientAuth) {
-    return new SSLSocketManager<Identifier>(sslTL,s,c,server,useClientAuth);
+    return new SSLSocketManager<>(sslTL, s, c, server, useClientAuth);
   }
   
 }

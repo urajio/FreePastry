@@ -37,12 +37,16 @@ advised of the possibility of such damage.
 
 package rice.p2p.scribe;
 
-import java.util.*;
-
 import rice.environment.Environment;
-import rice.p2p.commonapi.*;
-import rice.p2p.scribe.messaging.*;
-import rice.p2p.util.TimerWeakHashMap;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.scribe.messaging.AnycastMessage;
+import rice.p2p.scribe.messaging.ScribeMessage;
+import rice.p2p.scribe.messaging.SubscribeMessage;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @(#) ScribePolicy.java This interface represents a policy for Scribe, which is asked whenever a
@@ -95,7 +99,7 @@ public interface ScribePolicy {
    * @param content the content that came with the message
    * @param return the list that is accepted
    */
-  public List<Topic> allowSubscribe(Scribe scribe, NodeHandle source, List<Topic> topics, ScribeContent content);
+  List<Topic> allowSubscribe(Scribe scribe, NodeHandle source, List<Topic> topics, ScribeContent content);
 
   /**
    * This method is called when an anycast is received which is not satisfied at the local node.
@@ -107,7 +111,7 @@ public interface ScribePolicy {
    * @param parent Our current parent for this message's topic
    * @param children Our current children for this message's topic
    */
-  public void directAnycast(AnycastMessage message, NodeHandle parent, Collection<NodeHandle> children);
+  void directAnycast(AnycastMessage message, NodeHandle parent, Collection<NodeHandle> children);
   
   /**
    * Informs this policy that a child was added to a topic - the topic is free to ignore this
@@ -116,7 +120,7 @@ public interface ScribePolicy {
    * @param topic The topic to unsubscribe from
    * @param child The child that was added
    */
-  public void childAdded(Topic topic, NodeHandle child);
+  void childAdded(Topic topic, NodeHandle child);
   
   /**
    * Informs this policy that a child was removed from a topic - the topic is free to ignore this
@@ -125,18 +129,18 @@ public interface ScribePolicy {
    * @param topic The topic to unsubscribe from
    * @param child The child that was removed
    */
-  public void childRemoved(Topic topic, NodeHandle child);
+  void childRemoved(Topic topic, NodeHandle child);
   
   /**
    * This notifies us when we receive a failure for a anycast
    */
-  public void recvAnycastFail(Topic topic, NodeHandle failedAtNode, ScribeContent content);
+  void recvAnycastFail(Topic topic, NodeHandle failedAtNode, ScribeContent content);
 
   /**
    * This is invoked whenever this message arrives on any overlay node, this gives the ScribeClient's power
    * to tap into some datastructures they might wanna edit
    */
-  public void intermediateNode(ScribeMessage message);
+  void intermediateNode(ScribeMessage message);
 
   /**
    * This method is called when the ScribeImpl splits a SubscribeMessage into multiple parts.  
@@ -149,7 +153,7 @@ public interface ScribePolicy {
    * @param content the content that may need to be divided
    * @return the content if not changed, a new ScribeContent if changed
    */
-  public ScribeContent divideContent(List<Topic> theTopics, ScribeContent content);
+  ScribeContent divideContent(List<Topic> theTopics, ScribeContent content);
 
   /**
    * The default policy for Scribe, which always allows new children to join and adds children in
@@ -158,7 +162,7 @@ public interface ScribePolicy {
    * @version $Id$
    * @author amislove
    */
-  public static class DefaultScribePolicy implements ScribePolicy {
+  class DefaultScribePolicy implements ScribePolicy {
     protected Environment environment;
     public DefaultScribePolicy(Environment env) {
       environment = env;
@@ -227,7 +231,7 @@ public interface ScribePolicy {
         message.addLast(parent);
       }
       
-      ArrayList<NodeHandle> children = new ArrayList<NodeHandle>(theChildren);
+      ArrayList<NodeHandle> children = new ArrayList<>(theChildren);
       
       // now randomize the children list
       while (!children.isEmpty()) {
@@ -273,7 +277,7 @@ public interface ScribePolicy {
    * @version $Id$
    * @author amislove
    */
-  public static class LimitedScribePolicy extends DefaultScribePolicy {
+  class LimitedScribePolicy extends DefaultScribePolicy {
 
     /**
      * The number of children to allow per topic

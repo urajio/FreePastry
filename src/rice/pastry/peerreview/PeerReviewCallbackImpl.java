@@ -36,26 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.peerreview;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
-import org.mpisws.p2p.transport.peerreview.PeerReview;
 import org.mpisws.p2p.transport.peerreview.PeerReviewCallback;
 import org.mpisws.p2p.transport.peerreview.WitnessListener;
 import org.mpisws.p2p.transport.peerreview.replay.Verifier;
-
 import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
@@ -65,12 +50,13 @@ import rice.pastry.Id;
 import rice.pastry.NodeHandle;
 import rice.pastry.NodeHandleFactory;
 import rice.pastry.PastryNode;
-import rice.pastry.socket.SocketNodeHandle;
-import rice.pastry.socket.SocketNodeHandleFactory;
-import rice.pastry.socket.SocketPastryNodeFactory;
 import rice.pastry.socket.TransportLayerNodeHandle;
-import rice.pastry.transport.NodeHandleAdapter;
-import rice.pastry.transport.TLDeserializer;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 
 public class PeerReviewCallbackImpl implements PeerReviewCallback<TransportLayerNodeHandle<MultiInetSocketAddress>, Id>,
     TransportLayer<TransportLayerNodeHandle<MultiInetSocketAddress>, ByteBuffer> {
@@ -140,8 +126,8 @@ public class PeerReviewCallbackImpl implements PeerReviewCallback<TransportLayer
 
   public Collection<TransportLayerNodeHandle<MultiInetSocketAddress>> getMyWitnessedNodes() {
     Collection<NodeHandle> foo = pn.getLeafSet().getUniqueSet(); // TODO: make this a smaller set
-    ArrayList<TransportLayerNodeHandle<MultiInetSocketAddress>> ret = 
-      new ArrayList<TransportLayerNodeHandle<MultiInetSocketAddress>>(foo.size());
+    ArrayList<TransportLayerNodeHandle<MultiInetSocketAddress>> ret =
+            new ArrayList<>(foo.size());
     for (NodeHandle h : foo) {
       ret.add((TransportLayerNodeHandle<MultiInetSocketAddress>)h);
     }
@@ -194,7 +180,7 @@ public class PeerReviewCallbackImpl implements PeerReviewCallback<TransportLayer
     fetchLeafSetApp.getNeighbors(subject,new Continuation<Collection<NodeHandle>, Exception>() {
     
       public void receiveResult(Collection<NodeHandle> result) {
-        ArrayList<TransportLayerNodeHandle<MultiInetSocketAddress>> ret = new ArrayList<TransportLayerNodeHandle<MultiInetSocketAddress>>(result.size());
+        ArrayList<TransportLayerNodeHandle<MultiInetSocketAddress>> ret = new ArrayList<>(result.size());
         for (NodeHandle nh : result) {
           if (!nh.getId().equals(subject)) ret.add((TransportLayerNodeHandle<MultiInetSocketAddress>)nh);
         }

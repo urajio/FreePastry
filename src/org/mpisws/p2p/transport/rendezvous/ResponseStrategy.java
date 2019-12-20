@@ -56,7 +56,7 @@ public interface ResponseStrategy<Identifier> {
    * @param i
    * @return
    */
-  public boolean sendDirect(Identifier i, ByteBuffer msg, Map<String,Object> options);
+  boolean sendDirect(Identifier i, ByteBuffer msg, Map<String, Object> options);
 
   /**
    * Called when a message is directly sent to the Identifier
@@ -65,7 +65,7 @@ public interface ResponseStrategy<Identifier> {
    * @param msg
    * @param options
    */
-  public void messageSent(Identifier i, ByteBuffer msg, Map<String,Object> options);
+  void messageSent(Identifier i, ByteBuffer msg, Map<String, Object> options);
   
   /**
    * Called when a message is directly received from the Identifier
@@ -74,5 +74,5 @@ public interface ResponseStrategy<Identifier> {
    * @param msg
    * @param options
    */
-  public void messageReceived(Identifier i, ByteBuffer msg, Map<String,Object> options);  
+  void messageReceived(Identifier i, ByteBuffer msg, Map<String, Object> options);
 }

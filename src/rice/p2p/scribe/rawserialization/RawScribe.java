@@ -37,13 +37,13 @@ advised of the possibility of such damage.
 
 package rice.p2p.scribe.rawserialization;
 
-import java.util.Collection;
-
 import rice.p2p.commonapi.NodeHandle;
 import rice.p2p.scribe.BaseScribe;
 import rice.p2p.scribe.ScribeClient;
 import rice.p2p.scribe.ScribeMultiClient;
 import rice.p2p.scribe.Topic;
+
+import java.util.Collection;
 
 /**
  * Scribe that uses RawSerialization for the Clients
@@ -62,7 +62,7 @@ public interface RawScribe extends BaseScribe {
    * @param content The content to include in the subscribe
    * @deprecated use subscribe(Topic, ScribeMultiClient, RawScribeContent, NodeHandle)
    */
-  public void subscribe(Topic topic, ScribeClient client, RawScribeContent content);
+  void subscribe(Topic topic, ScribeClient client, RawScribeContent content);
 
   /**
    * Subscribes the given client to the provided topic.  Any message published
@@ -74,8 +74,8 @@ public interface RawScribe extends BaseScribe {
    * @param hint The first hop of the message ( Helpful to implement a centralized solution)
    * @deprecated use the version with the MultiClient
    */
-  public void subscribe(Topic topic, ScribeClient client, RawScribeContent content, NodeHandle hint);
-  public void subscribe(Topic topic, ScribeMultiClient client, RawScribeContent content, NodeHandle hint);
+  void subscribe(Topic topic, ScribeClient client, RawScribeContent content, NodeHandle hint);
+  void subscribe(Topic topic, ScribeMultiClient client, RawScribeContent content, NodeHandle hint);
 
   /**
    * Subscribe to multiple topics.
@@ -86,8 +86,8 @@ public interface RawScribe extends BaseScribe {
    * @param hint the first hop
    * @deprecated use the version with the MultiClient
    */
-  public void subscribe(Collection<Topic> topics, ScribeClient client, RawScribeContent content, NodeHandle hint);
-  public void subscribe(Collection<Topic> topics, ScribeMultiClient client, RawScribeContent content, NodeHandle hint);
+  void subscribe(Collection<Topic> topics, ScribeClient client, RawScribeContent content, NodeHandle hint);
+  void subscribe(Collection<Topic> topics, ScribeMultiClient client, RawScribeContent content, NodeHandle hint);
 
   // ***************** Messaging functions ****************
   /**
@@ -96,7 +96,7 @@ public interface RawScribe extends BaseScribe {
    * @param topic The topic to publish to
    * @param content The content to publish
    */
-  public void publish(Topic topic, RawScribeContent content);
+  void publish(Topic topic, RawScribeContent content);
 
   /**
    * Anycasts the given content to a member of the given topic
@@ -104,7 +104,7 @@ public interface RawScribe extends BaseScribe {
    * @param topic The topic to anycast to
    * @param content The content to anycast
    */
-  public void anycast(Topic topic, RawScribeContent content);
+  void anycast(Topic topic, RawScribeContent content);
 
   /**
    * Anycasts the given content to a member of the given topic
@@ -117,12 +117,12 @@ public interface RawScribe extends BaseScribe {
    * @param content The content to anycast
    * @param hint the first hop of the Anycast
    */
-  public void anycast(Topic topic, RawScribeContent content, NodeHandle hint);
+  void anycast(Topic topic, RawScribeContent content, NodeHandle hint);
      
 
 
   // ********************* Application management functions **************
-  public void setContentDeserializer(ScribeContentDeserializer deserializer);
-  public ScribeContentDeserializer getContentDeserializer();
+  void setContentDeserializer(ScribeContentDeserializer deserializer);
+  ScribeContentDeserializer getContentDeserializer();
 
 }

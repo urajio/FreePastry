@@ -39,17 +39,17 @@ advised of the possibility of such damage.
  */
 package rice.pastry.socket.nat.sbbi;
 
-import java.io.IOException;
-import java.net.*;
-import java.util.*;
-
+import net.sbbi.upnp.impls.InternetGatewayDevice;
+import net.sbbi.upnp.messages.ActionResponse;
+import net.sbbi.upnp.messages.UPNPResponseException;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.pastry.socket.nat.CantFindFirewallException;
 import rice.pastry.socket.nat.NATHandler;
 
-import net.sbbi.upnp.impls.InternetGatewayDevice;
-import net.sbbi.upnp.messages.*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.Set;
 
 public class SBBINatHandler implements NATHandler {
 
@@ -173,12 +173,11 @@ public class SBBINatHandler implements NATHandler {
 
     if (logger.level <= Logger.FINEST) {
       Set s = response.getOutActionArgumentNames();
-      Iterator i = s.iterator();
-      while (i.hasNext()) {
-        String key = (String) i.next();
-        String val = response.getOutActionArgumentValue(key);
-        System.out.println("  " + key + " -> " + val);
-      }
+        for (Object o : s) {
+            String key = (String) o;
+            String val = response.getOutActionArgumentValue(key);
+            System.out.println("  " + key + " -> " + val);
+        }
     }
 
     boolean ret = true;

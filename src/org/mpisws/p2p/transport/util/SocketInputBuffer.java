@@ -36,15 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.util;
 
+import org.mpisws.p2p.transport.ClosedChannelException;
+import org.mpisws.p2p.transport.P2PSocket;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-
-import org.mpisws.p2p.transport.ClosedChannelException;
-import org.mpisws.p2p.transport.P2PSocket;
-
-import rice.p2p.commonapi.rawserialization.InputBuffer;
 
 /**
  * An easy way to read a complete object in from a socket.  Wraps a Socket as an InputBuffer
@@ -319,7 +318,7 @@ public class SocketInputBuffer implements InputBuffer {
    * Clears the cache from memory, resetting it to the initial size.  This is a 
    * good thing to do after you read an object.  
    */
-  public void clear() throws IOException {
+  public void clear() {
     if (cache.length > initialSize)
       cache = new byte[initialSize];
     readPtr = ByteBuffer.wrap(cache);

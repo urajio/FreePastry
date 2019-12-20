@@ -55,5 +55,5 @@ public interface LivenessListener<Identifier> extends LivenessTypes {
    * @param i
    * @param val
    */
-  public void livenessChanged(Identifier i, int val, Map<String, Object> options);
+  void livenessChanged(Identifier i, int val, Map<String, Object> options);
 }

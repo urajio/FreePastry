@@ -72,7 +72,7 @@ public interface Node {
    * @deprecated use buildEndpoint(), then call Endpoint.register(), fixes 
    * synchronization problems, related to implicit behavior        
    */
-  public Endpoint registerApplication(Application application, String instance);
+  Endpoint registerApplication(Application application, String instance);
   
   /**
    * This returns a Endpoint specific to the given application and
@@ -99,14 +99,14 @@ public interface Node {
    * 
    * @return This node's Id
    */
-  public Id getId();
+  Id getId();
 
   /**
    * Returns a factory for Ids specific to this node's protocol.
    * 
    * @return A factory for creating Ids.
    */
-  public IdFactory getIdFactory();
+  IdFactory getIdFactory();
 
   /**
    * Returns a handle to the local node. This node handle is serializable, and
@@ -114,13 +114,13 @@ public interface Node {
    * 
    * @return A NodeHandle referring to the local node.
    */
-  public NodeHandle getLocalNodeHandle();
+  NodeHandle getLocalNodeHandle();
   
   /**
    * Returns the environment.  This allows the nodes to be virtualized within the JVM
    * @return the environment for this node/app.
    */
-  public Environment getEnvironment();
+  Environment getEnvironment();
   
   /**
    * Same as register application, but returns an unregistered Endpoint.  This allows
@@ -133,12 +133,12 @@ public interface Node {
    * @param instance
    * @return
    */
-  public Endpoint buildEndpoint(Application application, String instance);
+  Endpoint buildEndpoint(Application application, String instance);
 
   /**
    * For debugging: print the internal routing state of the Node.
    * @return
    */
-  public String printRouteState();  
+  String printRouteState();
 }
 

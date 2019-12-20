@@ -36,34 +36,7 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.priority;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.net.SocketException;
-import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.ClosedSelectorException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Queue;
-
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
-import org.mpisws.p2p.transport.TransportLayerListener;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.exception.NodeIsFaultyException;
 import org.mpisws.p2p.transport.identity.MemoryExpiredException;
 import org.mpisws.p2p.transport.liveness.LivenessListener;
@@ -73,17 +46,21 @@ import org.mpisws.p2p.transport.proximity.ProximityProvider;
 import org.mpisws.p2p.transport.util.DefaultErrorHandler;
 import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
 import org.mpisws.p2p.transport.wire.WireTransportLayer;
-
-import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Cancellable;
-import rice.p2p.commonapi.exception.NodeIsDeadException;
 import rice.p2p.util.MathUtils;
 import rice.p2p.util.SortedLinkedList;
 import rice.p2p.util.tuples.Tuple;
 import rice.selector.SelectorManager;
 import rice.selector.TimerTask;
+
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.net.SocketException;
+import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
+import java.util.*;
 
 /**
  * 
@@ -113,7 +90,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
   
   public Logger logger;
   
-  protected Map<Identifier, EntityManager> entityManagers;
+  protected final Map<Identifier, EntityManager> entityManagers;
 
   private TransportLayerCallback<Identifier, ByteBuffer> callback;
 
@@ -122,7 +99,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
   protected SelectorManager selectorManager;
   protected Environment environment;
   
-  protected ArrayList<PrimarySocketListener<Identifier>> primarySocketListeners = new ArrayList<PrimarySocketListener<Identifier>>();
+  protected ArrayList<PrimarySocketListener<Identifier>> primarySocketListeners = new ArrayList<>();
   
   /**
    * The maximum message size;
@@ -137,7 +114,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
       int maxMsgSize,
       int maxQueueSize,
       ErrorHandler<Identifier> handler) {
-    entityManagers = new HashMap<Identifier, EntityManager>();
+    entityManagers = new HashMap<>();
     this.logger = env.getLogManager().getLogger(PriorityTransportLayerImpl.class, null);
     this.selectorManager = env.getSelectorManager();
     this.environment = env;
@@ -151,7 +128,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
     livenessProvider.addLivenessListener(this);
     this.errorHandler = handler;
     if (this.errorHandler == null) {
-      this.errorHandler = new DefaultErrorHandler<Identifier>(logger); 
+      this.errorHandler = new DefaultErrorHandler<>(logger);
     }
   }
 
@@ -160,7 +137,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
    * passthrough (the layer higher than us asked to open it) socket or a 
    * primary (our layer tried to open it) socket.
    */
-  public void incomingSocket(final P2PSocket<Identifier> s) throws IOException {
+  public void incomingSocket(final P2PSocket<Identifier> s) {
     s.register(true, false, new P2PSocketReceiver<Identifier>() {
       public void receiveSelectResult(P2PSocket<Identifier> socket, boolean canRead, boolean canWrite) throws IOException {
         if (socket != s) throw new IllegalArgumentException("Sockets not equal!!! s:"+s+" socket:"+socket);
@@ -219,7 +196,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
   public SocketRequestHandle<Identifier> openSocket(Identifier i, final SocketCallback<Identifier> deliverSocketToMe, Map<String, Object> options) {
     if (deliverSocketToMe == null) throw new IllegalArgumentException("No handle to return socket to! (deliverSocketToMe must be non-null!)");
     
-    final SocketRequestHandleImpl<Identifier> handle = new SocketRequestHandleImpl<Identifier>(i, options, logger);    
+    final SocketRequestHandleImpl<Identifier> handle = new SocketRequestHandleImpl<>(i, options, logger);
     handle.setSubCancellable(tl.openSocket(i, new SocketCallback<Identifier>() {
       public void receiveResult(SocketRequestHandle<Identifier> cancellable, final P2PSocket<Identifier> sock) {
         
@@ -278,7 +255,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
         options.containsKey(WireTransportLayer.OPTION_TRANSPORT_TYPE)) {
         Integer val = (Integer)options.get(WireTransportLayer.OPTION_TRANSPORT_TYPE);
         if (val != null &&
-            val.intValue() == WireTransportLayer.TRANSPORT_TYPE_DATAGRAM) {
+                val == WireTransportLayer.TRANSPORT_TYPE_DATAGRAM) {
           final int originalSize = m.remaining();
           return tl.sendMessage(i, m, new MessageCallback<Identifier, ByteBuffer>() {
 
@@ -471,8 +448,8 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
   public class EntityManager implements P2PSocketReceiver<Identifier> {
     // TODO: think about the behavior of this when it wraps around...
     int seq = Integer.MIN_VALUE;
-    SortedLinkedList<MessageWrapper> queue; // messages we want to send
-    Collection<P2PSocket<Identifier>> sockets;
+    final SortedLinkedList<MessageWrapper> queue; // messages we want to send
+    final Collection<P2PSocket<Identifier>> sockets;
     
     WeakReference<Identifier> identifier;
     
@@ -484,9 +461,9 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
     private boolean registered = false;  // true if registed for writing
     
     public EntityManager(Identifier identifier) {
-      this.identifier = new WeakReference<Identifier>(identifier);
-      queue = new SortedLinkedList<MessageWrapper>();
-      sockets = new HashSet<P2PSocket<Identifier>>();
+      this.identifier = new WeakReference<>(identifier);
+      queue = new SortedLinkedList<>();
+      sockets = new HashSet<>();
     }
 
     public String toString() {
@@ -515,7 +492,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
         messageThatIsBeingWritten = null;
       }
       synchronized(EntityManager.this) {  
-        if (logger.level <= logger.INFO) logger.log(EntityManager.this+".clearState() setting pendingSocket to null "+pendingSocket);
+        if (logger.level <= Logger.INFO) logger.log(EntityManager.this+".clearState() setting pendingSocket to null "+pendingSocket);
 
         if (pendingSocket != null) {
           pendingSocket.cancel();
@@ -567,7 +544,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
       synchronized(EntityManager.this) {
         if (receipt != null) {
           if (receipt == pendingSocket) {
-            if (logger.level <= logger.INFO) logger.log(EntityManager.this+".primarySocketAvailable setting pendingSocket to null "+pendingSocket);
+            if (logger.level <= Logger.INFO) logger.log(EntityManager.this+".primarySocketAvailable setting pendingSocket to null "+pendingSocket);
             stopLivenessChecker();
             if (logger.level <= Logger.FINE) logger.log("got socket:"+s+" clearing pendingSocket:"+pendingSocket);
             pendingSocket = null;  // this is the one we requested
@@ -736,7 +713,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
               livenessProvider.checkLiveness(temp, options);        
 
             // if this throws a NPE, there is a bug, cause this should have been cancelled if pendingSocket == null
-              if (logger.level <= logger.INFO) logger.log(EntityManager.this+".liveness checker setting pendingSocket to null "+pendingSocket);
+              if (logger.level <= Logger.INFO) logger.log(EntityManager.this+".liveness checker setting pendingSocket to null "+pendingSocket);
               pendingSocket.cancel();  
               pendingSocket = null;
             }
@@ -795,8 +772,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
      * @return
      */
     private boolean haveMessageToSend() {
-      if (messageThatIsBeingWritten == null && queue.isEmpty()) return false; 
-      return true;
+      return messageThatIsBeingWritten != null || !queue.isEmpty();
     }
 
     /**
@@ -864,9 +840,9 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
 //      }
       synchronized(EntityManager.this) {
         if (handle == pendingSocket) {        
-          if (logger.level <= logger.FINE) {
+          if (logger.level <= Logger.FINE) {
             logger.logException(EntityManager.this+".receiveSocketException("+ex+") setting pendingSocket to null "+pendingSocket, ex);
-          } else if (logger.level <= logger.INFO) {
+          } else if (logger.level <= Logger.INFO) {
             logger.log(EntityManager.this+".receiveSocketException("+ex+") setting pendingSocket to null "+pendingSocket);
           }
 
@@ -905,8 +881,8 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
     
     public void purge(IOException ioe) {
       if (logger.level <= Logger.FINE) logger.log(this+"purge("+ioe+"):"+messageThatIsBeingWritten);
-      ArrayList<Tuple<MessageCallback<Identifier, ByteBuffer>, MessageWrapper>> callSendFailed = 
-        new ArrayList<Tuple<MessageCallback<Identifier, ByteBuffer>, MessageWrapper>>();
+      ArrayList<Tuple<MessageCallback<Identifier, ByteBuffer>, MessageWrapper>> callSendFailed =
+              new ArrayList<>();
       synchronized(queue) {
         // return NodeIsFaultyException to all of the message(s) deliverAckToMe(s)
         if (messageThatIsBeingWritten != null) {
@@ -942,7 +918,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
       }
       setWritingSocket(null/*, "purge"*/);
       synchronized(EntityManager.this) {
-        if (logger.level <= logger.INFO) logger.log(EntityManager.this+".purge setting pendingSocket to null "+pendingSocket);
+        if (logger.level <= Logger.INFO) logger.log(EntityManager.this+".purge setting pendingSocket to null "+pendingSocket);
         if (pendingSocket != null) {
           stopLivenessChecker();
   //        logger.log("cancelling "+pendingSocket);
@@ -954,15 +930,15 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
     }
     
     // ******************************* Big messages **************************** //
-    Map<Identifier,PendingMessages> pendingBigMessages = new HashMap<Identifier, PendingMessages>();
+    Map<Identifier,PendingMessages> pendingBigMessages = new HashMap<>();
     class PendingMessages implements SocketCallback<Identifier>, P2PSocketReceiver<Identifier> {
       Identifier i;
       
       /**
        * Put on back, get from front
        */
-      LinkedList<PendingMessage> msgs = 
-        new LinkedList<PendingMessage>();
+      LinkedList<PendingMessage> msgs =
+              new LinkedList<>();
       P2PSocket<Identifier> socket;
       ByteBuffer header;
       
@@ -1227,7 +1203,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
       int priority = DEFAULT_PRIORITY;
       if (options != null) {
         if (options.containsKey(OPTION_PRIORITY)) {
-          priority = ((Integer)options.get(OPTION_PRIORITY)).intValue();          
+          priority = (Integer) options.get(OPTION_PRIORITY);
         }
       }
 
@@ -1344,6 +1320,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
       boolean cancelled = false; // true when cancel is called
       boolean completed = false; // true when completed is called
       
+      @SuppressWarnings("PointlessBitwiseExpression")
       MessageWrapper(
           Identifier temp,
           ByteBuffer message, 
@@ -1499,7 +1476,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
       }
       
       @Override
-      public void done(P2PSocket<Identifier> socket) throws IOException {
+      public void done(P2PSocket<Identifier> socket) {
         int msgSize = buf.asIntBuffer().get();
         if (logger.level <= Logger.FINER) logger.log(EntityManager.this+" reading message of size "+msgSize);
 
@@ -1613,7 +1590,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
     
     public List<MessageInfo> getPendingMessages() {
       synchronized(queue) {
-        ArrayList<MessageInfo> ret = new ArrayList<MessageInfo>(queue.size());
+        ArrayList<MessageInfo> ret = new ArrayList<>(queue.size());
 //        if (messageThatIsBeingWritten != null) {
 //          ret+=messageThatIsBeingWritten.message.remaining();        
 //        }
@@ -1629,8 +1606,8 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
   /**
    * Note that listeners contains a superset of plisteners
    */
-  ArrayList<TransportLayerListener<Identifier>> listeners = new ArrayList<TransportLayerListener<Identifier>>();
-  ArrayList<PriorityTransportLayerListener<Identifier>> plisteners = new ArrayList<PriorityTransportLayerListener<Identifier>>();
+  final ArrayList<TransportLayerListener<Identifier>> listeners = new ArrayList<>();
+  final ArrayList<PriorityTransportLayerListener<Identifier>> plisteners = new ArrayList<>();
   
   public void addTransportLayerListener(TransportLayerListener<Identifier> listener) {
     synchronized(listeners) { 
@@ -1663,7 +1640,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
     ArrayList<TransportLayerListener<Identifier>> temp;
     
     synchronized(listeners) { 
-      temp = new ArrayList<TransportLayerListener<Identifier>>(listeners);
+      temp = new ArrayList<>(listeners);
     }
     for (TransportLayerListener<Identifier> l : temp) {
       l.read(size, source, options, true, true);
@@ -1676,7 +1653,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
     ArrayList<TransportLayerListener<Identifier>> temp;
     
     synchronized(listeners) { 
-      temp = new ArrayList<TransportLayerListener<Identifier>>(listeners);
+      temp = new ArrayList<>(listeners);
     }
     for (TransportLayerListener<Identifier> l : temp) {
       l.wrote(size, dest, options, true, true);
@@ -1689,7 +1666,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
     ArrayList<PriorityTransportLayerListener<Identifier>> temp;
     
     synchronized(plisteners) { 
-      temp = new ArrayList<PriorityTransportLayerListener<Identifier>>(plisteners);
+      temp = new ArrayList<>(plisteners);
     }
     for (PriorityTransportLayerListener<Identifier> l : temp) {
       l.enqueued(size, dest, options, true, true);
@@ -1702,7 +1679,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
     ArrayList<PriorityTransportLayerListener<Identifier>> temp;
     
     synchronized(plisteners) { 
-      temp = new ArrayList<PriorityTransportLayerListener<Identifier>>(plisteners);
+      temp = new ArrayList<>(plisteners);
     }
     for (PriorityTransportLayerListener<Identifier> l : temp) {
       l.dropped(size, dest, options, true, true);
@@ -1724,7 +1701,7 @@ public class PriorityTransportLayerImpl<Identifier> implements PriorityTransport
   }
   
   public Collection<Identifier> nodesWithPendingMessages() {
-    ArrayList<Identifier> ret = new ArrayList<Identifier>();
+    ArrayList<Identifier> ret = new ArrayList<>();
     synchronized(entityManagers) {
       for(EntityManager m : entityManagers.values()) {
         if (m.peek() != null) {

@@ -36,18 +36,17 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.commitment;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.MessageCallback;
 import org.mpisws.p2p.transport.MessageRequestHandle;
 import org.mpisws.p2p.transport.peerreview.infostore.StatusChangeListener;
 import org.mpisws.p2p.transport.peerreview.message.AckMessage;
 import org.mpisws.p2p.transport.peerreview.message.UserDataMessage;
-
 import rice.p2p.commonapi.rawserialization.RawSerializable;
 import rice.p2p.util.tuples.Tuple;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 /**
  * This protocol attaches signatures to outgoing messages and acknowledges
@@ -63,14 +62,14 @@ public interface CommitmentProtocol<Handle extends RawSerializable, Identifier e
 //  long long findAckEntry(Identifier *id, long long seq);
 //  void initReceiveCache();
 //  void addToReceiveCache(Identifier *id, long long senderSeq, int indexInLocalHistory);
-  public MessageRequestHandle<Handle, ByteBuffer> handleOutgoingMessage(
-      Handle target, ByteBuffer message, 
-      MessageCallback<Handle, ByteBuffer> deliverAckToMe, 
-      Map<String, Object> options);
-  public void handleIncomingAck(Handle source, AckMessage<Identifier> ackMessage, Map<String, Object> options) throws IOException;
-  public void handleIncomingMessage(Handle source, UserDataMessage<Handle> msg, Map<String, Object> options) throws IOException;
-  public void notifyCertificateAvailable(Identifier id);
-  public Tuple<AckMessage<Identifier>,Boolean> logMessageIfNew(UserDataMessage<Handle> udm);
-  public void setTimeToleranceMillis(long timeToleranceMicros);
+MessageRequestHandle<Handle, ByteBuffer> handleOutgoingMessage(
+        Handle target, ByteBuffer message,
+        MessageCallback<Handle, ByteBuffer> deliverAckToMe,
+        Map<String, Object> options);
+  void handleIncomingAck(Handle source, AckMessage<Identifier> ackMessage, Map<String, Object> options) throws IOException;
+  void handleIncomingMessage(Handle source, UserDataMessage<Handle> msg, Map<String, Object> options);
+  void notifyCertificateAvailable(Identifier id);
+  Tuple<AckMessage<Identifier>,Boolean> logMessageIfNew(UserDataMessage<Handle> udm);
+  void setTimeToleranceMillis(long timeToleranceMicros);
 
 }

@@ -37,15 +37,19 @@ advised of the possibility of such damage.
 
 package rice.p2p.splitstream;
 
-import java.io.*;
-import java.util.*;
-
 import rice.environment.Environment;
 import rice.environment.params.Parameters;
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Node;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.p2p.scribe.*;
+import rice.p2p.scribe.Scribe;
+import rice.p2p.scribe.ScribeContent;
+import rice.p2p.scribe.ScribeImpl;
+import rice.p2p.scribe.ScribePolicy;
 import rice.p2p.scribe.rawserialization.ScribeContentDeserializer;
+
+import java.io.IOException;
+import java.util.Hashtable;
 
 /**
  * This is the implementing class of the ISplitStream interface. It provides the functionality of
@@ -123,7 +127,7 @@ public class SplitStreamImpl implements SplitStream {
     });
     
     this.node = node;
-    this.channels = new Hashtable<ChannelId, Channel>();
+    this.channels = new Hashtable<>();
     scribe.setPolicy(factory.getSplitStreamScribePolicy(scribe, this));
   }
 

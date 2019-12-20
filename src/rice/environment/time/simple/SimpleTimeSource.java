@@ -40,7 +40,6 @@ advised of the possibility of such damage.
 package rice.environment.time.simple;
 
 import rice.environment.time.TimeSource;
-import rice.selector.SelectorManager;
 
 
 /**

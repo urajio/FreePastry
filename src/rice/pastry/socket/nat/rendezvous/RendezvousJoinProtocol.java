@@ -36,16 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.socket.nat.rendezvous;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.SocketRequestHandle;
 import org.mpisws.p2p.transport.rendezvous.ContactDirectStrategy;
 import org.mpisws.p2p.transport.rendezvous.PilotManager;
 import org.mpisws.p2p.transport.rendezvous.RendezvousTransportLayerImpl;
 import org.mpisws.p2p.transport.util.OptionsFactory;
-
 import rice.Continuation;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
@@ -57,6 +52,9 @@ import rice.pastry.leafset.LeafSet;
 import rice.pastry.messaging.Message;
 import rice.pastry.routing.RoutingTable;
 import rice.pastry.standard.ConsistentJoinProtocol;
+
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * The purpose of this class is to allow a NATted node to boot.  
@@ -163,10 +161,9 @@ public class RendezvousJoinProtocol extends ConsistentJoinProtocol {
 
     @Override
     public Message deserialize(InputBuffer buf, short type, int priority, NodeHandle sender) throws IOException {
-      switch(type) {
-        case RendezvousJoinRequest.TYPE:
-          return new RendezvousJoinRequest(buf,pn, (NodeHandle)sender, pn);
-      }      
+        if (type == RendezvousJoinRequest.TYPE) {
+            return new RendezvousJoinRequest(buf, pn, (NodeHandle) sender, pn);
+        }
       return super.deserialize(buf, type, priority, sender);
     }
   }

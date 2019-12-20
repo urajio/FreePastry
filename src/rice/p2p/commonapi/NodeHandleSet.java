@@ -37,10 +37,11 @@ advised of the possibility of such damage.
 
 package rice.p2p.commonapi;
 
-import java.io.*;
-import java.util.*;
-
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.NoSuchElementException;
 
 /**
  * @(#) NodeHandleSet.java
@@ -61,7 +62,7 @@ public interface NodeHandleSet extends Serializable /*, Iterable<NodeHandle>*/ {
    *
    * @return true if the put succeeded, false otherwise.
    */
-  public boolean putHandle(NodeHandle handle);
+  boolean putHandle(NodeHandle handle);
 
   /**
    * Finds the NodeHandle associated with the NodeId.
@@ -69,7 +70,7 @@ public interface NodeHandleSet extends Serializable /*, Iterable<NodeHandle>*/ {
    * @param id a node id.
    * @return the handle associated with that id or null if no such handle is found.
    */
-  public NodeHandle getHandle(Id id);
+  NodeHandle getHandle(Id id);
 
   /**
    * Gets the ith element in the set.
@@ -77,7 +78,7 @@ public interface NodeHandleSet extends Serializable /*, Iterable<NodeHandle>*/ {
    * @param i an index.
    * @return the handle associated with that id or null if no such handle is found.
    */
-  public NodeHandle getHandle(int i);
+  NodeHandle getHandle(int i);
 
   /**
    * Verifies if the set contains this particular id.
@@ -85,7 +86,7 @@ public interface NodeHandleSet extends Serializable /*, Iterable<NodeHandle>*/ {
    * @param id a node id.
    * @return true if that node id is in the set, false otherwise.
    */
-  public boolean memberHandle(Id id);
+  boolean memberHandle(Id id);
 
   /**
    * Removes a node id and its handle from the set.
@@ -94,14 +95,14 @@ public interface NodeHandleSet extends Serializable /*, Iterable<NodeHandle>*/ {
    *
    * @return the node handle removed or null if nothing.
    */
-  public NodeHandle removeHandle(Id id);
+  NodeHandle removeHandle(Id id);
 
   /**
    * Gets the size of the set.
    *
    * @return the size.
    */
-  public int size();
+  int size();
   
   /**
    * Gets the index of the element with the given node id.
@@ -110,9 +111,9 @@ public interface NodeHandleSet extends Serializable /*, Iterable<NodeHandle>*/ {
    *
    * @return the index or throws a NoSuchElementException.
    */
-  public int getIndexHandle(Id id) throws NoSuchElementException;
+  int getIndexHandle(Id id) throws NoSuchElementException;
   
-  public void serialize(OutputBuffer buf) throws IOException;  
+  void serialize(OutputBuffer buf) throws IOException;
   
-  public short getType();
+  short getType();
 }

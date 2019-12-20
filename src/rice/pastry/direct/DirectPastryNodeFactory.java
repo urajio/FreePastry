@@ -37,31 +37,31 @@ advised of the possibility of such damage.
 
 package rice.pastry.direct;
 
+import org.mpisws.p2p.transport.TransportLayer;
+import org.mpisws.p2p.transport.direct.DirectTransportLayer;
+import org.mpisws.p2p.transport.proximity.ProximityListener;
+import org.mpisws.p2p.transport.proximity.ProximityProvider;
 import rice.Continuation;
 import rice.environment.Environment;
-import rice.environment.logging.*;
+import rice.environment.logging.CloneableLogManager;
+import rice.environment.logging.Logger;
 import rice.p2p.commonapi.CancellableTask;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.RawMessage;
 import rice.pastry.*;
-import rice.pastry.messaging.*;
-import rice.pastry.standard.*;
+import rice.pastry.boot.Bootstrapper;
+import rice.pastry.leafset.LeafSet;
+import rice.pastry.leafset.LeafSetProtocol;
+import rice.pastry.routing.RouteSet;
+import rice.pastry.routing.RoutingTable;
+import rice.pastry.standard.ProximityNeighborSelector;
+import rice.pastry.standard.StandardLeafSetProtocol;
 import rice.pastry.transport.NodeHandleAdapter;
 import rice.pastry.transport.TLDeserializer;
 import rice.pastry.transport.TransportPastryNodeFactory;
-import rice.pastry.routing.*;
-import rice.pastry.boot.Bootstrapper;
-import rice.pastry.leafset.*;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
-
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.direct.DirectTransportLayer;
-import org.mpisws.p2p.transport.liveness.LivenessListener;
-import org.mpisws.p2p.transport.liveness.LivenessProvider;
-import org.mpisws.p2p.transport.proximity.ProximityListener;
-import org.mpisws.p2p.transport.proximity.ProximityProvider;
 
 /**
  * Pastry node factory for direct connections between nodes (local instances).
@@ -79,8 +79,8 @@ public class DirectPastryNodeFactory extends TransportPastryNodeFactory {
 
   protected NetworkSimulator simulator;
   
-  protected Collection<NodeHandleFactoryListener<NodeHandle>> listeners = 
-    new ArrayList<NodeHandleFactoryListener<NodeHandle>>();
+  protected Collection<NodeHandleFactoryListener<NodeHandle>> listeners =
+          new ArrayList<>();
 
   
   /**
@@ -129,7 +129,7 @@ public class DirectPastryNodeFactory extends TransportPastryNodeFactory {
     return newNode(nidFactory.generateNodeId());
   }
 
-  HashMap<Id, NodeRecord> recordTable = new HashMap<Id, NodeRecord>();
+  HashMap<Id, NodeRecord> recordTable = new HashMap<>();
 
   public PastryNode newNode(NodeHandle bootstrap, Id nodeId) {
     try {
@@ -185,7 +185,7 @@ public class DirectPastryNodeFactory extends TransportPastryNodeFactory {
    * @param handle The node to connect to
    * @return The leafset of the remote node
    */
-  public LeafSet getLeafSet(NodeHandle handle) throws IOException {
+  public LeafSet getLeafSet(NodeHandle handle) {
     DirectNodeHandle dHandle = (DirectNodeHandle) handle;
 
     return dHandle.getRemote().getLeafSet();
@@ -225,7 +225,7 @@ public class DirectPastryNodeFactory extends TransportPastryNodeFactory {
    * @param row The row number to retrieve
    * @return The route row of the remote node
    */
-  public RouteSet[] getRouteRow(NodeHandle handle, int row) throws IOException {
+  public RouteSet[] getRouteRow(NodeHandle handle, int row) {
     DirectNodeHandle dHandle = (DirectNodeHandle) handle;
 
     return dHandle.getRemote().getRoutingTable().getRow(row);
@@ -250,17 +250,16 @@ public class DirectPastryNodeFactory extends TransportPastryNodeFactory {
   }
 
   @Override
-  protected NodeHandle getLocalHandle(PastryNode pn, NodeHandleFactory handleFactory) throws IOException {
-    DirectNodeHandle localhandle = new DirectNodeHandle(pn, simulator);
-    return localhandle;
+  protected NodeHandle getLocalHandle(PastryNode pn, NodeHandleFactory handleFactory) {
+    return new DirectNodeHandle(pn, simulator);
   }
 
   @Override
-  protected NodeHandleFactory getNodeHandleFactory(PastryNode pn) throws IOException {
+  protected NodeHandleFactory getNodeHandleFactory(PastryNode pn) {
     // TODO: Make this work
     return new NodeHandleFactory<NodeHandle>(){
     
-      public NodeHandle readNodeHandle(InputBuffer buf) throws IOException {
+      public NodeHandle readNodeHandle(InputBuffer buf) {
         // TODO Auto-generated method stub
         return null;
       }
@@ -277,7 +276,7 @@ public class DirectPastryNodeFactory extends TransportPastryNodeFactory {
       protected void notifyListeners(NodeHandle nh) {
         Collection<NodeHandleFactoryListener<NodeHandle>> temp = listeners;
         synchronized (listeners) {      
-          temp = new ArrayList<NodeHandleFactoryListener<NodeHandle>>(listeners);      
+          temp = new ArrayList<>(listeners);
         }
         for (NodeHandleFactoryListener<NodeHandle> foo:temp) {
           foo.nodeHandleFound(nh);
@@ -302,7 +301,7 @@ public class DirectPastryNodeFactory extends TransportPastryNodeFactory {
   }
 
   @Override
-  protected NodeHandleAdapter getNodeHandleAdapter(final PastryNode pn, NodeHandleFactory handleFactory, TLDeserializer deserializer) throws IOException {
+  protected NodeHandleAdapter getNodeHandleAdapter(final PastryNode pn, NodeHandleFactory handleFactory, TLDeserializer deserializer) {
     NodeRecord nr = (NodeRecord)recordTable.get(pn.getId());
     if (nr == null) {
       nr = simulator.generateNodeRecord();
@@ -310,14 +309,14 @@ public class DirectPastryNodeFactory extends TransportPastryNodeFactory {
     }
     TransportLayer<NodeHandle, RawMessage> tl = getDirectTransportLayer(pn, nr);
     // new DirectTransportLayer<NodeHandle, RawMessage>(pn.getLocalHandle(), simulator, nr, pn.getEnvironment());
-        
-    NodeHandleAdapter nha = new NodeHandleAdapter(tl,simulator.getLivenessProvider(),new ProximityProvider<NodeHandle>(){          
+
+    return new NodeHandleAdapter(tl,simulator.getLivenessProvider(),new ProximityProvider<NodeHandle>(){
       public int proximity(NodeHandle i, Map<String, Object> options) {
         return (int)simulator.proximity((DirectNodeHandle)pn.getLocalHandle(), (DirectNodeHandle)i);
       }
-    
+
       // proximity won't change, so don't worry about it
-      List<ProximityListener<NodeHandle>> proxListeners = new ArrayList<ProximityListener<NodeHandle>>();
+      List<ProximityListener<NodeHandle>> proxListeners = new ArrayList<>();
       public void addProximityListener(ProximityListener<NodeHandle> name) {
         proxListeners.add(name);
       }
@@ -328,10 +327,8 @@ public class DirectPastryNodeFactory extends TransportPastryNodeFactory {
 
       public void clearState(NodeHandle i) {
 
-      }    
+      }
     });
-    
-    return nha;
   }
 
   /**
@@ -341,8 +338,7 @@ public class DirectPastryNodeFactory extends TransportPastryNodeFactory {
    * @return
    */
   protected TransportLayer<NodeHandle, RawMessage> getDirectTransportLayer(PastryNode pn, NodeRecord nr) {
-    DirectTransportLayer<NodeHandle, RawMessage> tl = new DirectTransportLayer<NodeHandle, RawMessage>(pn.getLocalHandle(), simulator, nr, pn.getEnvironment());    
-    return tl;
+    return new DirectTransportLayer<NodeHandle, RawMessage>(pn.getLocalHandle(), simulator, nr, pn.getEnvironment());
   }
   
   @Override

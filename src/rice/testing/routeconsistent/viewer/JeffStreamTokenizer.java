@@ -90,7 +90,7 @@ public class JeffStreamTokenizer {
     private Reader reader = null;
     private InputStream input = null;
 
-    private char buf[] = new char[20];
+    private char[] buf = new char[20];
 
     /**
      * The next character to be considered by the nextToken method.  May also
@@ -113,7 +113,7 @@ public class JeffStreamTokenizer {
     private boolean slashSlashCommentsP = false;
     private boolean slashStarCommentsP = false;
 
-    private byte ctype[] = new byte[256];
+    private byte[] ctype = new byte[256];
     private static final byte CT_WHITESPACE = 1;
     private static final byte CT_DIGIT = 2;
     private static final byte CT_ALPHA = 4;
@@ -545,7 +545,7 @@ public class JeffStreamTokenizer {
       pushedBack = false;
       return ttype;
   }
-  byte ct[] = ctype;
+  byte[] ct = ctype;
   sval = null;
 
   int c = peekc;
@@ -599,7 +599,7 @@ public class JeffStreamTokenizer {
       int i = 0;
       do {
     if (i >= buf.length) {
-        char nb[] = new char[buf.length * 2];
+        char[] nb = new char[buf.length * 2];
         System.arraycopy(buf, 0, nb, 0, buf.length);
         buf = nb;
     }
@@ -657,7 +657,7 @@ public class JeffStreamTokenizer {
       int i = 0;
       do {
     if (i >= buf.length) {
-        char nb[] = new char[buf.length * 2];
+        char[] nb = new char[buf.length * 2];
         System.arraycopy(buf, 0, nb, 0, buf.length);
         buf = nb;
     }
@@ -728,7 +728,7 @@ public class JeffStreamTokenizer {
         d = read();
     }
     if (i >= buf.length) {
-        char nb[] = new char[buf.length * 2];
+        char[] nb = new char[buf.length * 2];
         System.arraycopy(buf, 0, nb, 0, buf.length);
         buf = nb;
     }
@@ -863,7 +863,7 @@ public class JeffStreamTokenizer {
         break;
     }
 
-    char s[] = new char[3];
+    char[] s = new char[3];
     s[0] = s[2] = '\'';
     s[1] = (char) ttype;
     ret = new String(s);

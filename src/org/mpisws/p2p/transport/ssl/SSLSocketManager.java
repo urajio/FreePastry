@@ -36,27 +36,24 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.ssl;
 
+import org.mpisws.p2p.transport.ClosedChannelException;
+import org.mpisws.p2p.transport.P2PSocket;
+import org.mpisws.p2p.transport.P2PSocketReceiver;
+import org.mpisws.p2p.transport.util.OptionsFactory;
+import rice.Continuation;
+import rice.Executable;
+import rice.environment.logging.Logger;
+
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLEngineResult;
+import javax.net.ssl.SSLEngineResult.HandshakeStatus;
+import javax.net.ssl.SSLException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLEngineResult;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLEngineResult.HandshakeStatus;
-
-import org.mpisws.p2p.transport.ClosedChannelException;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.util.OptionsFactory;
-
-import rice.Continuation;
-import rice.Executable;
-import rice.environment.logging.Logger;
-import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
 
 public class SSLSocketManager<Identifier> implements P2PSocket<Identifier>,
     P2PSocketReceiver<Identifier> {
@@ -79,8 +76,8 @@ public class SSLSocketManager<Identifier> implements P2PSocket<Identifier>,
   protected HandshakeStatus status;
 
 //  LinkedList<ByteBuffer> encryptMe; // plain, outgoing
-  protected LinkedList<ByteBuffer> writeMe = new LinkedList<ByteBuffer>(); // cipher, outgoing
-  protected LinkedList<ByteBuffer> unwrapMe = new LinkedList<ByteBuffer>(); // cipher, incoming
+  protected LinkedList<ByteBuffer> writeMe = new LinkedList<>(); // cipher, outgoing
+  protected LinkedList<ByteBuffer> unwrapMe = new LinkedList<>(); // cipher, incoming
   protected LinkedList<ByteBuffer> readMe; // plain, incoming
   
 
@@ -131,7 +128,7 @@ public class SSLSocketManager<Identifier> implements P2PSocket<Identifier>,
 
 //    encryptMe = new LinkedList<ByteBuffer>();
     bogusEncryptMe = ByteBuffer.allocate(0);
-    readMe = new LinkedList<ByteBuffer>();
+    readMe = new LinkedList<>();
     
 //    logger.log("app:"+appBufferMax+" net:"+netBufferMax);
     socket.register(true, false, this);
@@ -414,7 +411,7 @@ public class SSLSocketManager<Identifier> implements P2PSocket<Identifier>,
       runningTaskLock = true;
       sslTL.environment.getProcessor().process(new Executable<Object, Exception>() {
         
-        public Object execute() throws Exception {
+        public Object execute() {
           Runnable runnable;
           while ((runnable = engine.getDelegatedTask()) != null) {
 //            logger.log("\trunning delegated task...");
@@ -431,13 +428,14 @@ public class SSLSocketManager<Identifier> implements P2PSocket<Identifier>,
       },new Continuation<Object, Exception>() {
         public void receiveException(Exception exception) {
           exception.printStackTrace();
-        };
-        public void receiveResult(Object result) {          
+        }
+
+                                                   public void receiveResult(Object result) {
 //          logger.log("Done executing, calling go2");          
           runningTaskLock = false;
           continueHandshaking();
-        };
-      }
+        }
+                                               }
       , sslTL.environment.getSelectorManager(), sslTL.environment.getTimeSource(), sslTL.environment.getLogManager());
     }
   }

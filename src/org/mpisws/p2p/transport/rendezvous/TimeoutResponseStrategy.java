@@ -36,12 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.rendezvous;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
-
 import rice.environment.Environment;
 import rice.environment.time.TimeSource;
 import rice.p2p.util.TimerWeakHashMap;
+
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 /**
  * This impl allows responses up to timeout millis later.
@@ -60,7 +60,7 @@ public class TimeoutResponseStrategy<Identifier> implements ResponseStrategy<Ide
   
   public TimeoutResponseStrategy(int timeout, Environment env) {
     this.timeout = timeout;
-    this.lastTimeReceived = new TimerWeakHashMap<Identifier, Long>(env.getSelectorManager(), 60000+timeout);
+    this.lastTimeReceived = new TimerWeakHashMap<>(env.getSelectorManager(), 60000 + timeout);
     this.time = env.getTimeSource();
   }
   

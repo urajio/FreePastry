@@ -37,17 +37,18 @@ advised of the possibility of such damage.
 
 package rice.p2p.commonapi;
 
+import rice.Continuation;
+import rice.Executable;
+import rice.environment.Environment;
+import rice.p2p.commonapi.appsocket.AppSocketReceiver;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.MessageDeserializer;
+import rice.p2p.commonapi.rawserialization.NodeHandleReader;
+import rice.p2p.commonapi.rawserialization.RawMessage;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-
-import rice.*;
-import rice.environment.Environment;
-import rice.p2p.commonapi.appsocket.AppSocketReceiver;
-import rice.p2p.commonapi.rawserialization.*;
 
 /**
  * @(#) Endpoint.java
@@ -68,7 +69,7 @@ public interface Endpoint extends NodeHandleReader {
    *
    * @return The local node's id
    */
-  public Id getId();
+  Id getId();
   
   /**
    * This method makes an attempt to route the message to the root of the given id.
@@ -242,13 +243,13 @@ public interface Endpoint extends NodeHandleReader {
    * 
    * @return The unique instance name of this application
    */
-  public String getInstance();
+  String getInstance();
   
   /**
    * Returns the environment.  This allows the nodes to be virtualized within the JVM
    * @return the environment for this node/app.
    */
-  public Environment getEnvironment();
+  Environment getEnvironment();
 
   /**
    * Set's the acceptor for this application.  If no acceptor is set, then when a remote
@@ -259,7 +260,7 @@ public interface Endpoint extends NodeHandleReader {
    * Note that you must call accept() again after each socket is received to properly handle
    * socket backlogging
    */
-  public void accept(AppSocketReceiver receiver);
+  void accept(AppSocketReceiver receiver);
 
   /**
    * Opens a connection to this application on a remote node.
@@ -268,20 +269,20 @@ public interface Endpoint extends NodeHandleReader {
    * @param receiver calls receiveSocket() when a new AppSocket is opened to this application
    * on a remote node.
    */
-  public void connect(NodeHandle handle, AppSocketReceiver receiver, int timeout);
+  void connect(NodeHandle handle, AppSocketReceiver receiver, int timeout);
   
   /**
    * To use a more efficient serialization format than Java Serialization
    * 
    * @param md
    */
-  public void setDeserializer(MessageDeserializer md);
+  void setDeserializer(MessageDeserializer md);
   
   /**
    * Returns the deserializer.  The default deserializer can deserialize rice.p2p.util.JavaSerializedMessage
    * @return
    */
-  public MessageDeserializer getDeserializer();
+  MessageDeserializer getDeserializer();
   
   /**
    * default value is true
@@ -300,7 +301,7 @@ public interface Endpoint extends NodeHandleReader {
    * 
    * @param val
    */
-  public void setConsistentRouting(boolean val);
+  void setConsistentRouting(boolean val);
   
   /**
    * Can we guarantee that this id is currently ours, and routing will be consistent?  
@@ -310,14 +311,14 @@ public interface Endpoint extends NodeHandleReader {
    * @param the id to verify
    * @return true if routing consistency can currently be guaranteed for this
    */
-  public boolean routingConsistentFor(Id id);
+  boolean routingConsistentFor(Id id);
   
   /**
    * To use a more efficient serialization format than Java Serialization
    * 
    * @param md
    */
-  public Id readId(InputBuffer buf, short type) throws IOException;
+  Id readId(InputBuffer buf, short type) throws IOException;
 
   /**
    * Returns an ordered list of the nearest known neighbors.  
@@ -326,7 +327,7 @@ public interface Endpoint extends NodeHandleReader {
    * @param num
    * @return List of NodeHandle
    */
-  public List<NodeHandle> networkNeighbors(int num);
+  List<NodeHandle> networkNeighbors(int num);
   
   /**
    * To use Raw Serialization
@@ -334,18 +335,18 @@ public interface Endpoint extends NodeHandleReader {
    * @return
    * @throws IOException 
    */
-  public IdRange readIdRange(InputBuffer buf) throws IOException;
+  IdRange readIdRange(InputBuffer buf) throws IOException;
   
-  public NodeHandleSet readNodeHandleSet(InputBuffer buf, short type) throws IOException;
+  NodeHandleSet readNodeHandleSet(InputBuffer buf, short type) throws IOException;
   
-  public NodeHandle readNodeHandle(InputBuffer buf) throws IOException;
+  NodeHandle readNodeHandle(InputBuffer buf) throws IOException;
   
   /**
    * Call this after you have set up your Endpoint:
    *   called setDeserializer(), called accept().
    *
    */
-  public void register();
+  void register();
   
   /**
    * This replaces NodeHandle.proximity(), so that you don't have to have a "coalesced" NodeHandle.
@@ -353,16 +354,16 @@ public interface Endpoint extends NodeHandleReader {
    * @param nh
    * @return
    */
-  public int proximity(NodeHandle nh);
+  int proximity(NodeHandle nh);
   
-  public boolean isAlive(NodeHandle nh);
+  boolean isAlive(NodeHandle nh);
   
   /**
    * Uses these options as defaults.
    * 
    * @param options
    */
-  public void setSendOptions(Map<String, Object> options);
+  void setSendOptions(Map<String, Object> options);
 }
 
 

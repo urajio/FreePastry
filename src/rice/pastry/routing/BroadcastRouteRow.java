@@ -36,12 +36,16 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.routing;
 
-import rice.p2p.commonapi.rawserialization.*;
-import rice.pastry.*;
-import rice.pastry.messaging.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.pastry.NodeHandle;
+import rice.pastry.NodeHandleFactory;
+import rice.pastry.PastryNode;
+import rice.pastry.messaging.PRawMessage;
 
-import java.util.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Broadcast message for a row from a routing table.
@@ -114,9 +118,9 @@ public class BroadcastRouteRow extends PRawMessage implements Serializable {
   
   public String toStringFull() {
     String s = "BRR{"+fromNode+"}:";
-    for (int i = 0; i < row.length; i++) {
-      s+=row[i]+"|";
-    }
+      for (RouteSet nodeHandles : row) {
+          s += nodeHandles + "|";
+      }
     return s;
   }
   
@@ -129,31 +133,29 @@ public class BroadcastRouteRow extends PRawMessage implements Serializable {
     buf.writeByte((byte)0); // version
     fromNode.serialize(buf);
     buf.writeByte((byte) row.length);
-    for (int i=0; i<row.length; i++) {
-      if (row[i] != null) {
-        buf.writeBoolean(true);
-        row[i].serialize(buf);
-      } else {
-        buf.writeBoolean(false);
+      for (RouteSet nodeHandles : row) {
+          if (nodeHandles != null) {
+              buf.writeBoolean(true);
+              nodeHandles.serialize(buf);
+          } else {
+              buf.writeBoolean(false);
+          }
       }
-    }
   }
 
   public BroadcastRouteRow(InputBuffer buf, NodeHandleFactory nhf, PastryNode localNode) throws IOException {
     super(RouteProtocolAddress.getCode(), null);    
     
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        fromNode = nhf.readNodeHandle(buf);
-        row = new RouteSet[buf.readByte()];
-        for (int i=0; i<row.length; i++)
-          if (buf.readBoolean()) {
-            row[i] = new RouteSet(buf, nhf, localNode);
-          }
-        break;
-      default:
-        throw new IOException("Unknown Version: "+version);
-    }      
+      if (version == 0) {
+          fromNode = nhf.readNodeHandle(buf);
+          row = new RouteSet[buf.readByte()];
+          for (int i = 0; i < row.length; i++)
+              if (buf.readBoolean()) {
+                  row[i] = new RouteSet(buf, nhf, localNode);
+              }
+      } else {
+          throw new IOException("Unknown Version: " + version);
+      }
   }
 }

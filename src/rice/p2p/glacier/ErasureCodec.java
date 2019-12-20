@@ -36,17 +36,18 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.glacier;
 
-import java.io.*;
-import java.util.Arrays;
-
 import rice.environment.Environment;
-import rice.environment.logging.*;
-import rice.environment.random.RandomSource;
-import rice.environment.random.simple.SimpleRandomSource;
+import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Endpoint;
 import rice.p2p.past.PastContent;
-import rice.p2p.past.rawserialization.*;
-import rice.p2p.util.rawserialization.*;
+import rice.p2p.past.rawserialization.JavaSerializedPastContent;
+import rice.p2p.past.rawserialization.PastContentDeserializer;
+import rice.p2p.past.rawserialization.RawPastContent;
+import rice.p2p.util.rawserialization.SimpleInputBuffer;
+import rice.p2p.util.rawserialization.SimpleOutputBuffer;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * DESCRIBE THE CLASS
@@ -175,11 +176,12 @@ public class ErasureCodec {
    * @param generateFragment
    * @return
    */
+  @SuppressWarnings("PointlessArithmeticExpression")
   public Fragment[] encode(byte[] bytes, int length, boolean[] generateFragment) {
     int wantFragments = 0;
-    for (int i=0; i<generateFragment.length; i++)
-      if (generateFragment[i])
-        wantFragments ++;
+    for (boolean b : generateFragment)
+      if (b)
+        wantFragments++;
         
     // System.outt.println(Systemm.currentTimeMillis()+" XXX before encode("+bytes.length+" bytes, "+wantFragments+" fragments) free="+Runtime.getRuntime().freeMemory()+" total="+Runtime.getRuntime().totalMemory());
     
@@ -187,8 +189,8 @@ public class ErasureCodec {
     int wordsPerGroup = (numSurvivors * Lfield);
     int numGroups = (numWords + (wordsPerGroup - 1)) / wordsPerGroup;
     int wordsPerFragment = numGroups * Lfield;
-    int buffer[] = new int[numFragments * Lfield];
-    Fragment frag[] = new Fragment[numFragments];
+    int[] buffer = new int[numFragments * Lfield];
+    Fragment[] frag = new Fragment[numFragments];
 
     for (int i = 0; i < numFragments; i++) {
       if (generateFragment[i])
@@ -235,10 +237,9 @@ public class ErasureCodec {
 
     // *** Second last step ***
   
-    int M[] = new int[(numFragments - numSurvivors) * Lfield];
+    int[] M = new int[(numFragments - numSurvivors) * Lfield];
     for (int i = 0; i < nExtra; i++)
-      for (int j = 0; j < Lfield; j++)
-        M[i * Lfield + j] = buffer[(RowInd[i] + numSurvivors) * Lfield + j];
+      System.arraycopy(buffer, (RowInd[i] + numSurvivors) * 10 + 0, M, i * 10 + 0, Lfield);
 
     for (int row = 0; row < nExtra; row++) {
       for (int col = 0; col < numSurvivors; col++) {
@@ -265,12 +266,12 @@ public class ErasureCodec {
     }
   }
 
-  public PastContent decode(Fragment frag[], Endpoint endpoint, PastContentDeserializer pcd) {
+  public PastContent decode(Fragment[] frag, Endpoint endpoint, PastContentDeserializer pcd) {
 
     Fragment firstFrag = null;
-    for (int i=0; i<frag.length; i++)
-      if (frag[i] != null)
-        firstFrag = frag[i];
+    for (Fragment fragment : frag)
+      if (fragment != null)
+        firstFrag = fragment;
 
     // System.out.println(Systemm.currentTimeMillis()+" XXX before decode("+firstFrag.getPayload().length+" bytes per fragment) free="+Runtime.getRuntime().freeMemory()+" total="+Runtime.getRuntime().totalMemory());
 
@@ -285,15 +286,15 @@ public class ErasureCodec {
     int wordsPerFragment = (frag[firstFragment].payload.length + 3) / 4;
     int numGroups = wordsPerFragment / Lfield;
 
-    boolean haveFragment[] = new boolean[numFragments];
+    boolean[] haveFragment = new boolean[numFragments];
     Arrays.fill(haveFragment, false);
 
     for (int i = 0; i < numFragments; i++)
       if (frag[i] != null)
         haveFragment[i] = true;
 
-    int ColInd[] = new int[numSurvivors];
-    int RowInd[] = new int[numFragments - numSurvivors];
+    int[] ColInd = new int[numSurvivors];
+    int[] RowInd = new int[numFragments - numSurvivors];
 
     int nMissing = 0;
 
@@ -335,7 +336,7 @@ public class ErasureCodec {
       }
     }
 
-    long InvMat[][] = new long[nExtra][nExtra];
+    long[][] InvMat = new long[nExtra][nExtra];
 
     for (int row = 0; row < nExtra; row++) {
       for (int col = 0; col < nExtra; col++) {
@@ -413,7 +414,7 @@ public class ErasureCodec {
   }
 
   protected void initElt() {
-    final int polymask[] = {
+    final int[] polymask = {
       0x0000, 0x0003, 0x0007, 0x000B, 0x0013, 0x0025, 0x0043, 0x0083,
       0x011D, 0x0211, 0x0409, 0x0805, 0x1053, 0x201B, 0x402B, 0x8003
       };

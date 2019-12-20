@@ -38,10 +38,12 @@ package rice.pastry.standard;
 
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.pastry.*;
+import rice.pastry.Id;
+import rice.pastry.NodeIdFactory;
 
-import java.net.*;
-import java.security.*;
+import java.net.InetAddress;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Constructs NodeIds for virtual nodes derived from the IP address and port
@@ -92,16 +94,16 @@ public class IPNodeIdFactory implements NodeIdFactory {
    */
 
   public Id generateNodeId() {
-    byte rawIP[] = localIP.getAddress();
+    byte[] rawIP = localIP.getAddress();
 
-    byte rawPort[] = new byte[2];
+    byte[] rawPort = new byte[2];
     int tmp = port;
     for (int i = 0; i < 2; i++) {
       rawPort[i] = (byte) (tmp & 0xff);
       tmp >>= 8;
     }
 
-    byte raw[] = new byte[4];
+    byte[] raw = new byte[4];
     tmp = ++nextInstance;
     for (int i = 0; i < 4; i++) {
       raw[i] = (byte) (tmp & 0xff);
@@ -128,9 +130,7 @@ public class IPNodeIdFactory implements NodeIdFactory {
     //  for (int i=0; i<4; i++)
     //      digest[i] = rand[i];
 
-    Id nodeId = Id.build(digest);
-
-    return nodeId;
+    return Id.build(digest);
   }
 
 }

@@ -37,14 +37,17 @@ advised of the possibility of such damage.
 
 package rice.post.storage;
 
-import rice.*;
-import rice.Continuation.*;
+import rice.Continuation;
+import rice.Continuation.StandardContinuation;
 import rice.environment.logging.Logger;
-import rice.p2p.commonapi.*;
-import rice.p2p.past.*;
-import rice.p2p.past.messaging.*;
-import rice.post.*;
-import rice.persistence.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.past.Past;
+import rice.p2p.past.PastContent;
+import rice.p2p.past.PastContentHandle;
+import rice.p2p.past.PastPolicy;
+import rice.persistence.Cache;
+import rice.post.PostException;
 
 /**
  * @(#) PastPolicy.java 
@@ -80,10 +83,10 @@ public class PostPastPolicy implements PastPolicy {
         
         long latest = 0;
         StorageServiceDataHandle handle = null;
-        
-        for (int i=0; i<handles.length; i++) {
-          StorageServiceDataHandle thisH = (StorageServiceDataHandle) handles[i];
-          
+
+        for (PastContentHandle pastContentHandle : handles) {
+          StorageServiceDataHandle thisH = (StorageServiceDataHandle) pastContentHandle;
+
           if ((thisH != null) && (thisH.getTimestamp() > latest)) {
             latest = thisH.getTimestamp();
             handle = thisH;

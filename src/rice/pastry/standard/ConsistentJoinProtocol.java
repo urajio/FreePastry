@@ -39,22 +39,21 @@ advised of the possibility of such damage.
  */
 package rice.pastry.standard;
 
-import java.io.IOException;
-import java.util.*;
-
 import org.mpisws.p2p.transport.liveness.LivenessListener;
-
 import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.MessageDeserializer;
 import rice.p2p.util.TimerWeakHashMap;
 import rice.pastry.*;
 import rice.pastry.leafset.LeafSet;
 import rice.pastry.messaging.Message;
 import rice.pastry.routing.RoutingTable;
 import rice.selector.LoopObserver;
-import rice.selector.SelectorManager;
 import rice.selector.TimerTask;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Does not setReady until contacting entire leafset which gossips new members.
@@ -97,7 +96,7 @@ public class ConsistentJoinProtocol extends StandardJoinProtocol implements Obse
    * 
    * NodeHandle -> FailedTime
    */
-  HashMap<NodeHandle, FailedTime> failed;
+  final HashMap<NodeHandle, FailedTime> failed;
   TimerTask cleanupTask; // cleans up failed
   static class FailedTime implements Comparable<FailedTime> {
     long time;
@@ -107,9 +106,8 @@ public class ConsistentJoinProtocol extends StandardJoinProtocol implements Obse
       this.handle = handle;
     }
     public int compareTo(FailedTime arg0) {
-      FailedTime ft = (FailedTime)arg0;
       // note this is backwards, because we want them sorted in reverse order
-      return (int)(ft.time-this.time);
+      return (int)(((FailedTime)arg0).time-this.time);
     }
     
     public String toString() {
@@ -205,10 +203,9 @@ public class ConsistentJoinProtocol extends StandardJoinProtocol implements Obse
 
     @Override
     public Message deserialize(InputBuffer buf, short type, int priority, NodeHandle sender) throws IOException {
-      switch(type) {
-        case ConsistentJoinMsg.TYPE:
-          return new ConsistentJoinMsg(buf,pn,(NodeHandle)sender);
-      }      
+        if (type == ConsistentJoinMsg.TYPE) {
+            return new ConsistentJoinMsg(buf, pn, (NodeHandle) sender);
+        }
       return super.deserialize(buf, type, priority, sender);
     }
   }
@@ -232,9 +229,9 @@ public class ConsistentJoinProtocol extends StandardJoinProtocol implements Obse
       RoutingTable rt, LeafSet ls, ReadyStrategy nextReadyStrategy, 
       MessageDeserializer md) {
     super(ln, lh, rt, ls, md != null ? md : new CJPDeserializer(ln));    
-    gotResponse = new TimerWeakHashMap<NodeHandle, Object>(ln.getEnvironment().getSelectorManager().getTimer(), 300000);
-    failed = new HashMap<NodeHandle, FailedTime>();
-    observing = new HashSet<NodeHandle>();
+    gotResponse = new TimerWeakHashMap<>(ln.getEnvironment().getSelectorManager().getTimer(), 300000);
+    failed = new HashMap<>();
+    observing = new HashSet<>();
     this.nextReadyStrategy = nextReadyStrategy;
     ls.addNodeSetListener(this);
     ln.addObserver(this);
@@ -293,11 +290,10 @@ public class ConsistentJoinProtocol extends StandardJoinProtocol implements Obse
     //failed.clear(); // done by cleanup task as of March 6th, 2006
     
     // send a probe to everyone in the leafset
-    Iterator<NodeHandle> i = whoDoWeNeedAResponseFrom().iterator(); //leafSet.neighborSet(Integer.MAX_VALUE).iterator();
-    while(i.hasNext()) {
-      NodeHandle nh = i.next();
-      sendTheMessage(nh, false);      
-    }
+      //leafSet.neighborSet(Integer.MAX_VALUE).iterator();
+      for (NodeHandle nh : whoDoWeNeedAResponseFrom()) {
+          sendTheMessage(nh, false);
+      }
         
     if (retryTask == null) 
       retryTask = thePastryNode.scheduleMsg(new RequestFromEveryoneMsg(getAddress()), RETRY_INTERVAL, RETRY_INTERVAL);
@@ -337,19 +333,17 @@ public class ConsistentJoinProtocol extends StandardJoinProtocol implements Obse
     
     Collection<NodeHandle> c = whoDoWeNeedAResponseFrom();
     if (logger.level <= Logger.INFO) logger.log("CJP: timeout1, still waiting to hear from "+c.size()+" nodes.");
-    
-    Iterator<NodeHandle> i = c.iterator();
-    while(i.hasNext()) {
-      NodeHandle nh = (NodeHandle)i.next(); 
-      if (logger.level <= Logger.FINE) logger.log("CJP: timeout2, still waiting to hear from "+nh);
-      //nh.checkLiveness();
-      try {
-        sendTheMessage(nh, false);
-      } catch (NullPointerException npe) {
-        if (logger.level <= Logger.WARNING) logger.log("npe, nh = "+nh+" c:"+c);
-        throw npe;
+
+      for (NodeHandle nh : c) {
+          if (logger.level <= Logger.FINE) logger.log("CJP: timeout2, still waiting to hear from " + nh);
+          //nh.checkLiveness();
+          try {
+              sendTheMessage(nh, false);
+          } catch (NullPointerException npe) {
+              if (logger.level <= Logger.WARNING) logger.log("npe, nh = " + nh + " c:" + c);
+              throw npe;
+          }
       }
-    }
   }
   
   /**
@@ -384,7 +378,7 @@ public class ConsistentJoinProtocol extends StandardJoinProtocol implements Obse
    * @return
    */
   public Collection<NodeHandle> whoDoWeNeedAResponseFrom() {
-    HashSet<NodeHandle> ret = new HashSet<NodeHandle>();
+    HashSet<NodeHandle> ret = new HashSet<>();
     int leftIndex = leafSet.ccwSize();
     if (leftIndex > MAX_NUM_TO_HEAR_FROM/2) leftIndex = MAX_NUM_TO_HEAR_FROM/2;
     int rightIndex = leafSet.cwSize();
@@ -433,22 +427,20 @@ public class ConsistentJoinProtocol extends StandardJoinProtocol implements Obse
       // for each n in L_i and failed do {probe}
       // rather than removing everyone in the remote failedset,
       // checkLiveness on them all
-      Iterator<NodeHandle> it = cjm.failed.iterator();
-      while(it.hasNext()) {
-        NodeHandle nh = (NodeHandle)it.next(); 
-        if (leafSet.member(nh)) {
-          if (nh.getLiveness() == NodeHandle.LIVENESS_DEAD) {
-            // if we already found them dead, don't bother
-            // hopefully this is redundant with the leafset protocol
-            
-            // Note, can't remove from leafset, this is to only be done by the LeafSetProtocol
+        for (NodeHandle nh : cjm.failed) {
+            if (leafSet.member(nh)) {
+                if (nh.getLiveness() == NodeHandle.LIVENESS_DEAD) {
+                    // if we already found them dead, don't bother
+                    // hopefully this is redundant with the leafset protocol
+
+                    // Note, can't remove from leafset, this is to only be done by the LeafSetProtocol
 //            leafSet.remove(nh); 
-          } else {
-            if (logger.level <= Logger.FINE) logger.log("CJP: checking liveness2 on "+nh);
-            nh.checkLiveness();
-          }
+                } else {
+                    if (logger.level <= Logger.FINE) logger.log("CJP: checking liveness2 on " + nh);
+                    nh.checkLiveness();
+                }
+            }
         }
-      }
       
       // we don't do the L_i.remove() because we don't trust this info
 
@@ -464,7 +456,7 @@ public class ConsistentJoinProtocol extends StandardJoinProtocol implements Obse
         }
       }
       
-      HashSet<NodeHandle> addThese = new HashSet<NodeHandle>(); 
+      HashSet<NodeHandle> addThese = new HashSet<>();
       for (int i=-lprime.ccwSize(); i<=lprime.cwSize(); i++) {
         if (i != 0) {
           NodeHandle nh = lprime.get(i);
@@ -473,17 +465,15 @@ public class ConsistentJoinProtocol extends StandardJoinProtocol implements Obse
           }
         }
       }
-      
-      Iterator<NodeHandle> it2 = addThese.iterator();
-      while(it2.hasNext()) {
-        NodeHandle nh = (NodeHandle)it2.next();
-        // he's not a member, but he could be
-        if (!failed.containsKey(nh) && nh.getLiveness() < NodeHandle.LIVENESS_DEAD) {
-          addToLeafSet(nh);
-          // probe
-          sendTheMessage(nh, false);
+
+        for (NodeHandle nh : addThese) {
+            // he's not a member, but he could be
+            if (!failed.containsKey(nh) && nh.getLiveness() < NodeHandle.LIVENESS_DEAD) {
+                addToLeafSet(nh);
+                // probe
+                sendTheMessage(nh, false);
+            }
         }
-      } 
       
       if (cjm.request) {
         // send reply
@@ -516,8 +506,8 @@ public class ConsistentJoinProtocol extends StandardJoinProtocol implements Obse
     if (rightIndex > MAX_NUM_TO_HEAR_FROM/2) rightIndex = MAX_NUM_TO_HEAR_FROM/2;
     if (leafSet.isComplete() || ((leftIndex == MAX_NUM_TO_HEAR_FROM/2) && (rightIndex == MAX_NUM_TO_HEAR_FROM/2))) {
       // here is where we see if we can go active
-      ArrayList<NodeHandle> toHearFrom = new ArrayList<NodeHandle>();
-      HashSet<NodeHandle> seen = new HashSet<NodeHandle>();
+      ArrayList<NodeHandle> toHearFrom = new ArrayList<>();
+      HashSet<NodeHandle> seen = new HashSet<>();
 
       for (int i=-leftIndex; i<=rightIndex; i++) {
 //      for (int i=-leafSet.ccwSize(); i<=leafSet.cwSize(); i++) {
@@ -556,11 +546,9 @@ public class ConsistentJoinProtocol extends StandardJoinProtocol implements Obse
       } else {
         if (logger.level <= Logger.FINE) {
           String toHearFromStr = "";
-          Iterator<NodeHandle> i = toHearFrom.iterator();
-          while(i.hasNext()) {
-            NodeHandle nh = (NodeHandle)i.next();
-            toHearFromStr+=nh+":"+nh.getLiveness()+",";
-          }
+            for (NodeHandle nh : toHearFrom) {
+                toHearFromStr += nh + ":" + nh.getLiveness() + ",";
+            }
           logger.log("CJP: still need to hear from:"+toHearFromStr);
         }
       }
@@ -606,11 +594,11 @@ public class ConsistentJoinProtocol extends StandardJoinProtocol implements Obse
 //    }    
     HashSet<NodeHandle> toSend;
     if (failed.size() < maxFailedEntries) {
-      toSend = new HashSet<NodeHandle>(failed.keySet());
+      toSend = new HashSet<>(failed.keySet());
     } else {
-      ArrayList<FailedTime> l = new ArrayList<FailedTime>(failed.values());
+      ArrayList<FailedTime> l = new ArrayList<>(failed.values());
       Collections.sort(l);
-      toSend = new HashSet<NodeHandle>();
+      toSend = new HashSet<>();
       for (int i = 0; i < maxFailedEntries; i++) {
         FailedTime tf = (FailedTime)l.get(i);
         toSend.add(tf.handle); 
@@ -655,7 +643,7 @@ public class ConsistentJoinProtocol extends StandardJoinProtocol implements Obse
         // assume it's a NodeHandle, cause we
         // want to throw the exception if it is something we don't recognize
       NodeHandle nh = (NodeHandle)arg0;
-      if (((Integer) arg) == NodeHandle.DECLARED_DEAD) {
+      if (arg == NodeHandle.DECLARED_DEAD) {
         if (logger.level <= Logger.FINE) logger.log("CJP:"+arg0+" declared dead");
         if (!failed.containsKey(nh)) {
           failed.put(nh, new FailedTime(nh, thePastryNode.getEnvironment().getTimeSource().currentTimeMillis()));
@@ -666,7 +654,7 @@ public class ConsistentJoinProtocol extends StandardJoinProtocol implements Obse
         doneProbing();
       }
   
-      if (((Integer) arg) == NodeHandle.DECLARED_LIVE) {
+      if (((Integer) arg).equals(NodeHandle.DECLARED_LIVE)) {
         failed.remove(nh);
         if (!thePastryNode.isReady()) {
           if (leafSet.test(nh)) {

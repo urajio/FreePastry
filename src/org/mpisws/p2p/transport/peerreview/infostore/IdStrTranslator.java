@@ -37,6 +37,6 @@ advised of the possibility of such damage.
 package org.mpisws.p2p.transport.peerreview.infostore;
 
 public interface IdStrTranslator<Identifier> {
-  public Identifier readIdentifierFromString(String s);
-  public String toString(Identifier id);
+  Identifier readIdentifierFromString(String s);
+  String toString(Identifier id);
 }

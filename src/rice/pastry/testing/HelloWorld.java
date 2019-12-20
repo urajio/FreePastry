@@ -38,15 +38,16 @@ package rice.pastry.testing;
 
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.environment.params.simple.SimpleParameters;
-import rice.environment.time.simulated.DirectTimeSource;
-import rice.pastry.*;
-import rice.pastry.direct.*;
-import rice.pastry.standard.*;
-import rice.pastry.join.*;
+import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
+import rice.pastry.PastryNodeFactory;
+import rice.pastry.direct.DirectPastryNodeFactory;
+import rice.pastry.direct.EuclideanNetwork;
+import rice.pastry.direct.NetworkSimulator;
+import rice.pastry.standard.RandomNodeIdFactory;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.NoSuchElementException;
+import java.util.Vector;
 
 /**
  * A hello world example for pastry. This is the "direct" driver.
@@ -128,8 +129,8 @@ public class HelloWorld {
    * Print leafsets of all nodes in pastryNodes.
    */
   private void printLeafSets() {
-    for (int i = 0; i < pastryNodes.size(); i++) {
-      PastryNode pn = (PastryNode) pastryNodes.get(i);
+    for (Object pastryNode : pastryNodes) {
+      PastryNode pn = (PastryNode) pastryNode;
       System.out.println(pn.getLeafSet().toString());
     }
   }
@@ -153,7 +154,7 @@ public class HelloWorld {
 //    return simulator.simulate();
   }
 
-  private static void doIinitstuff(String args[], Environment env) {
+  private static void doIinitstuff(String[] args, Environment env) {
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("-verbosity") && i + 1 < args.length) {
         int num = Integer.parseInt(args[i + 1]);
@@ -205,7 +206,7 @@ public class HelloWorld {
    * Usage: HelloWorld [-msgs m] [-nodes n] [-verbose|-silent|-verbosity v]
    * [-simultaneous_joins] [-simultaneous_msgs] [-help]
    */
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     Environment env = Environment.directEnvironment();
     
 //    env.getParameters().setInt("loglevel", 800);    

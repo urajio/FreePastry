@@ -36,12 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.leafset;
 
-import rice.p2p.commonapi.rawserialization.*;
-import rice.pastry.*;
-import rice.pastry.messaging.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.pastry.NodeHandle;
+import rice.pastry.NodeHandleFactory;
+import rice.pastry.messaging.PRawMessage;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.Date;
 
 /**
  * Broadcast a leaf set to another node.
@@ -127,8 +129,7 @@ public class BroadcastLeafSet extends PRawMessage {
   }
 
   public String toString() {
-    String s = "BroadcastLeafSet("+theLeafSet+","+requestTimeStamp+")";
-    return s;
+    return "BroadcastLeafSet("+theLeafSet+","+requestTimeStamp+")";
   }
   
   /***************** Raw Serialization ***************************************/  
@@ -148,16 +149,14 @@ public class BroadcastLeafSet extends PRawMessage {
     super(LeafSetProtocolAddress.getCode());
     
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        fromNode = nhf.readNodeHandle(buf);
-        theLeafSet = LeafSet.build(buf, nhf);
-        theType = buf.readByte();
-        requestTimeStamp = buf.readLong();
-        break;
-      default:
-        throw new IOException("Unknown Version: "+version);
-    }
+      if (version == 0) {
+          fromNode = nhf.readNodeHandle(buf);
+          theLeafSet = LeafSet.build(buf, nhf);
+          theType = buf.readByte();
+          requestTimeStamp = buf.readLong();
+      } else {
+          throw new IOException("Unknown Version: " + version);
+      }
   }
 
   public long getTimeStamp() {

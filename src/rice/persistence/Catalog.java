@@ -37,21 +37,22 @@ advised of the possibility of such damage.
 
 package rice.persistence;
 
-import java.util.*;
-import rice.p2p.util.*;
+import rice.Continuation;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdRange;
+import rice.p2p.commonapi.IdSet;
+
+import java.io.Serializable;
+import java.util.SortedMap;
 
 /*
  * @(#) Catalog.java
  *
  * @author Ansley Post
  * @author Alan Mislove
- * 
+ *
  * @version $Id$
  */
-import java.io.*;
-
-import rice.*;
-import rice.p2p.commonapi.*;
 
 /**
  * This interface is the abstraction of something which holds objects
@@ -73,7 +74,7 @@ public interface Catalog {
    * @param id The id of the object in question.
    * @return Whether or not an object is present at id.
    */
-  public boolean exists(Id id);
+  boolean exists(Id id);
 
   /**
    * Returns the object identified by the given id, or <code>null</code> if
@@ -82,7 +83,7 @@ public interface Catalog {
    * @param id The id of the object in question.
    * @param c The command to run once the operation is complete
    */
-  public void getObject(Id id, Continuation c);
+  void getObject(Id id, Continuation c);
   
   /**
    * Returns the metadata associated with the provided object, or null if
@@ -98,7 +99,7 @@ public interface Catalog {
    * @param id The id for which the metadata is needed
    * @return The metadata, or null if none exists
    */
-  public Serializable getMetadata(Id id);
+  Serializable getMetadata(Id id);
   
   /**
    * Updates the metadata stored under the given key to be the provided
@@ -109,7 +110,7 @@ public interface Catalog {
    * @param metadata The metadata to store
    * @param c The command to run once the operation is complete
    */
-  public void setMetadata(Id id, Serializable metadata, Continuation command);
+  void setMetadata(Id id, Serializable metadata, Continuation command);
   
   /**
    * Renames the given object to the new id.  This method is potentially faster
@@ -119,7 +120,7 @@ public interface Catalog {
    * @param newId The new id of the object in question.
    * @param c The command to run once the operation is complete
    */
-  public void rename(Id oldId, Id newId, Continuation c);
+  void rename(Id oldId, Id newId, Continuation c);
 
  /**
    * Return the objects identified by the given range of ids. The IdSet 
@@ -133,7 +134,7 @@ public interface Catalog {
    * @param range The range to query  
    * @return The idset containing the keys 
    */
-  public IdSet scan(IdRange range);
+ IdSet scan(IdRange range);
   
   /**
    * Return all objects currently stored by this catalog
@@ -143,7 +144,7 @@ public interface Catalog {
    *
    * @return The idset containing the keys 
    */
-  public IdSet scan();
+  IdSet scan();
 
   /**
    * Returns a map which contains keys mapping ids to the associated 
@@ -152,7 +153,7 @@ public interface Catalog {
    * @param range The range to query  
    * @return The map containing the keys 
    */
-  public SortedMap scanMetadata(IdRange range);
+  SortedMap scanMetadata(IdRange range);
   
   /**
    * Returns a map which contains keys mapping ids to the associated 
@@ -160,7 +161,7 @@ public interface Catalog {
    *
    * @return The treemap mapping ids to metadata 
    */
-  public SortedMap scanMetadata();
+  SortedMap scanMetadata();
   
   /**
    * Returns the submapping of ids which have metadata less than the provided
@@ -169,28 +170,28 @@ public interface Catalog {
    * @param value The maximal metadata value 
    * @return The submapping
    */
-  public SortedMap scanMetadataValuesHead(Object value);
+  SortedMap scanMetadataValuesHead(Object value);
   
   /**
    * Returns the submapping of ids which have metadata null
    *
    * @return The submapping
    */
-  public SortedMap scanMetadataValuesNull();
+  SortedMap scanMetadataValuesNull();
   
   /**
    * Returns the number of Ids currently stored in the catalog
    *
    * @return The number of ids in the catalog
    */
-  public int getSize();
+  int getSize();
   
   /**
    * Returns the total size of the stored data in bytes.
    *
    * @return The total storage size
    */
-  public long getTotalSize();
+  long getTotalSize();
   
   /**
    * Method which is used to erase all data stored in the Catalog.  
@@ -198,5 +199,5 @@ public interface Catalog {
    *
    * @param c The command to run once done
    */
-  public void flush(Continuation c);
+  void flush(Continuation c);
 }

@@ -37,15 +37,17 @@ advised of the possibility of such damage.
 package rice.pastry.testing;
 
 import rice.environment.Environment;
-import rice.pastry.*;
-import rice.pastry.direct.*;
-import rice.pastry.standard.*;
-import rice.pastry.join.*;
-import rice.pastry.routing.*;
+import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
+import rice.pastry.direct.DirectPastryNodeFactory;
+import rice.pastry.direct.EuclideanNetwork;
+import rice.pastry.direct.NetworkSimulator;
+import rice.pastry.direct.TestRecord;
+import rice.pastry.standard.RandomNodeIdFactory;
 
-import java.util.*;
-import java.io.*;
-import java.lang.*;
+import java.util.Date;
+import java.util.NoSuchElementException;
+import java.util.Vector;
 
 /**
  * SinglePingTest

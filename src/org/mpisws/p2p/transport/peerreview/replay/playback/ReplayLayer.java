@@ -36,25 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.replay.playback;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.ClosedChannelException;
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.peerreview.history.HashProvider;
-import org.mpisws.p2p.transport.peerreview.history.IndexEntry;
 import org.mpisws.p2p.transport.peerreview.history.SecureHistory;
 import org.mpisws.p2p.transport.util.MessageRequestHandleImpl;
 import org.mpisws.p2p.transport.util.Serializer;
-
 import rice.environment.Environment;
 import rice.environment.logging.CloneableLogManager;
 import rice.environment.logging.LogManager;
@@ -68,12 +54,16 @@ import rice.environment.random.simple.SimpleRandomSource;
 import rice.environment.time.simulated.DirectTimeSource;
 import rice.p2p.util.MathUtils;
 import rice.selector.SelectorManager;
-import rice.selector.TimerTask;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ReplayLayer<Identifier> extends ReplayVerifier<Identifier> {
 
   TransportLayerCallback<Identifier, ByteBuffer> callback;
-  Map<Integer, ReplaySocket<Identifier>> sockets = new HashMap<Integer, ReplaySocket<Identifier>>();
+  Map<Integer, ReplaySocket<Identifier>> sockets = new HashMap<>();
 
   public ReplayLayer(Serializer<Identifier> serializer, HashProvider hashProv, SecureHistory history, Identifier localHandle, Environment environment) throws IOException {
     super(serializer, hashProv, history, localHandle, (short)0, (short)0, 0, environment.getLogManager().getLogger(ReplayLayer.class, localHandle.toString()));
@@ -84,7 +74,7 @@ public class ReplayLayer<Identifier> extends ReplayVerifier<Identifier> {
     try {
       int socketId = openSocket(i);
 //      logger.log("openSocket("+i+"):"+socketId);
-      ReplaySocket<Identifier> socket = new ReplaySocket<Identifier>(i,socketId,this,options);
+      ReplaySocket<Identifier> socket = new ReplaySocket<>(i, socketId, this, options);
       socket.setDeliverSocketToMe(deliverSocketToMe);
       sockets.put(socketId, socket);
       return socket;
@@ -117,7 +107,7 @@ public class ReplayLayer<Identifier> extends ReplayVerifier<Identifier> {
     } else if (logger.level <= Logger.FINE) {
       logger.log("sendMessage("+i+","+m+")");      
     }
-    MessageRequestHandleImpl<Identifier, ByteBuffer> ret = new MessageRequestHandleImpl<Identifier, ByteBuffer>(i, m, options);
+    MessageRequestHandleImpl<Identifier, ByteBuffer> ret = new MessageRequestHandleImpl<>(i, m, options);
     try {
       send(i, m, -1);
       if (deliverAckToMe != null) deliverAckToMe.ack(ret);
@@ -166,7 +156,7 @@ public class ReplayLayer<Identifier> extends ReplayVerifier<Identifier> {
 
   @Override
   protected void incomingSocket(Identifier from, int socketId) throws IOException {
-    ReplaySocket<Identifier> socket = new ReplaySocket<Identifier>(from, socketId, this, null);
+    ReplaySocket<Identifier> socket = new ReplaySocket<>(from, socketId, this, null);
     sockets.put(socketId, socket);
     callback.incomingSocket(socket);
   }
@@ -187,19 +177,18 @@ public class ReplayLayer<Identifier> extends ReplayVerifier<Identifier> {
     SelectorManager selector = new ReplaySM("Replay "+name, dts, lm);
     dts.setSelectorManager(selector);
     Processor proc = new SimProcessor(selector);
-    Environment env = new Environment(selector,proc,rs,dts,lm,
+    return new Environment(selector,proc,rs,dts,lm,
         params, Environment.generateDefaultExceptionStrategy(lm));
-    return env;
   }
 
   @Override
-  protected void socketOpened(int socketId) throws IOException {
+  protected void socketOpened(int socketId) {
 //    logger.log("socketOpened("+socketId+")");
     sockets.get(socketId).socketOpened();
   }
 
   @Override
-  protected void socketException(int socketId, IOException ioe) throws IOException {
+  protected void socketException(int socketId, IOException ioe) {
     //logger.log("socketException("+socketId+")");
 //    sockets.get(socketId).receiveException(new IOException("Replay Exception"));
     sockets.get(socketId).receiveException(ioe);

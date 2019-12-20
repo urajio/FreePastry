@@ -36,19 +36,18 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.testing.rendezvous;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.util.Collections;
-
 import rice.Continuation;
 import rice.environment.Environment;
 import rice.pastry.NodeIdFactory;
-import rice.pastry.PastryNodeFactory;
 import rice.pastry.socket.SocketPastryNodeFactory;
 import rice.pastry.socket.nat.connectivityverifiier.ConnectivityVerifier;
 import rice.pastry.socket.nat.connectivityverifiier.ConnectivityVerifierImpl;
 import rice.pastry.standard.RandomNodeIdFactory;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.Collections;
 
 public class WhatIsMyIP {
 

@@ -36,35 +36,22 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.rc4;
 
+import org.mpisws.p2p.transport.*;
+import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
+import rice.environment.Environment;
+import rice.environment.logging.Logger;
+import rice.environment.random.RandomSource;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import javax.security.sasl.AuthenticationException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
-
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import javax.security.sasl.AuthenticationException;
-
-import org.mpisws.p2p.transport.ClosedChannelException;
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
-import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
-
-import rice.environment.Environment;
-import rice.environment.logging.Logger;
-import rice.environment.random.RandomSource;
-import rice.p2p.commonapi.IdFactory;
-import rice.pastry.commonapi.PastryIdFactory;
 
 /**
  * Only encrypts socket traffic!!!
@@ -117,7 +104,7 @@ public class RC4TransportLayer<Identifier, MsgType> implements TransportLayer<Id
 
   protected ErrorHandler<Identifier> errorHandler;
   
-  protected MessageDigest md;
+  protected final MessageDigest md;
 
   public static final int KEY_LENGTH = 16;
   
@@ -172,7 +159,7 @@ public class RC4TransportLayer<Identifier, MsgType> implements TransportLayer<Id
 //      return tl.openSocket(i, deliverSocketToMe, options);
 //    }
     
-    final SocketRequestHandleImpl<Identifier> ret = new SocketRequestHandleImpl<Identifier>(i,options,logger);
+    final SocketRequestHandleImpl<Identifier> ret = new SocketRequestHandleImpl<>(i, options, logger);
     
     ret.setSubCancellable(tl.openSocket(i, new SocketCallback<Identifier>() {
 
@@ -265,7 +252,7 @@ public class RC4TransportLayer<Identifier, MsgType> implements TransportLayer<Id
                   try {
                     Cipher encryptCipher = Cipher.getInstance(ALGORITHM);
                     encryptCipher.init(Cipher.ENCRYPT_MODE, encryptKey);
-                    deliverSocketToMe.receiveResult(ret, new EncryptedSocket<Identifier>(i,socket,logger,errorHandler,options,encryptCipher,decryptCipher,WRITE_BUFFER_SIZE));
+                    deliverSocketToMe.receiveResult(ret, new EncryptedSocket<>(i, socket, logger, errorHandler, options, encryptCipher, decryptCipher, WRITE_BUFFER_SIZE));
                   } catch (GeneralSecurityException gse) {
                     socket.close();
                     deliverSocketToMe.receiveException(ret, gse);
@@ -374,7 +361,7 @@ public class RC4TransportLayer<Identifier, MsgType> implements TransportLayer<Id
               }
               
               // we're done...
-              callback.incomingSocket(new EncryptedSocket<Identifier>(socket.getIdentifier(),socket,logger,errorHandler,socket.getOptions(),encryptCipher,decryptCipher,WRITE_BUFFER_SIZE));
+              callback.incomingSocket(new EncryptedSocket<>(socket.getIdentifier(), socket, logger, errorHandler, socket.getOptions(), encryptCipher, decryptCipher, WRITE_BUFFER_SIZE));
             }
             
             public void receiveException(P2PSocket<Identifier> socket,

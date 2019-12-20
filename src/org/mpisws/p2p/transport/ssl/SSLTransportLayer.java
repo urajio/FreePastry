@@ -36,13 +36,8 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.ssl;
 
-import java.nio.ByteBuffer;
-
 import org.mpisws.p2p.transport.TransportLayer;
 import org.mpisws.p2p.transport.TransportLayerCallback;
-import org.mpisws.p2p.transport.multiaddress.MultiInetAddressTransportLayer;
-
-import rice.pastry.socket.EpochInetSocketAddress;
 
 /**
  * Optionally Encrypts or Authenticates sockets.
@@ -50,14 +45,14 @@ import rice.pastry.socket.EpochInetSocketAddress;
  *
  */
 public interface SSLTransportLayer<Identifier, MessageType> extends TransportLayer<Identifier, MessageType>, TransportLayerCallback<Identifier, MessageType> {
-  public static final String OPTION_ENCRYPTION = "encrypt";
-  public static final String OPTION_AUTHENTICATION = "authenticate";
-  public static final String OPTION_CERT_SUBJECT = "ssl_certificate_subject";
+  String OPTION_ENCRYPTION = "encrypt";
+  String OPTION_AUTHENTICATION = "authenticate";
+  String OPTION_CERT_SUBJECT = "ssl_certificate_subject";
 
-  public static final int CLIENT_AUTH_NONE = 0;
-  public static final int CLIENT_AUTH_REQUIRED = 1;
-  public static final int CLIENT_AUTH_OPTIONAL = 2;
+  int CLIENT_AUTH_NONE = 0;
+  int CLIENT_AUTH_REQUIRED = 1;
+  int CLIENT_AUTH_OPTIONAL = 2;
   
-  public static final int NO = 0;
-  public static final int YES = 1;
+  int NO = 0;
+  int YES = 1;
 }

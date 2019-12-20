@@ -37,18 +37,20 @@ advised of the possibility of such damage.
 
 package rice.p2p.replication.manager;
 
-import java.util.*;
-import java.util.logging.*;
-
-import rice.*;
-import rice.Continuation.*;
-
+import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
 import rice.p2p.commonapi.*;
-import rice.p2p.replication.*;
-import rice.p2p.replication.manager.messaging.*;
+import rice.p2p.replication.Replication;
+import rice.p2p.replication.ReplicationClient;
+import rice.p2p.replication.ReplicationImpl;
+import rice.p2p.replication.ReplicationPolicy;
+import rice.p2p.replication.manager.messaging.ReminderMessage;
+import rice.p2p.replication.manager.messaging.TimeoutMessage;
+
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * @(#) ReplicationManagerImpl.java
@@ -190,7 +192,7 @@ public class ReplicationManagerImpl implements ReplicationManager, ReplicationCl
     
     client.fetch(id, hint, new Continuation() {
       public void receiveResult(Object o) {
-        if (! (new Boolean(true)).equals(o)) {
+        if (! (Boolean.TRUE).equals(o)) {
           if (o instanceof Throwable) {
             if (logger.level <= Logger.WARNING) logger.logException( "Fetching of id " + id + " failed with ", (Throwable)o);
           } else {
@@ -382,7 +384,7 @@ public class ReplicationManagerImpl implements ReplicationManager, ReplicationCl
         
         if (! (set.isMemberId(id) || 
                client.exists(id) || 
-               ((current != null) && (id.equals(current))))) {
+               ((id.equals(current))))) {
           set.addId(id);
           hints.put(id, hint);
         }

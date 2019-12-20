@@ -36,22 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.socket.internet;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.BindException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
 import org.mpisws.p2p.transport.networkinfo.CantVerifyConnectivityException;
 import org.mpisws.p2p.transport.networkinfo.ConnectivityResult;
-
 import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
@@ -67,6 +54,18 @@ import rice.pastry.socket.nat.connectivityverifiier.ConnectivityVerifier;
 import rice.pastry.socket.nat.connectivityverifiier.ConnectivityVerifierImpl;
 import rice.pastry.socket.nat.rendezvous.RendezvousSocketPastryNodeFactory;
 import rice.selector.TimerTask;
+
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.BindException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * This Factory is designed for real deployments (with NATs).
@@ -323,8 +322,8 @@ public class InternetPastryNodeFactory extends
       Collection<InetSocketAddress> myProbeAddresses = null;
       Collection<InetSocketAddress> nonInternetRoutable = null;
       if (this.probeAddresses != null) {
-        myProbeAddresses = new ArrayList<InetSocketAddress>(probeAddresses);
-        nonInternetRoutable = new ArrayList<InetSocketAddress>();
+        myProbeAddresses = new ArrayList<>(probeAddresses);
+        nonInternetRoutable = new ArrayList<>();
         while(myProbeAddresses.remove(bindAddress));
         
         // pull non-internet routable addresses

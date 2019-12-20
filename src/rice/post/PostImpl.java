@@ -36,32 +36,40 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post;
 
-import java.io.*; 
-import java.security.*;
-import java.util.*;
-
-import rice.*;
-import rice.Continuation.*;
-
+import rice.Continuation;
+import rice.Continuation.ListenerContinuation;
+import rice.Continuation.StandardContinuation;
+import rice.Executable;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.past.*;
-import rice.p2p.past.rawserialization.PastContentDeserializer;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.past.Past;
+import rice.p2p.past.PastException;
 import rice.p2p.scribe.*;
 import rice.p2p.scribe.rawserialization.ScribeContentDeserializer;
-import rice.p2p.util.*;
-import rice.p2p.util.rawserialization.*;
-
-import rice.pastry.messaging.JavaSerializedDeserializer;
-import rice.post.delivery.*;
-import rice.post.log.*;
+import rice.p2p.util.SecurityUtils;
+import rice.p2p.util.rawserialization.SimpleInputBuffer;
+import rice.p2p.util.rawserialization.SimpleOutputBuffer;
+import rice.post.delivery.Delivery;
+import rice.post.delivery.DeliveryPast;
+import rice.post.delivery.DeliveryService;
+import rice.post.log.Log;
 import rice.post.messaging.*;
-import rice.post.rawserialization.*;
-import rice.post.storage.*;
-import rice.post.security.*;
-import rice.post.security.ca.*;
+import rice.post.rawserialization.NotificationMessageDeserializer;
+import rice.post.rawserialization.Raw;
+import rice.post.security.PostCertificate;
+import rice.post.security.SecurityService;
+import rice.post.security.ca.CASecurityModule;
+import rice.post.storage.ContentHashReference;
+import rice.post.storage.SignedReference;
+import rice.post.storage.StorageException;
+import rice.post.storage.StorageService;
+
+import java.io.IOException;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.*;
 
 /**
  * This class is the service layer which allows 
@@ -120,7 +128,7 @@ public class PostImpl implements Post, Application, ScribeClient {
   /**
    * Maps PostEntityAddress to list of pending continuations
    */
-  private Hashtable pendingLogs;
+  private final Hashtable pendingLogs;
   
 
   // --- GROUP SUPPORT ---
@@ -149,7 +157,7 @@ public class PostImpl implements Post, Application, ScribeClient {
   /**
    * The buffer of incoming delivery messages
    */
-  private Vector deliveryBuffer;
+  private final Vector deliveryBuffer;
 
   
   // --- STORAGE SUPPORT ---
@@ -225,8 +233,7 @@ public class PostImpl implements Post, Application, ScribeClient {
    * @param certificate The certificate authenticating this user
    * @param caPublicKey The public key of the certificate authority
    * @param instance The unique instance name of this POST
-   * 
-   * @throws PostException if the PostLog could not be accessed
+   *
    */
   public PostImpl(Node node,
                   Past immutablePast,
@@ -243,8 +250,7 @@ public class PostImpl implements Post, Application, ScribeClient {
                   PostEntityAddress previousAddress,
                   long synchronizeInterval,
                   long refreshInterval,
-                  long timeoutInterval) throws PostException 
-  {
+                  long timeoutInterval) {
     this.environment = node.getEnvironment();
     this.logger = environment.getLogManager().getLogger(PostImpl.class, instance);
 
@@ -291,10 +297,9 @@ public class PostImpl implements Post, Application, ScribeClient {
     
       public ScribeContent deserializeScribeContent(InputBuffer buf,
           Endpoint endpoint, short contentType) throws IOException {
-        switch(contentType) {
-          case PostScribeMessage.TYPE:
-            return new PostScribeMessage(buf, endpoint);
-        }
+          if (contentType == PostScribeMessage.TYPE) {
+              return new PostScribeMessage(buf, endpoint);
+          }
         throw new IllegalArgumentException("Unknown type:"+buf);
       }    
     });
@@ -518,7 +523,7 @@ public class PostImpl implements Post, Application, ScribeClient {
           endpoint.route(message.getLocation(), new PostPastryMessage(signPostMessage(dm)), message.getHandle());
         }
         
-        parent.receiveResult(new Boolean(true));
+        parent.receiveResult(Boolean.TRUE);
       }
     });
   }
@@ -534,7 +539,7 @@ public class PostImpl implements Post, Application, ScribeClient {
     
     if (! message.getDestination().equals(address)) {
       if (logger.level <= Logger.FINER) logger.log("Incorrectly received delivery message at "  + address + " for " + message.getDestination());
-      command.receiveResult(new Boolean(false));
+      command.receiveResult(Boolean.FALSE);
       return;
     }
     
@@ -566,7 +571,7 @@ public class PostImpl implements Post, Application, ScribeClient {
         }
         delivery.check(message.getId(), new StandardContinuation(command) {
           public void receiveResult(Object o) {
-            if (((Boolean) o).booleanValue()) {
+            if ((Boolean) o) {
               if (logger.level <= Logger.FINE) logger.log("Haven't seen message " + message + " before - accepting");
               
               processSignedPostMessage(message.getEncryptedMessage(), new StandardContinuation(parent) {
@@ -615,7 +620,7 @@ public class PostImpl implements Post, Application, ScribeClient {
               });
             } else {
               if (logger.level <= Logger.FINE) logger.log("Seen message " + message + " before - ignoring");
-              parent.receiveResult(new Boolean(true));
+              parent.receiveResult(Boolean.TRUE);
               next();
             }   
           }
@@ -657,8 +662,7 @@ public class PostImpl implements Post, Application, ScribeClient {
       public void receiveResult(Object o) {
         if (o != null) {
           Object[] a = (Object[]) o;
-          for (int i=0; i<a.length; i++)
-            set.add(a[i]);
+          set.addAll(Arrays.asList(a));
         }
           
         if (i.hasNext()) {
@@ -690,8 +694,7 @@ public class PostImpl implements Post, Application, ScribeClient {
           public void receiveResult(Object o) {
             if (o != null) {
               Object[] a = (Object[]) o;
-              for (int i=0; i<a.length; i++)
-                set.add(a[i]);
+              set.addAll(Arrays.asList(a));
             }
             
             if (j.hasNext()) 
@@ -841,7 +844,7 @@ public class PostImpl implements Post, Application, ScribeClient {
             if (logger.level <= Logger.INFO) logger.log("Creating new log at " + getEntityAddress() + " based off of address at " + previousAddress);
             
             log = new PostLog(getEntityAddress(), keyPair.getPublic(), certificate, PostImpl.this, previous, parent);
-            parent.receiveResult(new Boolean(true));
+            parent.receiveResult(Boolean.TRUE);
           } else {
             parent.receiveException(new PostException("Unable to find previous log - aborting!"));
           }
@@ -873,15 +876,16 @@ public class PostImpl implements Post, Application, ScribeClient {
           public void receiveResult(Object result) {
             Object[] results = (Object[]) result;
             PostLog goodLog = null;
-            for (int i = 0; i < results.length; i++) {
-              if (results[i] instanceof PostLog) {
-                if (logger.level <= Logger.FINEST) logger.log("Got response log " + results[i] + " for entity " + entity);
+            for (Object o : results) {
+              if (o instanceof PostLog) {
+                if (logger.level <= Logger.FINEST) logger.log("Got response log " + o + " for entity " + entity);
                 if (goodLog == null)
-                  goodLog = (PostLog)results[i];
-              } else if (results[i] instanceof Throwable) {
-                if (logger.level <= Logger.FINE) logger.logException("Got Exception verifying PostLog ",(Throwable)results[i]);
-              } else if (results[i] != null) {
-                if (logger.level <= Logger.WARNING) logger.log("Got "+results[i].getClass()+" instead of PostLog verifying postlog for "+entity);
+                  goodLog = (PostLog) o;
+              } else if (o instanceof Throwable) {
+                if (logger.level <= Logger.FINE) logger.logException("Got Exception verifying PostLog ", (Throwable) o);
+              } else if (o != null) {
+                if (logger.level <= Logger.WARNING)
+                  logger.log("Got " + o.getClass() + " instead of PostLog verifying postlog for " + entity);
               }
             }
             if (goodLog != null) {
@@ -1042,7 +1046,7 @@ public class PostImpl implements Post, Application, ScribeClient {
 
         security.verify(log.getCertificate(), new StandardContinuation(parent) {
           public void receiveResult(Object o) {
-            if ((new Boolean(true)).equals(o)) {
+            if ((Boolean.TRUE).equals(o)) {
               if (!storage.verifySigned(log, log.getPublicKey())) {
                   if (logger.level <= Logger.WARNING) logger.log("PostLog could not be verified for entity " + entity);
                  passException(new PostException("PostLog could not verified for entity: " + entity), parent);

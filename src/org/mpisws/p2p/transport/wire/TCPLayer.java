@@ -36,45 +36,24 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.wire;
 
+import org.mpisws.p2p.transport.SocketCallback;
+import org.mpisws.p2p.transport.SocketRequestHandle;
+import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
+import rice.environment.logging.Logger;
+import rice.environment.params.Parameters;
+import rice.selector.SelectionKeyHandler;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
-
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
-
-import rice.Continuation;
-import rice.Destructable;
-import rice.environment.Environment;
-import rice.environment.logging.Logger;
-import rice.environment.params.Parameters;
-import rice.p2p.commonapi.Cancellable;
-import rice.p2p.commonapi.rawserialization.RawMessage;
-import rice.selector.SelectionKeyHandler;
+import java.util.*;
 
 public class TCPLayer extends SelectionKeyHandler {
   public static final Map<String, Object> OPTIONS;  
   static {
-    Map<String, Object> map = new HashMap<String, Object>();
+    Map<String, Object> map = new HashMap<>();
     map.put(WireTransportLayer.OPTION_TRANSPORT_TYPE, WireTransportLayer.TRANSPORT_TYPE_GUARANTEED);
     OPTIONS = Collections.unmodifiableMap(map);    
   }
@@ -150,13 +129,13 @@ public class TCPLayer extends SelectionKeyHandler {
       }
     } catch (IOException e) {
       if (logger.level <= Logger.WARNING) logger.logException("GOT ERROR " + e + " OPENING PATH - MARKING PATH " + destination + " AS DEAD!",e);
-      SocketRequestHandle<InetSocketAddress> can = new SocketRequestHandleImpl<InetSocketAddress>(destination, options, logger);
+      SocketRequestHandle<InetSocketAddress> can = new SocketRequestHandleImpl<>(destination, options, logger);
       deliverSocketToMe.receiveException(can, e);
       return can;
     }
   }
   
-  Collection<SocketManager> sockets = new HashSet<SocketManager>();
+  final Collection<SocketManager> sockets = new HashSet<>();
   
   protected void socketClosed(SocketManager sm) {
     wire.broadcastChannelClosed(sm.addr, sm.options);
@@ -195,7 +174,7 @@ public class TCPLayer extends SelectionKeyHandler {
     }
 
     // TODO: add a flag to disable this to simulate a silent fault
-    for (SocketManager socket : new ArrayList<SocketManager>(sockets)) {
+    for (SocketManager socket : new ArrayList<>(sockets)) {
      // logger.log("closing "+socket);
       socket.close();      
     }

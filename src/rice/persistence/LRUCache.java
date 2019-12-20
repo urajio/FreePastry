@@ -45,16 +45,21 @@ package rice.persistence;
  *
  * @version $Id$
  */
-import java.io.*;
-import java.util.*;
-import java.util.zip.*;
 
-import rice.*;
-import rice.Continuation.*;
+import rice.Continuation;
+import rice.Continuation.StandardContinuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.p2p.commonapi.*;
-import rice.p2p.util.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdRange;
+import rice.p2p.commonapi.IdSet;
+import rice.p2p.util.XMLObjectOutputStream;
+
+import java.io.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.SortedMap;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * This class is an encapsulation of a least-recently-used (LRU)
@@ -72,7 +77,7 @@ public class LRUCache implements Cache {
   private Storage storage;
 
   // the list of keys, in MRU -> LRU order
-  private LinkedList order;
+  private final LinkedList order;
 
   protected Environment environment;
   
@@ -149,12 +154,12 @@ public class LRUCache implements Cache {
         order.addFirst(id);
       }
       
-      c.receiveResult(new Boolean(true));
+      c.receiveResult(Boolean.TRUE);
       return;
     }
       
     if (size > maximumSize) {
-      c.receiveResult(new Boolean(false));
+      c.receiveResult(Boolean.FALSE);
       return;
     }
     
@@ -375,7 +380,7 @@ public class LRUCache implements Cache {
       public void receiveResult(Object o) {
         maximumSize = size;
 
-        c.receiveResult(new Boolean(true));
+        c.receiveResult(Boolean.TRUE);
       }
 
       public void receiveException(Exception e) {
@@ -386,7 +391,7 @@ public class LRUCache implements Cache {
     if (size < maximumSize) {
       resize(size, local);
     } else {
-      local.receiveResult(new Boolean(true));
+      local.receiveResult(Boolean.TRUE);
     }
   }
 
@@ -405,7 +410,7 @@ public class LRUCache implements Cache {
         if (storage.getTotalSize() > size) {
           uncache((Id) order.getLast(), this);
         } else {
-          parent.receiveResult(new Boolean(true));
+          parent.receiveResult(Boolean.TRUE);
         }
       }
     };

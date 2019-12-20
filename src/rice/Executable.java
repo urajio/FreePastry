@@ -52,6 +52,6 @@ public interface Executable<R,E extends Exception> {
    *
    * @param result The result of the command.
    */
-  public R execute() throws E;
+  R execute() throws E;
 
 }

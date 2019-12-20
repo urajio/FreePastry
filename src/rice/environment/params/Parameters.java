@@ -40,7 +40,9 @@ advised of the possibility of such damage.
 package rice.environment.params;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 
 /**
  * Parameters interface for FreePastry
@@ -54,28 +56,28 @@ public interface Parameters {
    * Remove the key
    * @param name
    */
-  public void remove(String name);  
+  void remove(String name);
   /**
    * See if the parameters contains the key
    * 
    * @param name
    * @return
    */
-  public boolean contains(String name);
+  boolean contains(String name);
   /**
    * Persistently stores the parameters.
    * @throws IOException
    */
-  public void store() throws IOException;
+  void store() throws IOException;
   
   // getters
-  public String getString(String paramName);
-  public String[] getStringArray(String paramName);
-  public int getInt(String paramName);
-  public double getDouble(String paramName);
-  public float getFloat(String paramName);
-  public long getLong(String paramName);
-  public boolean getBoolean(String paramName);
+  String getString(String paramName);
+  String[] getStringArray(String paramName);
+  int getInt(String paramName);
+  double getDouble(String paramName);
+  float getFloat(String paramName);
+  long getLong(String paramName);
+  boolean getBoolean(String paramName);
   
   /**
    * String format is dnsname
@@ -84,7 +86,7 @@ public interface Parameters {
    * @return
    * @throws UnknownHostException
    */
-  public InetAddress getInetAddress(String paramName) throws UnknownHostException;
+  InetAddress getInetAddress(String paramName) throws UnknownHostException;
   
   
   /**
@@ -93,7 +95,7 @@ public interface Parameters {
    * @param paramName
    * @return
    */
-  public InetSocketAddress getInetSocketAddress(String paramName) throws UnknownHostException;
+  InetSocketAddress getInetSocketAddress(String paramName) throws UnknownHostException;
   
   /**
    * String format is comma seperated.
@@ -101,21 +103,21 @@ public interface Parameters {
    * @param paramName
    * @return
    */
-  public InetSocketAddress[] getInetSocketAddressArray(String paramName) throws UnknownHostException;
+  InetSocketAddress[] getInetSocketAddressArray(String paramName) throws UnknownHostException;
   
   // setters
-  public void setString(String paramName, String val);
-  public void setStringArray(String paramName, String[] val);
-  public void setInt(String paramName, int val);
-  public void setDouble(String paramName, double val);
-  public void setFloat(String paramName, float val);
-  public void setLong(String paramName, long val);
-  public void setBoolean(String paramName, boolean val);
-  public void setInetAddress(String paramName, InetAddress val);
-  public void setInetSocketAddress(String paramName, InetSocketAddress val);
-  public void setInetSocketAddressArray(String paramName, InetSocketAddress[] val);
-  public void restoreDefault(String paramName);
+  void setString(String paramName, String val);
+  void setStringArray(String paramName, String[] val);
+  void setInt(String paramName, int val);
+  void setDouble(String paramName, double val);
+  void setFloat(String paramName, float val);
+  void setLong(String paramName, long val);
+  void setBoolean(String paramName, boolean val);
+  void setInetAddress(String paramName, InetAddress val);
+  void setInetSocketAddress(String paramName, InetSocketAddress val);
+  void setInetSocketAddressArray(String paramName, InetSocketAddress[] val);
+  void restoreDefault(String paramName);
     
-  public void addChangeListener(ParameterChangeListener p);
-  public void removeChangeListener(ParameterChangeListener p);
+  void addChangeListener(ParameterChangeListener p);
+  void removeChangeListener(ParameterChangeListener p);
 }

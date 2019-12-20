@@ -45,10 +45,11 @@ package rice.persistence;
  *
  * @version $Id$
  */
-import java.io.*;
 
-import rice.*;
-import rice.p2p.commonapi.*;
+import rice.Continuation;
+import rice.p2p.commonapi.Id;
+
+import java.io.Serializable;
 
 /**
  * This interface is the abstraction of something which provides a
@@ -75,7 +76,7 @@ public interface Storage extends Catalog {
    * @param obj The object to store.
    * @param c The command to run once the operation is complete
    */
-  public void store(Id id, Serializable metadata, Serializable obj, Continuation c);
+  void store(Id id, Serializable metadata, Serializable obj, Continuation c);
 
   /**
    * Removes the object from the list of stored objects. This method is
@@ -88,5 +89,5 @@ public interface Storage extends Catalog {
    * @param pid The object's persistence id
    * @param c The command to run once the operation is complete
    */
-  public void unstore(Id id, Continuation c);
+  void unstore(Id id, Continuation c);
 }

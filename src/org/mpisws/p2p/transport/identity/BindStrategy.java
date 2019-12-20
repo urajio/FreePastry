@@ -39,5 +39,5 @@ package org.mpisws.p2p.transport.identity;
 import java.util.Map;
 
 public interface BindStrategy<UpperIdentifier, LowerIdentifier> {
-  public boolean accept(UpperIdentifier u, LowerIdentifier l, Map<String, Object> options);
+  boolean accept(UpperIdentifier u, LowerIdentifier l, Map<String, Object> options);
 }

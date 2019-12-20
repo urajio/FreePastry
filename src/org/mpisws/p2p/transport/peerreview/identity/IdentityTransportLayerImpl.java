@@ -36,50 +36,26 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.identity;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-
 import org.mpisws.p2p.pki.x509.X509Serializer;
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
 import org.mpisws.p2p.transport.TransportLayer;
 import org.mpisws.p2p.transport.TransportLayerCallback;
 import org.mpisws.p2p.transport.peerreview.history.HashProvider;
 import org.mpisws.p2p.transport.table.TableStore;
 import org.mpisws.p2p.transport.table.TableTransprotLayerImpl;
-import org.mpisws.p2p.transport.util.BufferReader;
-import org.mpisws.p2p.transport.util.BufferWriter;
 import org.mpisws.p2p.transport.util.DefaultErrorHandler;
 import org.mpisws.p2p.transport.util.Serializer;
-import org.mpisws.p2p.transport.util.SocketInputBuffer;
-import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
-
 import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.environment.params.Parameters;
 import rice.p2p.commonapi.Cancellable;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.util.MathUtils;
-import rice.p2p.util.rawserialization.SimpleInputBuffer;
-import rice.p2p.util.rawserialization.SimpleOutputBuffer;
-import rice.p2p.util.tuples.Tuple3;
+
+import java.nio.ByteBuffer;
+import java.security.*;
+import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * TODO: make it store known certs to a file, make it periodically check the revocation server.
@@ -102,7 +78,7 @@ public class IdentityTransportLayerImpl<Identifier, I> extends
   Signature signer;
   
   // TODO: handle memory problems
-  Map<I, Signature> verifiers = new HashMap<I, Signature>();
+  Map<I, Signature> verifiers = new HashMap<>();
   
   HashProvider hasher;
   private Environment environment;
@@ -114,7 +90,7 @@ public class IdentityTransportLayerImpl<Identifier, I> extends
    * @return
    */
   static <H, I> TableStore<I, X509Certificate> getTableStore(I localId, X509Certificate localCert, Serializer<I> iSerializer, X509Serializer cSerializer, InputBuffer buf) {
-    MyStore<H, I> ret = new MyStore<H, I>();
+    MyStore<H, I> ret = new MyStore<>();
     ret.put(localId, localCert);
     if (buf != null) {
       // load store from the file
@@ -145,7 +121,7 @@ public class IdentityTransportLayerImpl<Identifier, I> extends
     this.hasher = hasher;
     this.environment = env;
     this.logger = env.getLogManager().getLogger(IdentityTransportLayerImpl.class, null);
-    this.errorHandler = new DefaultErrorHandler<Identifier>(this.logger);
+    this.errorHandler = new DefaultErrorHandler<>(this.logger);
     
     signer = Signature.getInstance(DEFAULT_SIGNATURE_ALGORITHM,"BC");
     signer.initSign(localPrivate);    
@@ -178,9 +154,7 @@ public class IdentityTransportLayerImpl<Identifier, I> extends
       if (logger.level <= Logger.FINEST) logger.log("Signature of "+MathUtils.toBase64(bytes)+" was "+MathUtils.toBase64(ret));
       return ret;
     } catch (SignatureException se) {
-      RuntimeException throwMe = new RuntimeException("Couldn't sign "+bytes);
-      throwMe.initCause(se);
-      throw throwMe;
+      throw new RuntimeException("Couldn't sign "+bytes, se);
     }
   }
 

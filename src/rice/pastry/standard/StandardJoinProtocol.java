@@ -38,18 +38,25 @@ package rice.pastry.standard;
 
 import rice.Continuation;
 import rice.environment.logging.Logger;
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.MessageDeserializer;
 import rice.pastry.*;
-import rice.pastry.messaging.*;
-import rice.pastry.leafset.*;
+import rice.pastry.client.PastryAppl;
+import rice.pastry.join.InitiateJoin;
+import rice.pastry.join.JoinAddress;
+import rice.pastry.join.JoinProtocol;
+import rice.pastry.join.JoinRequest;
+import rice.pastry.leafset.BroadcastLeafSet;
+import rice.pastry.leafset.LeafSet;
+import rice.pastry.messaging.Message;
+import rice.pastry.messaging.PJavaSerializedDeserializer;
 import rice.pastry.routing.*;
 import rice.pastry.transport.PMessageNotification;
 import rice.pastry.transport.PMessageReceipt;
-import rice.pastry.client.PastryAppl;
-import rice.pastry.join.*;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * An implementation of a simple join protocol.
@@ -75,7 +82,7 @@ public class StandardJoinProtocol extends PastryAppl implements JoinProtocol {
 
   protected RoutingTable routeTable;
 
-  protected LeafSet leafSet;
+  protected final LeafSet leafSet;
   
   public static class SJPDeserializer extends PJavaSerializedDeserializer {
     public SJPDeserializer(PastryNode pn) {
@@ -84,10 +91,9 @@ public class StandardJoinProtocol extends PastryAppl implements JoinProtocol {
 
     @Override
     public Message deserialize(InputBuffer buf, short type, int priority, NodeHandle sender) throws IOException {
-      switch(type) {
-        case JoinRequest.TYPE:
-          return new JoinRequest(buf,pn, (NodeHandle)sender, pn);
-      }      
+      if (type == JoinRequest.TYPE) {
+        return new JoinRequest(buf, pn, (NodeHandle) sender, pn);
+      }
       return null;
     }
   }
@@ -324,7 +330,7 @@ public class StandardJoinProtocol extends PastryAppl implements JoinProtocol {
 
     // send the rows to the RouteSetProtocol on the local node
     for (int i = jr.lastRow(); i < n; i++) {
-      RouteSet row[] = jr.getRow(i);
+      RouteSet[] row = jr.getRow(i);
 
       if (row != null) {
         BroadcastRouteRow brr = new BroadcastRouteRow(localHandle, row);
@@ -336,28 +342,27 @@ public class StandardJoinProtocol extends PastryAppl implements JoinProtocol {
     // now broadcast the rows to our peers in each row
 
     for (int i = jr.lastRow(); i < n; i++) {
-      RouteSet row[] = jr.getRow(i);
+      RouteSet[] row = jr.getRow(i);
 
       BroadcastRouteRow brr = new BroadcastRouteRow(localHandle, row);
 
-      for (int j = 0; j < row.length; j++) {
-        RouteSet rs = row[j];
-        if (rs == null)
-          continue;
+        for (RouteSet rs : row) {
+            if (rs == null)
+                continue;
 
-        // send to closest nodes only
+            // send to closest nodes only
 
-        NodeHandle nh = rs.closestNode();
-        if (nh != null)
-          thePastryNode.send(nh,brr, null, options);
+            NodeHandle nh = rs.closestNode();
+            if (nh != null)
+                thePastryNode.send(nh, brr, null, options);
 
-        /*
-         * int m = rs.size(); for (int k=0; k<m; k++) { NodeHandle nh =
-         * rs.get(k);
-         * 
-         * nh.receiveMessage(brr); }
-         */
-      }
+            /*
+             * int m = rs.size(); for (int k=0; k<m; k++) { NodeHandle nh =
+             * rs.get(k);
+             *
+             * nh.receiveMessage(brr); }
+             */
+        }
     }
   }
 

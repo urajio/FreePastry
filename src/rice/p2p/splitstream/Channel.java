@@ -37,12 +37,11 @@ advised of the possibility of such damage.
 
 package rice.p2p.splitstream;
 
-import java.io.*;
-import java.math.*;
-import java.util.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.scribe.Scribe;
 
-import rice.p2p.commonapi.*;
-import rice.p2p.scribe.*;
+import java.math.BigInteger;
 
 /**
  * The channel controls all the meta data associated with a group of stripes. It contains the
@@ -145,9 +144,9 @@ public class Channel {
    * @return Stripe The Stripe object that is the primary stripe.
    */
   protected Stripe getPrimaryStripe() {
-    for(int i = 0; i < stripes.length; i++) {
-      if (SplitStreamScribePolicy.getPrefixMatch(this.localId, stripes[i].getStripeId().getId(), stripeBase) > 0)
-        return stripes[i];
+    for (Stripe stripe : stripes) {
+      if (SplitStreamScribePolicy.getPrefixMatch(this.localId, stripe.getStripeId().getId(), stripeBase) > 0)
+        return stripe;
     }
     
     return null;

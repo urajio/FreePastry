@@ -41,7 +41,7 @@ import rice.p2p.commonapi.Id;
 
 @SuppressWarnings("unchecked")
 public interface LockManager {
-  public void lock(Id id, Continuation c);
+  void lock(Id id, Continuation c);
   
-  public void unlock(Id id);
+  void unlock(Id id);
 }

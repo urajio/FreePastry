@@ -36,10 +36,13 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.glacier;
 
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdRange;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
 import java.io.IOException;
-import java.util.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
 
 /**
  * DESCRIBE THE CLASS
@@ -168,7 +171,7 @@ public class VersionKeyRange implements IdRange {
     return "[VKRange " + range + "]";
   }
   
-  public void VersionKeyRange(InputBuffer buf, Endpoint endpoint) throws IOException {
+  public VersionKeyRange(InputBuffer buf, Endpoint endpoint) throws IOException {
     range = endpoint.readIdRange(buf); 
   }
   

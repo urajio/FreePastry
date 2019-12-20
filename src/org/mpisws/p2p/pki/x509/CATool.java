@@ -36,17 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.pki.x509;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-
-import org.bouncycastle.jce.PKCS10CertificationRequest;
 
 public interface CATool {
 
@@ -55,9 +49,9 @@ public interface CATool {
   
 //  public X509Certificate signCert(PKCS10CertificationRequest request);
 
-  public X509Certificate sign(String CN, PublicKey key) throws CertificateParsingException, CertificateEncodingException, InvalidKeyException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException;
+  X509Certificate sign(String CN, PublicKey key) throws CertificateParsingException, CertificateEncodingException, InvalidKeyException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException;
 
-  public X509Certificate sign(String CN, PublicKey publicKey, Date expiryDate, long serialNumber) throws CertificateParsingException, CertificateEncodingException, InvalidKeyException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException;
+  X509Certificate sign(String CN, PublicKey publicKey, Date expiryDate, long serialNumber) throws CertificateParsingException, CertificateEncodingException, InvalidKeyException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException;
 
-  public X509Certificate getCertificate();
+  X509Certificate getCertificate();
 }

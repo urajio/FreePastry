@@ -42,5 +42,5 @@ package org.mpisws.p2p.transport.peerreview;
  *
  */
 public interface IdentifierExtractor<Handle, Identifier> {
-  public Identifier extractIdentifier(Handle h);
+  Identifier extractIdentifier(Handle h);
 }

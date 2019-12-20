@@ -36,10 +36,6 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.testing.transportlayer;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mpisws.p2p.transport.TransportLayer;
@@ -47,9 +43,12 @@ import org.mpisws.p2p.transport.multiaddress.MultiInetAddressTransportLayerImpl;
 import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
 import org.mpisws.p2p.transport.wire.WireTransportLayerImpl;
 import org.mpisws.p2p.transport.wire.magicnumber.MagicNumberTransportLayer;
-
 import rice.environment.Environment;
 import rice.environment.logging.CloneableLogManager;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 public class EpochTest extends TLTest<MultiInetSocketAddress>{
   /**
@@ -82,9 +81,9 @@ public class EpochTest extends TLTest<MultiInetSocketAddress>{
     InetSocketAddress addr_a = new InetSocketAddress(addr,port);
     return
         new MultiInetAddressTransportLayerImpl(new MultiInetSocketAddress(addr_a),
-          new MagicNumberTransportLayer<InetSocketAddress>(
-            new WireTransportLayerImpl(addr_a,env_a, null),
-          env_a, null,GOOD_HDR, 2000),
+                new MagicNumberTransportLayer<>(
+                        new WireTransportLayerImpl(addr_a, env_a, null),
+                        env_a, null, GOOD_HDR, 2000),
         env_a, null, null);
   }
 

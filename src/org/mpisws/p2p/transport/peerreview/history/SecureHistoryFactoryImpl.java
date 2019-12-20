@@ -36,18 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.history;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
 import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
-
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.util.RandomAccessFileIOBuffer;
+
+import java.io.File;
+import java.io.IOException;
 
 public class SecureHistoryFactoryImpl implements SecureHistoryFactory, IndexEntryFactory, PeerReviewConstants {
   Environment environment;
@@ -96,10 +92,8 @@ public class SecureHistoryFactoryImpl implements SecureHistoryFactory, IndexEntr
     IndexEntry entry = new IndexEntry(baseSeq, (long)0,EVT_INIT,-1, hashProv.getEmptyHash(), baseHash);
     
     entry.serialize(indexFile);
-    
-    SecureHistoryImpl history = makeSecureHistory(indexFile, dataFile, false, hashProv, this, environment.getLogManager().getLogger(SecureHistoryImpl.class, name));
-    
-    return history;
+
+    return makeSecureHistory(indexFile, dataFile, false, hashProv, this, environment.getLogManager().getLogger(SecureHistoryImpl.class, name));
   }
 
   protected SecureHistoryImpl makeSecureHistory(RandomAccessFileIOBuffer indexFile, RandomAccessFileIOBuffer dataFile, boolean readOnly, HashProvider hashProv, IndexEntryFactory indexFactory, Logger logger) throws IOException {

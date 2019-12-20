@@ -38,19 +38,20 @@ package rice.p2p.util.testing;
 
 import rice.environment.Environment;
 import rice.environment.random.RandomSource;
-import rice.environment.random.simple.SimpleRandomSource;
-import rice.p2p.commonapi.*;
-import rice.p2p.multiring.*;
-import rice.p2p.past.gc.*;
-import rice.pastry.commonapi.*;
-import rice.p2p.util.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.commonapi.IdSet;
+import rice.p2p.multiring.MultiringIdFactory;
+import rice.p2p.past.gc.GCId;
+import rice.p2p.past.gc.GCIdFactory;
+import rice.p2p.util.IdBloomFilter;
+import rice.pastry.commonapi.PastryIdFactory;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.Iterator;
 
 public class IdBloomFilterUnit {
   
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
     int n = 300;
     Environment env = new Environment();
     RandomSource random = env.getRandomSource();

@@ -36,13 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.testing;
 
-import rice.pastry.*;
-import rice.pastry.client.*;
-import rice.pastry.routing.*;
-import rice.pastry.messaging.*;
-import rice.pastry.direct.*;
-
-import java.util.*;
+import rice.pastry.Id;
+import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
+import rice.pastry.client.PastryAppl;
+import rice.pastry.direct.DirectNodeHandle;
+import rice.pastry.direct.NetworkSimulator;
+import rice.pastry.messaging.Message;
+import rice.pastry.routing.SendOptions;
 
 /**
  * Ping

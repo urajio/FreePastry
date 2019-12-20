@@ -36,26 +36,25 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.replay;
 
-import java.nio.ByteBuffer;
-
 import org.mpisws.p2p.transport.TransportLayer;
 import org.mpisws.p2p.transport.peerreview.PeerReviewCallback;
 import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
-
 import rice.environment.Environment;
+
+import java.nio.ByteBuffer;
 
 public interface Verifier<Handle> extends TransportLayer<Handle, ByteBuffer>, PeerReviewConstants {
 
-  public boolean makeProgress();
+  boolean makeProgress();
 
-  public boolean verifiedOK();
+  boolean verifiedOK();
   
-  public void setApplication(PeerReviewCallback app);
+  void setApplication(PeerReviewCallback app);
 
-  public long getNextEventTime();
+  long getNextEventTime();
   
-  public boolean isSuccess();
+  boolean isSuccess();
 
-  public Environment getEnvironment();
+  Environment getEnvironment();
 
 }

@@ -36,8 +36,6 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.util.rawserialization;
 
-import java.io.IOException;
-
 import rice.p2p.commonapi.rawserialization.SizeCheckOutputBuffer;
 
 public abstract class SizeChecker implements SizeCheckOutputBuffer {
@@ -45,9 +43,8 @@ public abstract class SizeChecker implements SizeCheckOutputBuffer {
   
   /**
    * Increment count appropriately
-   * @throws IOException 
    */
-  abstract public void writeSpecial(Object o) throws IOException;
+  abstract public void writeSpecial(Object o);
   
   public int bytesWritten() {
     return count;
@@ -57,46 +54,46 @@ public abstract class SizeChecker implements SizeCheckOutputBuffer {
     return -1;
   }
 
-  public void write(byte[] b, int off, int len) throws IOException {
+  public void write(byte[] b, int off, int len) {
     count+=len;
   }
 
-  public void writeBoolean(boolean v) throws IOException {
+  public void writeBoolean(boolean v) {
     count++;
   }
 
-  public void writeByte(byte v) throws IOException {
+  public void writeByte(byte v) {
     count+=Byte.SIZE/8;
   }
 
-  public void writeChar(char v) throws IOException {
+  public void writeChar(char v) {
     count+=Character.SIZE/8;
   }
 
-  public void writeDouble(double v) throws IOException {
+  public void writeDouble(double v) {
     count+=Double.SIZE/8;
   }
 
-  public void writeFloat(float v) throws IOException {
+  public void writeFloat(float v) {
     count+=Float.SIZE/8;
   }
 
-  public void writeInt(int v) throws IOException {
+  public void writeInt(int v) {
     count+=Integer.SIZE/8;
   }
 
-  public void writeLong(long v) throws IOException {
+  public void writeLong(long v) {
     count+=Long.SIZE/8;
   }
 
-  public void writeShort(short v) throws IOException {
+  public void writeShort(short v) {
     count+=Short.SIZE/8;
   }
 
   /**
    * This is bogus if you aren't using ascii!  Would need to do more introspection.
    */
-  public void writeUTF(String str) throws IOException {
+  public void writeUTF(String str) {
     count+=str.length();
   }
 

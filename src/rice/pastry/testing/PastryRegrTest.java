@@ -36,15 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.testing;
 
-import rice.Continuation;
-import rice.Continuation.*;
 import rice.environment.Environment;
 import rice.p2p.commonapi.RangeCannotBeDeterminedException;
 import rice.pastry.*;
-import rice.pastry.direct.*;
-import rice.pastry.messaging.*;
-import rice.pastry.routing.*;
-import rice.pastry.leafset.*;
+import rice.pastry.leafset.InitiateLeafSetMaintenance;
+import rice.pastry.leafset.LeafSet;
+import rice.pastry.messaging.Message;
+import rice.pastry.routing.InitiateRouteSetMaintenance;
+import rice.pastry.routing.RouteSet;
+import rice.pastry.routing.RoutingTable;
 
 import java.util.*;
 
@@ -162,9 +162,8 @@ public abstract class PastryRegrTest {
   }
 
   protected PastryNode generateNode(NodeHandle bootstrap) {
-    PastryNode pn = factory.newNode(bootstrap);
 
-    return pn;
+    return factory.newNode(bootstrap);
   }
 
   /**
@@ -175,7 +174,7 @@ public abstract class PastryRegrTest {
    */
 
   private void makePastryNode(int num) {
-    RegrTestApp rta[] = new RegrTestApp[num];
+    RegrTestApp[] rta = new RegrTestApp[num];
 
     pause(1000);
     pastryNodesLastAdded.clear();
@@ -225,13 +224,14 @@ public abstract class PastryRegrTest {
 
     // ADDED FOR WIRE PROTOCOL...
     // wait until all nodes are ready
-    for (int i = 0; i < pastryNodesLastAdded.size(); i++) {
-      PastryNode pn = (PastryNode) pastryNodesLastAdded.get(i);
-      synchronized(pn) {
-        while (!pn.isReady()) {                          
+    for (Object o : pastryNodesLastAdded) {
+      PastryNode pn = (PastryNode) o;
+      synchronized (pn) {
+        while (!pn.isReady()) {
           try {
             pn.wait(500);
-          } catch (InterruptedException ie) {}
+          } catch (InterruptedException ie) {
+          }
         }
       }
     }
@@ -365,9 +365,7 @@ public abstract class PastryRegrTest {
       }
 
       public int compare(Id o1, Id o2) {
-        Id nid1 = (Id) o1;
-        Id nid2 = (Id) o2;
-        return nid1.distance(id).compareTo(nid2.distance(id));
+        return ((Id) o1).distance(id).compareTo(((Id) o2).distance(id));
       }
     }
 
@@ -598,8 +596,8 @@ public abstract class PastryRegrTest {
    */
   private void initiateLeafSetMaintenance() {
 
-    for (int i = 0; i < pastryNodes.size(); i++) {
-      PastryNode pn = (PastryNode) pastryNodes.get(i);
+    for (Object pastryNode : pastryNodes) {
+      PastryNode pn = (PastryNode) pastryNode;
       pn.receiveMessage(new InitiateLeafSetMaintenance());
       while (simulate())
         ;
@@ -612,8 +610,8 @@ public abstract class PastryRegrTest {
    */
   private void initiateRouteSetMaintenance() {
 
-    for (int i = 0; i < pastryNodes.size(); i++) {
-      PastryNode pn = (PastryNode) pastryNodes.get(i);
+    for (Object pastryNode : pastryNodes) {
+      PastryNode pn = (PastryNode) pastryNode;
       pn.receiveMessage(new InitiateRouteSetMaintenance());
       while (simulate())
         ;
@@ -648,8 +646,8 @@ public abstract class PastryRegrTest {
    * main
    */
 
-  protected static void mainfunc(PastryRegrTest pt, String args[], int n,
-      int d, int k, int m, int numConcJoins) {
+  protected static void mainfunc(PastryRegrTest pt, String[] args, int n,
+                                 int d, int k, int m, int numConcJoins) {
 
     Date old = new Date();
 

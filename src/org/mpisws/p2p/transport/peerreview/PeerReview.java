@@ -36,14 +36,7 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
 import org.mpisws.p2p.transport.peerreview.audit.EvidenceTool;
 import org.mpisws.p2p.transport.peerreview.commitment.Authenticator;
 import org.mpisws.p2p.transport.peerreview.commitment.AuthenticatorSerializer;
@@ -54,15 +47,16 @@ import org.mpisws.p2p.transport.peerreview.identity.IdentityTransport;
 import org.mpisws.p2p.transport.peerreview.identity.IdentityTransportCallback;
 import org.mpisws.p2p.transport.peerreview.infostore.Evidence;
 import org.mpisws.p2p.transport.peerreview.message.PeerReviewMessage;
-import org.mpisws.p2p.transport.peerreview.message.UserDataMessage;
 import org.mpisws.p2p.transport.peerreview.replay.VerifierFactory;
 import org.mpisws.p2p.transport.util.Serializer;
-
 import rice.environment.Environment;
 import rice.environment.random.RandomSource;
 import rice.p2p.commonapi.Cancellable;
 import rice.p2p.commonapi.rawserialization.RawSerializable;
-import static org.mpisws.p2p.transport.peerreview.Basics.renderStatus;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 public interface PeerReview<Handle extends RawSerializable, Identifier extends RawSerializable> extends 
     IdentityTransportCallback<Handle, Identifier>, PeerReviewConstants, IdentityTransport<Handle, Identifier> {
@@ -70,21 +64,21 @@ public interface PeerReview<Handle extends RawSerializable, Identifier extends R
   /**
    * Option should map to an int < 255 to record the relevant length of the message.
    */
-  public static final String RELEVANT_LENGTH = "PeerReview_Relevant_length";  
+  String RELEVANT_LENGTH = "PeerReview_Relevant_length";
 
   /**
    * -> Boolean, tell peer review to not bother committing this message.  Don't sign it, log it, expect an ack
    */
-  public static final String DONT_COMMIT = "PeerReview_ignore_commit";  
+  String DONT_COMMIT = "PeerReview_ignore_commit";
 
-  public static final byte PEER_REVIEW_PASSTHROUGH = 0;
-  public static final byte PEER_REVIEW_COMMIT = 1;
+  byte PEER_REVIEW_PASSTHROUGH = 0;
+  byte PEER_REVIEW_COMMIT = 1;
   
   
-  public Authenticator extractAuthenticator(Identifier id, long seq, short entryType, byte[] entryHash, byte[] hTopMinusOne, byte[] signature);
-  public boolean addAuthenticatorIfValid(AuthenticatorStore<Identifier> store, Identifier subject, Authenticator auth);
+  Authenticator extractAuthenticator(Identifier id, long seq, short entryType, byte[] entryHash, byte[] hTopMinusOne, byte[] signature);
+  boolean addAuthenticatorIfValid(AuthenticatorStore<Identifier> store, Identifier subject, Authenticator auth);
 
-  public boolean hasCertificate(Identifier id);
+  boolean hasCertificate(Identifier id);
   
   Environment getEnvironment();
 
@@ -95,18 +89,18 @@ public interface PeerReview<Handle extends RawSerializable, Identifier extends R
 
   void challengeSuspectedNode(Handle h);
 
-  public Identifier getLocalId();
-  public Handle getLocalHandle();
-  public Cancellable requestCertificate(Handle source, Identifier certHolder);
+  Identifier getLocalId();
+  Handle getLocalHandle();
+  Cancellable requestCertificate(Handle source, Identifier certHolder);
 
-  public Authenticator extractAuthenticator(long seq, short entryType, byte[] entryHash, byte[] hTopMinusOne, byte[] signature);
+  Authenticator extractAuthenticator(long seq, short entryType, byte[] entryHash, byte[] hTopMinusOne, byte[] signature);
 
 //  public MessageRequestHandle<Handle, PeerReviewMessage> transmit(Handle dest, boolean b, PeerReviewMessage message, MessageCallback<Handle, PeerReviewMessage> deliverAckToMe);
   
-  public void transmit(Handle dest, 
-      PeerReviewMessage message,
-      MessageCallback<Handle, ByteBuffer> deliverAckToMe, 
-      Map<String, Object> options);
+  void transmit(Handle dest,
+                PeerReviewMessage message,
+                MessageCallback<Handle, ByteBuffer> deliverAckToMe,
+                Map<String, Object> options);
 
   /**
    * Current time in millis, however, we depend on there being a timesource that is more discritized
@@ -119,9 +113,9 @@ public interface PeerReview<Handle extends RawSerializable, Identifier extends R
 
   int getSignatureSizeInBytes();
   
-  public IdentifierExtractor<Handle, Identifier> getIdentifierExtractor();
+  IdentifierExtractor<Handle, Identifier> getIdentifierExtractor();
 
-  public long getEvidenceSeq();
+  long getEvidenceSeq();
   
   /**
    * 
@@ -129,15 +123,15 @@ public interface PeerReview<Handle extends RawSerializable, Identifier extends R
    * @param timestamp
    * @param evidence
    */
-  public void sendEvidenceToWitnesses(Identifier subject, long timestamp, Evidence evidence);
+  void sendEvidenceToWitnesses(Identifier subject, long timestamp, Evidence evidence);
 
-  public void init(String dirname) throws IOException;
+  void init(String dirname) throws IOException;
 
-  public void setApp(PeerReviewCallback<Handle, Identifier> callback);
+  void setApp(PeerReviewCallback<Handle, Identifier> callback);
 
-  public PeerReviewCallback<Handle, Identifier> getApp();
+  PeerReviewCallback<Handle, Identifier> getApp();
   
-  public EvidenceTool<Handle, Identifier> getEvidenceTool();
+  EvidenceTool<Handle, Identifier> getEvidenceTool();
   
   /**
    * Throws exception if called w/o the cert for the subject
@@ -145,13 +139,13 @@ public interface PeerReview<Handle extends RawSerializable, Identifier extends R
    * @param auth
    * @return
    */
-  public boolean verify(Identifier subject, Authenticator auth);
-  public RandomSource getRandomSource();
+  boolean verify(Identifier subject, Authenticator auth);
+  RandomSource getRandomSource();
   
-  public SecureHistoryFactory getHistoryFactory();
-  public VerifierFactory<Handle, Identifier> getVerifierFactory();
-  public SecureHistory getHistory();
+  SecureHistoryFactory getHistoryFactory();
+  VerifierFactory<Handle, Identifier> getVerifierFactory();
+  SecureHistory getHistory();
   
-  public long getTimeToleranceMillis();
-  public void sendEvidence(Handle destination, Identifier evidenceAgainst);
+  long getTimeToleranceMillis();
+  void sendEvidence(Handle destination, Identifier evidenceAgainst);
 }

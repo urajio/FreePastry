@@ -42,21 +42,15 @@ advised of the possibility of such damage.
  */
 package rice.selector;
 
-import java.io.IOException;
-import java.nio.channels.SelectionKey;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Iterator;
-
-import rice.environment.logging.*;
+import rice.environment.logging.LogManager;
+import rice.environment.logging.Logger;
 import rice.environment.random.RandomSource;
 import rice.environment.random.simple.SimpleRandomSource;
 import rice.environment.time.TimeSource;
+
+import java.io.IOException;
+import java.nio.channels.SelectionKey;
+import java.util.*;
 
 /**
  * @author jeffh
@@ -140,7 +134,7 @@ public class ProfileSelector extends SelectorManager {
   /**
    * Records how long it takes to receive each type of message.
    */
-  private Hashtable<String, Stat> stats = new Hashtable<String, Stat>();
+  private final Hashtable<String, Stat> stats = new Hashtable<>();
   
   public void addStat(String s, long time) {
     if (!recordStats) return;
@@ -155,33 +149,26 @@ public class ProfileSelector extends SelectorManager {
   public void printStats() {
     if (!recordStats) return;
 
-    ArrayList<Stat> list = new ArrayList<Stat>(stats.size());
+    ArrayList<Stat> list = new ArrayList<>(stats.size());
     if (stats != null) {
       synchronized(stats) {
-        Iterator<Stat> e = stats.values().iterator();
-        while(e.hasNext()) {
-          Stat s = (Stat)e.next(); 
-          list.add(s);
-//          System.out.println("  "+s);
-        }
+        //          System.out.println("  "+s);
+        list.addAll(stats.values());
       }
     }
     
-    Collections.sort(list,new Comparator<Stat>() {
+    list.sort(new Comparator<Stat>() {
       public boolean equals(Object arg0) {
         return false;
       }
 
       public int compare(Stat arg0, Stat arg1) {
-        Stat stat1 = (Stat)arg0;
-        Stat stat2 = (Stat)arg1;
-        
-        return (int)(stat2.totalTime-stat1.totalTime);
+
+        return (int) (((Stat) arg1).totalTime - ((Stat) arg0).totalTime);
       }
     });
-    Iterator<Stat> i = list.iterator();
-    while(i.hasNext()) {
-      System.out.println("  "+i.next()); 
+    for (Stat stat : list) {
+      System.out.println("  " + stat);
     }
   }
 
@@ -198,76 +185,76 @@ public class ProfileSelector extends SelectorManager {
   protected void doSelections() throws IOException {
     SelectionKey[] keys = selectedKeys();
 
-    for (int i = 0; i < keys.length; i++) {
-      selector.selectedKeys().remove(keys[i]);
+    for (SelectionKey key : keys) {
+      selector.selectedKeys().remove(key);
 
-      SelectionKeyHandler skh = (SelectionKeyHandler) keys[i].attachment();
+      SelectionKeyHandler skh = (SelectionKeyHandler) key.attachment();
 
       if (skh != null) {
         // accept
-        if (keys[i].isValid() && keys[i].isAcceptable()) {
+        if (key.isValid() && key.isAcceptable()) {
           lastTaskType = "Accept";
           lastTaskClass = skh.getClass().getName();
           lastTaskToString = skh.toString();
           lastTaskHash = System.identityHashCode(skh);
           long startTime = timeSource.currentTimeMillis();
-          skh.accept(keys[i]);
-          int time = (int)(timeSource.currentTimeMillis() - startTime);
+          skh.accept(key);
+          int time = (int) (timeSource.currentTimeMillis() - startTime);
           lastTaskType = "Accept Complete";
-          addStat("accepting",time);   
+          addStat("accepting", time);
         }
 
         // connect
-        if (keys[i].isValid() && keys[i].isConnectable()) {
+        if (key.isValid() && key.isConnectable()) {
           lastTaskType = "Connect";
           lastTaskClass = skh.getClass().getName();
           lastTaskToString = skh.toString();
           lastTaskHash = System.identityHashCode(skh);
           long startTime = timeSource.currentTimeMillis();
-          skh.connect(keys[i]);
-          int time = (int)(timeSource.currentTimeMillis() - startTime);
+          skh.connect(key);
+          int time = (int) (timeSource.currentTimeMillis() - startTime);
           lastTaskType = "Connect Complete";
-          addStat("connecting",time);   
+          addStat("connecting", time);
         }
 
         // read
-        if (keys[i].isValid() && keys[i].isReadable()) {
+        if (key.isValid() && key.isReadable()) {
           lastTaskType = "Read";
           lastTaskClass = skh.getClass().getName();
           lastTaskToString = skh.toString();
           lastTaskHash = System.identityHashCode(skh);
           long startTime = timeSource.currentTimeMillis();
-          skh.read(keys[i]);
-          int time = (int)(timeSource.currentTimeMillis() - startTime);
+          skh.read(key);
+          int time = (int) (timeSource.currentTimeMillis() - startTime);
           lastTaskType = "Read Complete";
 //          if (skh instanceof PingManager) {
-//            addStat("readingUDP",time);   
+//            addStat("readingUDP",time);
 //          } else {
-//            addStat("readingTCP",time);               
+//            addStat("readingTCP",time);
 //          }
-          //addStat("reading",time);               
+          //addStat("reading",time);
         }
 
         // write
-        if (keys[i].isValid() && keys[i].isWritable()) {
+        if (key.isValid() && key.isWritable()) {
           lastTaskType = "Write";
           lastTaskClass = skh.getClass().getName();
           lastTaskToString = skh.toString();
           lastTaskHash = System.identityHashCode(skh);
           long startTime = timeSource.currentTimeMillis();
-          skh.write(keys[i]);
-          int time = (int)(timeSource.currentTimeMillis() - startTime);
+          skh.write(key);
+          int time = (int) (timeSource.currentTimeMillis() - startTime);
           lastTaskType = "Write Complete";
 //          if (skh instanceof PingManager) {
-//            addStat("writingUDP",time);   
+//            addStat("writingUDP",time);
 //          } else {
-//            addStat("writingTCP",time);               
+//            addStat("writingTCP",time);
 //          }
-//          addStat("writing",time);   
+//          addStat("writing",time);
         }
       } else {
-        keys[i].channel().close();
-        keys[i].cancel();
+        key.channel().close();
+        key.cancel();
       }
     }
   }
@@ -280,7 +267,7 @@ public class ProfileSelector extends SelectorManager {
   protected void doInvocations() {    
     Iterator<Runnable> i;
     synchronized(this) {
-      i = new ArrayList<Runnable>(invocations).iterator();
+      i = new ArrayList<>(invocations).iterator();
       invocations.clear();
     }
     Runnable run;
@@ -311,7 +298,7 @@ public class ProfileSelector extends SelectorManager {
 
     Iterator<SelectionKey> i2;
     synchronized(this) {
-      i2 = new ArrayList<SelectionKey>(modifyKeys).iterator();
+      i2 = new ArrayList<>(modifyKeys).iterator();
     }
     SelectionKey key;
     while (i2.hasNext()) {

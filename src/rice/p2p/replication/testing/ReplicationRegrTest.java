@@ -36,15 +36,16 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.replication.testing;
 
-import java.io.IOException;
-import java.util.*;
-
 import rice.Continuation.ListenerContinuation;
 import rice.environment.Environment;
 import rice.p2p.commonapi.*;
 import rice.p2p.commonapi.testing.CommonAPITest;
-import rice.p2p.replication.*;
+import rice.p2p.replication.ReplicationClient;
+import rice.p2p.replication.ReplicationImpl;
 import rice.persistence.MemoryStorage;
+
+import java.io.IOException;
+import java.util.Iterator;
 
 /**
  * @(#) ReplicationRegrTest.java Provides regression testing for the replication service using distributed
@@ -92,7 +93,7 @@ public class ReplicationRegrTest extends CommonAPITest {
    *
    * @param args DESCRIBE THE PARAMETER
    */
-  public static void main(String args[]) throws IOException {
+  public static void main(String[] args) throws IOException {
     Environment env = parseArgs(args);
     ReplicationRegrTest test = new ReplicationRegrTest(env);
     test.start();

@@ -36,13 +36,6 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.challenge;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.peerreview.PeerReviewCallback;
 import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
 import org.mpisws.p2p.transport.peerreview.PeerReviewImpl;
 import org.mpisws.p2p.transport.peerreview.audit.AuditProtocol;
@@ -59,19 +52,15 @@ import org.mpisws.p2p.transport.peerreview.identity.IdentityTransport;
 import org.mpisws.p2p.transport.peerreview.infostore.Evidence;
 import org.mpisws.p2p.transport.peerreview.infostore.EvidenceRecord;
 import org.mpisws.p2p.transport.peerreview.infostore.PeerInfoStore;
-import org.mpisws.p2p.transport.peerreview.infostore.PeerInfoStoreImpl;
-import org.mpisws.p2p.transport.peerreview.message.AccusationMessage;
-import org.mpisws.p2p.transport.peerreview.message.AckMessage;
-import org.mpisws.p2p.transport.peerreview.message.ChallengeMessage;
-import org.mpisws.p2p.transport.peerreview.message.PeerReviewMessage;
-import org.mpisws.p2p.transport.peerreview.message.ResponseMessage;
-import org.mpisws.p2p.transport.peerreview.message.UserDataMessage;
-
+import org.mpisws.p2p.transport.peerreview.message.*;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.rawserialization.RawSerializable;
-import rice.p2p.util.rawserialization.SimpleInputBuffer;
-import rice.p2p.util.rawserialization.SimpleOutputBuffer;
 import rice.p2p.util.tuples.Tuple;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 public class ChallengeResponseProtocolImpl<Handle extends RawSerializable, Identifier extends RawSerializable> 
     implements PeerReviewConstants, ChallengeResponseProtocol<Handle, Identifier> {
@@ -83,7 +72,7 @@ public class ChallengeResponseProtocolImpl<Handle extends RawSerializable, Ident
   AuditProtocol<Handle, Identifier> auditProtocol;
   CommitmentProtocol<Handle, Identifier> commitmentProtocol;
   protected Logger logger;
-  Map<Handle, LinkedList<PacketInfo<Handle, Identifier>>> queue = new HashMap<Handle,LinkedList<PacketInfo<Handle, Identifier>>>();
+  Map<Handle, LinkedList<PacketInfo<Handle, Identifier>>> queue = new HashMap<>();
   
   public ChallengeResponseProtocolImpl(
       PeerReviewImpl<Handle, Identifier> peerReviewImpl,
@@ -107,10 +96,10 @@ public class ChallengeResponseProtocolImpl<Handle extends RawSerializable, Ident
       Map<String, Object> options) {
     LinkedList<PacketInfo<Handle, Identifier>> list = queue.get(source);
     if (list == null) {
-      list = new LinkedList<PacketInfo<Handle,Identifier>>();
+      list = new LinkedList<>();
       queue.put(source, list);
     }    
-    list.addLast(new PacketInfo<Handle, Identifier>(source,evidence,isAccusation,subject,originator,evidenceSeq,options));
+    list.addLast(new PacketInfo<>(source, evidence, isAccusation, subject, originator, evidenceSeq, options));
   }
   
   protected void deliver(PacketInfo<Handle, Identifier> pi) {
@@ -226,15 +215,15 @@ public class ChallengeResponseProtocolImpl<Handle extends RawSerializable, Ident
   
           /* Serialize the requested log snippet */
         
-          HashPolicy hashPolicy = new ChallengeHashPolicy<Identifier>(flags, challenge.originator, peerreview.getIdSerializer());
+          HashPolicy hashPolicy = new ChallengeHashPolicy<>(flags, challenge.originator, peerreview.getIdSerializer());
 //          SimpleOutputBuffer sob = new SimpleOutputBuffer();
           LogSnippet snippit;
           if ((snippit = history.serializeRange(idxFrom, idxTo, hashPolicy)) != null) {
 //            ByteBuffer buf = sob.getByteBuffer();
 //            int size = buf.remaining();
             /* Put together a RESPONSE message */
-            ResponseMessage<Identifier> response = new ResponseMessage<Identifier>(
-                challenge.originator,peerreview.getLocalId(),challenge.evidenceSeq,new AuditResponse<Handle>(peerreview.getLocalHandle(),snippit));
+            ResponseMessage<Identifier> response = new ResponseMessage<>(
+                    challenge.originator, peerreview.getLocalId(), challenge.evidenceSeq, new AuditResponse<>(peerreview.getLocalHandle(), snippit));
             
             /* ... and send it back to the challenger */
   
@@ -274,7 +263,7 @@ public class ChallengeResponseProtocolImpl<Handle extends RawSerializable, Ident
   
         /* Put together a RESPONSE with an authenticator for the message in the challenge */
 
-        ResponseMessage<Identifier> rMsg = new ResponseMessage<Identifier>(challenge.originator,peerreview.getLocalId(),challenge.evidenceSeq,ret.a());
+        ResponseMessage<Identifier> rMsg = new ResponseMessage<>(challenge.originator, peerreview.getLocalId(), challenge.evidenceSeq, ret.a());
 
         /* ... and send it back to the challenger */
         
@@ -369,7 +358,7 @@ public class ChallengeResponseProtocolImpl<Handle extends RawSerializable, Ident
     }
   }
 
-  boolean isValidResponse(Identifier subject, Evidence evidence, Evidence response) throws IOException {
+  boolean isValidResponse(Identifier subject, Evidence evidence, Evidence response) {
     return isValidResponse(subject, evidence, response, false);
   }
   
@@ -566,11 +555,11 @@ public class ChallengeResponseProtocolImpl<Handle extends RawSerializable, Ident
     
     try {
       /* Construct a CHALLENGE message ... */
-      ChallengeMessage<Identifier> challenge = 
-        new ChallengeMessage<Identifier>(
-            record.getOriginator(),record.getTimeStamp(),
-            infoStore.getEvidence(record.getOriginator(), tIdentifier, record.getTimeStamp())
-            );
+      ChallengeMessage<Identifier> challenge =
+              new ChallengeMessage<>(
+                      record.getOriginator(), record.getTimeStamp(),
+                      infoStore.getEvidence(record.getOriginator(), tIdentifier, record.getTimeStamp())
+              );
       /* ... and send it */
       peerreview.transmit(target, challenge, null, null);
     } catch (IOException ioe) {

@@ -111,9 +111,9 @@ public class MathUtilsUnit {
           System.out.println("[ FAILED ]");
           System.out.println("input:  "+l);
           System.out.print  ("byte[]: ");
-          for (int i=0; i<ar.length; i++) {
-            System.out.print(ar[i]+" ");
-          }
+            for (byte b : ar) {
+                System.out.print(b + " ");
+            }
           System.out.println();
           System.out.println("output: "+result);
           break;
@@ -136,9 +136,9 @@ public class MathUtilsUnit {
           System.out.println("[ FAILED ]");
           System.out.println("input:  "+l);
           System.out.print  ("byte[]: ");
-          for (int i=0; i<ar.length; i++) {
-            System.out.print(ar[i]+" ");
-          }
+            for (byte b : ar) {
+                System.out.print(b + " ");
+            }
           System.out.println();
           System.out.println("output: "+result);
           break;

@@ -39,11 +39,9 @@ advised of the possibility of such damage.
  */
 package rice.post.rawserialization;
 
-import java.io.IOException;
-
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
 public interface Raw {
-  public short getType();
-  public void serialize(OutputBuffer buf) throws IOException;
+  short getType();
+  void serialize(OutputBuffer buf);
 }

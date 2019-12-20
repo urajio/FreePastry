@@ -36,24 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.commitment;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import org.mpisws.p2p.transport.peerreview.PeerReview;
 import org.mpisws.p2p.transport.util.Serializer;
-
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.rawserialization.RawSerializable;
 import rice.p2p.util.RandomAccessFileIOBuffer;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 public class AuthenticatorStoreImpl<Identifier extends RawSerializable> implements AuthenticatorStore<Identifier> {
   
@@ -76,7 +67,7 @@ public class AuthenticatorStoreImpl<Identifier extends RawSerializable> implemen
 
   public AuthenticatorStoreImpl(PeerReview<?, Identifier> peerreview, boolean allowDuplicateSeqs) {
     this.allowDuplicateSeqs = allowDuplicateSeqs;
-    this.authenticators = new HashMap<Identifier, SortedSet<Authenticator>>();
+    this.authenticators = new HashMap<>();
     this.authFile = null;
     this.numSubjects = 0;
     this.peerreview = peerreview;
@@ -147,7 +138,7 @@ public class AuthenticatorStoreImpl<Identifier extends RawSerializable> implemen
   protected void addAuthenticatorToMemory(Identifier id, Authenticator authenticator) {
     SortedSet<Authenticator> list = authenticators.get(id);
     if (list == null) {
-      list = new TreeSet<Authenticator>();
+      list = new TreeSet<>();
       authenticators.put(id, list);
     }
     if (!allowDuplicateSeqs) {
@@ -229,7 +220,7 @@ public class AuthenticatorStoreImpl<Identifier extends RawSerializable> implemen
     if (list != null) {
       SortedSet<Authenticator> subList = list.subSet(new Authenticator(maxseq+1,null,null), new Authenticator(minseq,null,null));      
       //logger.log("getAuthenticators: "+subList);
-      return new ArrayList<Authenticator>(subList);
+      return new ArrayList<>(subList);
     }    
     return Collections.emptyList();
   }
@@ -261,7 +252,7 @@ public class AuthenticatorStoreImpl<Identifier extends RawSerializable> implemen
   }
 
   public List<Identifier> getSubjects() {
-    return new ArrayList<Identifier>(authenticators.keySet());
+    return new ArrayList<>(authenticators.keySet());
   }
 
   public int numAuthenticatorsFor(Identifier id) {

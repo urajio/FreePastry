@@ -39,11 +39,13 @@ advised of the possibility of such damage.
  */
 package rice.p2p.util.rawserialization;
 
-import java.io.*;
-
-import rice.p2p.commonapi.rawserialization.*;
-import rice.pastry.messaging.*;
 import rice.p2p.commonapi.Message;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.commonapi.rawserialization.RawMessage;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 
 /**
  * Wrapper that converts rice.pastry.messaging.Message to rice.pastry.messageing.PRawMessage

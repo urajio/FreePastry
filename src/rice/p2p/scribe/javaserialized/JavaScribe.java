@@ -37,14 +37,10 @@ advised of the possibility of such damage.
 
 package rice.p2p.scribe.javaserialized;
 
-import java.util.Collection;
-
 import rice.p2p.commonapi.NodeHandle;
-import rice.p2p.scribe.BaseScribe;
-import rice.p2p.scribe.ScribeClient;
-import rice.p2p.scribe.ScribeContent;
-import rice.p2p.scribe.ScribeMultiClient;
-import rice.p2p.scribe.Topic;
+import rice.p2p.scribe.*;
+
+import java.util.Collection;
 
 /**
  * Scribe that uses JavaSerialization for the ScribeContent
@@ -63,7 +59,7 @@ public interface JavaScribe extends BaseScribe {
    * @param content The content to include in the subscribe
    * @deprecated use subscribe(Topic, ScribeMultiClient, ScribeContent, NodeHandle)
    */
-  public void subscribe(Topic topic, ScribeClient client, ScribeContent content);
+  void subscribe(Topic topic, ScribeClient client, ScribeContent content);
 
   /**
    * Subscribes the given client to the provided topic.  Any message published
@@ -75,8 +71,8 @@ public interface JavaScribe extends BaseScribe {
    * @param hint The first hop of the message ( Helpful to implement a centralized solution)
    * @deprecated use the version with the MultiClient
    */
-  public void subscribe(Topic topic, ScribeClient client, ScribeContent content, NodeHandle hint);
-  public void subscribe(Topic topic, ScribeMultiClient client, ScribeContent content, NodeHandle hint);
+  void subscribe(Topic topic, ScribeClient client, ScribeContent content, NodeHandle hint);
+  void subscribe(Topic topic, ScribeMultiClient client, ScribeContent content, NodeHandle hint);
 
   /**
    * Subscribe to multiple topics.
@@ -87,8 +83,8 @@ public interface JavaScribe extends BaseScribe {
    * @param hint
    * @deprecated use the version with the MultiClient
    */
-  public void subscribe(Collection<Topic> topics, ScribeClient client, ScribeContent content, NodeHandle hint);
-  public void subscribe(Collection<Topic> topics, ScribeMultiClient client, ScribeContent content, NodeHandle hint);
+  void subscribe(Collection<Topic> topics, ScribeClient client, ScribeContent content, NodeHandle hint);
+  void subscribe(Collection<Topic> topics, ScribeMultiClient client, ScribeContent content, NodeHandle hint);
 
   // ***************** Messaging functions ****************
   /**
@@ -97,7 +93,7 @@ public interface JavaScribe extends BaseScribe {
    * @param topic The topic to publish to
    * @param content The content to publish
    */
-  public void publish(Topic topic, ScribeContent content);
+  void publish(Topic topic, ScribeContent content);
 
   /**
    * Anycasts the given content to a member of the given topic
@@ -105,7 +101,7 @@ public interface JavaScribe extends BaseScribe {
    * @param topic The topic to anycast to
    * @param content The content to anycast
    */
-  public void anycast(Topic topic, ScribeContent content);
+  void anycast(Topic topic, ScribeContent content);
 
   /**
    * Anycasts the given content to a member of the given topic
@@ -118,6 +114,6 @@ public interface JavaScribe extends BaseScribe {
    * @param content The content to anycast
    * @param hint the first hop of the Anycast
    */
-  public void anycast(Topic topic, ScribeContent content, NodeHandle hint);
+  void anycast(Topic topic, ScribeContent content, NodeHandle hint);
 
 }

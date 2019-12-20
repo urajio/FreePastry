@@ -37,18 +37,16 @@ advised of the possibility of such damage.
 
 package rice.p2p.scribe.messaging;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.scribe.Topic;
+import rice.p2p.scribe.rawserialization.RawScribeContent;
+import rice.p2p.scribe.rawserialization.ScribeContentDeserializer;
 
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.scribe.*;
-import rice.p2p.scribe.rawserialization.*;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @(#) SubscribeMessage.java The subscribe message.
@@ -89,7 +87,7 @@ public class SubscribeMessage extends AnycastMessage {
     super(source, topics.iterator().next(), content);
     this.id = id;
     this.subscriber = source;
-    this.topics = new ArrayList<Topic>(topics);
+    this.topics = new ArrayList<>(topics);
   }
 
   /**
@@ -184,7 +182,7 @@ public class SubscribeMessage extends AnycastMessage {
     
     
     int numTopics = buf.readInt();
-    topics = new ArrayList<Topic>(numTopics);
+    topics = new ArrayList<>(numTopics);
     
     // the first topic is the super's topic
     topics.add(getTopic());

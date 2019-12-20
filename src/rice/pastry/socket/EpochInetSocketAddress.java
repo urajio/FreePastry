@@ -37,10 +37,13 @@ advised of the possibility of such damage.
 
 package rice.pastry.socket;
 
-import java.io.*;
-import java.net.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
-import rice.p2p.commonapi.rawserialization.*;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 /**
  * Class which represets a source route to a remote IP address.
@@ -59,7 +62,7 @@ public class EpochInetSocketAddress implements Serializable {
   public static final long EPOCH_UNKNOWN = -1;
     
   // the address list, most external first
-  protected InetSocketAddress address[];
+  protected InetSocketAddress[] address;
   
   // the epoch number of the remote node
   protected long epoch;
@@ -95,9 +98,9 @@ public class EpochInetSocketAddress implements Serializable {
    */
   public int hashCode() {
     int result = (int)epoch;
-    for (int i = 0; i < address.length; i++) {
-      result ^=  address[i].hashCode();
-    }
+      for (InetSocketAddress inetSocketAddress : address) {
+          result ^= inetSocketAddress.hashCode();
+      }
     return result;
   }
   
@@ -272,10 +275,10 @@ public class EpochInetSocketAddress implements Serializable {
   public void serialize(OutputBuffer buf) throws IOException {
 //    System.out.println("EISA.serialize():numAddresses:"+address.length);
     buf.writeByte((byte)address.length);
-    for (int ctr = 0; ctr < address.length; ctr++) {
-      buf.write(address[ctr].getAddress().getAddress(),0,4);
-      buf.writeShort((short)address[ctr].getPort());
-    }
+      for (InetSocketAddress inetSocketAddress : address) {
+          buf.write(inetSocketAddress.getAddress().getAddress(), 0, 4);
+          buf.writeShort((short) inetSocketAddress.getPort());
+      }
     buf.writeLong(epoch);    
   }
 

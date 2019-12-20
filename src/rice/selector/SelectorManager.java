@@ -36,17 +36,20 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.selector;
 
-import java.io.IOException;
-import java.nio.channels.*;
-import java.util.*;
-
 import rice.Destructable;
 import rice.environment.Environment;
-import rice.environment.logging.*;
+import rice.environment.logging.LogManager;
+import rice.environment.logging.Logger;
 import rice.environment.random.RandomSource;
 import rice.environment.random.simple.SimpleRandomSource;
 import rice.environment.time.TimeSource;
-import rice.environment.time.simulated.DirectTimeSource;
+
+import java.io.IOException;
+import java.nio.channels.CancelledKeyException;
+import java.nio.channels.SelectableChannel;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.util.*;
 
 /**
  * This class is the class which handles the selector, and listens for activity.
@@ -75,7 +78,7 @@ public class SelectorManager extends Thread implements Timer, Destructable {
 
   // the set used to store the timer events
 //  protected TreeSet timerQueue = new TreeSet();
-  protected Queue<TimerTask> timerQueue = new PriorityQueue<TimerTask>();
+  protected Queue<TimerTask> timerQueue = new PriorityQueue<>();
 
   // the next time the selector is scheduled to wake up
   protected long wakeupTime = 0;
@@ -110,9 +113,9 @@ public class SelectorManager extends Thread implements Timer, Destructable {
     if (this.random == null) this.random = new SimpleRandomSource(log);
     this.instance = instance;
     this.logger = log.getLogger(getClass(), instance);
-    this.invocations = new LinkedList<Runnable>();
-    this.modifyKeys = new HashSet<SelectionKey>();
-    this.cancelledKeys = new HashSet<SelectionKey>();
+    this.invocations = new LinkedList<>();
+    this.modifyKeys = new HashSet<>();
+    this.cancelledKeys = new HashSet<>();
     this.timeSource = timeSource;
 
     // attempt to create selector
@@ -274,10 +277,8 @@ public class SelectorManager extends Thread implements Timer, Destructable {
           select(selectTime);
           
           if (cancelledKeys.size() > 0) {
-            Iterator<SelectionKey> i = cancelledKeys.iterator();
 
-            while (i.hasNext())
-              ((SelectionKey) i.next()).cancel();
+            for (SelectionKey cancelledKey : cancelledKeys) cancelledKey.cancel();
 
             cancelledKeys.clear();
 
@@ -341,9 +342,7 @@ public class SelectorManager extends Thread implements Timer, Destructable {
     long diff = now - lastTime;
     // notify observers
     synchronized (loopObservers) {
-      Iterator<LoopObserver> i = loopObservers.iterator();
-      while (i.hasNext()) {
-        LoopObserver lo = (LoopObserver) i.next();
+      for (LoopObserver lo : loopObservers) {
         if (lo.delayInterest() <= diff) {
           lo.loopTime((int) diff);
         }
@@ -352,7 +351,7 @@ public class SelectorManager extends Thread implements Timer, Destructable {
     lastTime = now;
   }
 
-  ArrayList<LoopObserver> loopObservers = new ArrayList<LoopObserver>();
+  ArrayList<LoopObserver> loopObservers = new ArrayList<>();
 
   public void addLoopObserver(LoopObserver lo) {
     synchronized (loopObservers) {
@@ -372,54 +371,52 @@ public class SelectorManager extends Thread implements Timer, Destructable {
     // to debug weird selection bug
     if (keys.length > 1000 && logger.level <= Logger.FINE) {
       logger.log("lots of selection keys!");
-      HashMap<String, Integer> histo = new HashMap<String, Integer>();
-      for (int i = 0; i < keys.length; i++) {
-        String keyclass = keys[i].getClass().getName();
+      HashMap<String, Integer> histo = new HashMap<>();
+      for (SelectionKey key : keys) {
+        String keyclass = key.getClass().getName();
         if (histo.containsKey(keyclass)) {
-          histo.put(keyclass, new Integer(((Integer)histo.get(keyclass)).intValue() + 1));
+          histo.put(keyclass, (Integer) histo.get(keyclass) + 1);
         } else {
-          histo.put(keyclass, new Integer(1));
+          histo.put(keyclass, 1);
         }
       }
       logger.log("begin selection keys by class");
-      Iterator<String> it = histo.keySet().iterator();
-      while (it.hasNext()) {
-        String name = (String)it.next();
-        logger.log("Selection Key: " + name + ": "+histo.get(name));
+      for (String name : histo.keySet()) {
+        logger.log("Selection Key: " + name + ": " + histo.get(name));
       }
       logger.log("end selection keys by class");
     }
 
-    for (int i = 0; i < keys.length; i++) {
+    for (SelectionKey key : keys) {
 //      System.out.println("handling key "+keys[i].attachment());
-      selector.selectedKeys().remove(keys[i]);      
+      selector.selectedKeys().remove(key);
 
-      synchronized (keys[i]) {
-        SelectionKeyHandler skh = (SelectionKeyHandler) keys[i].attachment();
+      synchronized (key) {
+        SelectionKeyHandler skh = (SelectionKeyHandler) key.attachment();
 
         if (skh != null) {
           // accept
-          if (keys[i].isValid() && keys[i].isAcceptable()) {
-            skh.accept(keys[i]);
+          if (key.isValid() && key.isAcceptable()) {
+            skh.accept(key);
           }
 
           // connect
-          if (keys[i].isValid() && keys[i].isConnectable()) {
-            skh.connect(keys[i]);
+          if (key.isValid() && key.isConnectable()) {
+            skh.connect(key);
           }
 
           // read
-          if (keys[i].isValid() && keys[i].isReadable()) {
-            skh.read(keys[i]);
+          if (key.isValid() && key.isReadable()) {
+            skh.read(key);
           }
 
           // write
-          if (keys[i].isValid() && keys[i].isWritable()) {
-            skh.write(keys[i]);
+          if (key.isValid() && key.isWritable()) {
+            skh.write(key);
           }
         } else {
-          keys[i].channel().close();
-          keys[i].cancel();
+          key.channel().close();
+          key.cancel();
         }
       }
     }
@@ -433,7 +430,7 @@ public class SelectorManager extends Thread implements Timer, Destructable {
     if (logger.level <= Logger.FINEST) logger.log("SM.doInvocations()");
     Iterator<Runnable> i;
     synchronized (this) {
-      i = new ArrayList<Runnable>(invocations).iterator();
+      i = new ArrayList<>(invocations).iterator();
       invocations.clear();
     }
 
@@ -458,7 +455,7 @@ public class SelectorManager extends Thread implements Timer, Destructable {
 
     Iterator<SelectionKey> i2;
     synchronized (this) {
-      i2 = new ArrayList<SelectionKey>(modifyKeys).iterator();
+      i2 = new ArrayList<>(modifyKeys).iterator();
       modifyKeys.clear();
     }
 
@@ -520,7 +517,7 @@ public class SelectorManager extends Thread implements Timer, Destructable {
       if (logger.level <= Logger.WARNING) logger.logException("CCE: cause:",cce.getCause());
       throw cce;
     } catch (IOException e) {
-      if (e.getMessage().indexOf("Interrupted system call") >= 0) {
+      if (e.getMessage().contains("Interrupted system call")) {
         if (logger.level <= Logger.WARNING) logger.log("Got interrupted system call, continuing anyway...");
         return 1;
       } else {
@@ -547,7 +544,7 @@ public class SelectorManager extends Thread implements Timer, Destructable {
    * @return The array of keys
    * @exception IOException DESCRIBE THE EXCEPTION
    */
-  protected SelectionKey[] selectedKeys() throws IOException {
+  protected SelectionKey[] selectedKeys() {
     Set<SelectionKey> s = selector.selectedKeys();
     SelectionKey[] k = (SelectionKey[])s.toArray(new SelectionKey[0]);
     // randomize k
@@ -623,7 +620,7 @@ public class SelectorManager extends Thread implements Timer, Destructable {
    * 
    * @param task The task to add
    */
-  protected Object seqLock = new Object();
+  protected final Object seqLock = new Object();
   protected int seqCtr = Integer.MIN_VALUE;
   protected synchronized void addTask(TimerTask task) {
     synchronized(seqLock) {
@@ -693,7 +690,7 @@ public class SelectorManager extends Thread implements Timer, Destructable {
     long now = timeSource.currentTimeMillis();
     if (logger.level <= Logger.FINEST) logger.log("SM.executeDueTasks() "+now);
     
-    ArrayList<TimerTask> executeNow = new ArrayList<TimerTask>();
+    ArrayList<TimerTask> executeNow = new ArrayList<>();
 
     // step 1, fetch all due timers
     synchronized (this) {
@@ -717,7 +714,7 @@ public class SelectorManager extends Thread implements Timer, Destructable {
 
     // step 2, execute them all
     // items to be added back into the queue
-    ArrayList<TimerTask> addBack = new ArrayList<TimerTask>();
+    ArrayList<TimerTask> addBack = new ArrayList<>();
     Iterator<TimerTask> i = executeNow.iterator();
     while (i.hasNext()) {
       TimerTask next = i.next();

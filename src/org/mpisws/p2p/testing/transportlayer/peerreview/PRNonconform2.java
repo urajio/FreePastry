@@ -36,24 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.testing.transportlayer.peerreview;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
-import org.mpisws.p2p.testing.transportlayer.peerreview.PRRegressionTest.BogusApp;
-import org.mpisws.p2p.testing.transportlayer.peerreview.PRRegressionTest.HandleImpl;
-import org.mpisws.p2p.testing.transportlayer.peerreview.PRRegressionTest.IdImpl;
-import org.mpisws.p2p.testing.transportlayer.peerreview.PRRegressionTest.Player;
 import org.mpisws.p2p.transport.peerreview.PeerReview;
 import org.mpisws.p2p.transport.peerreview.PeerReviewImpl;
 import org.mpisws.p2p.transport.peerreview.infostore.StatusChangeListener;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.p2p.util.MathUtils;
-import rice.selector.TimerTask;
 
 /**
  * Alice deviates from the protocol by sending a message that's different 

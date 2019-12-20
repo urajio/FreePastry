@@ -36,25 +36,19 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.infostore;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.peerreview.commitment.Authenticator;
 import org.mpisws.p2p.transport.peerreview.commitment.AuthenticatorSerializer;
 import org.mpisws.p2p.transport.peerreview.identity.IdentityTransport;
-import org.mpisws.p2p.transport.peerreview.message.UserDataMessage;
 import org.mpisws.p2p.transport.util.FileInputBuffer;
 import org.mpisws.p2p.transport.util.FileOutputBuffer;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * In this class, the PeerReview library keeps information about its peers.
@@ -86,7 +80,7 @@ public class PeerInfoStoreImpl<Handle, Identifier> implements
       AuthenticatorSerializer authSerializer, 
       EvidenceSerializer evidenceSerializer, 
       Environment env) {
-    this.peerInfoRecords = new HashMap<Identifier, PeerInfoRecord<Handle, Identifier>>();
+    this.peerInfoRecords = new HashMap<>();
     this.directory = null;
     this.notificationEnabled = true;
     this.transport = transport;
@@ -191,8 +185,7 @@ public class PeerInfoStoreImpl<Handle, Identifier> implements
   }
 
   protected File getFile(Identifier subject, Identifier originator, long timestamp, String suffix) {
-    File outFile = new File(directory, stringTranslator.toString(subject)+"-"+stringTranslator.toString(originator)+"-"+timestamp+"."+suffix);  
-    return outFile;
+    return new File(directory, stringTranslator.toString(subject)+"-"+stringTranslator.toString(originator)+"-"+timestamp+"."+suffix);
   }
   
   /* Find out whether a node is TRUSTED, SUSPECTED or EXPOSED */
@@ -262,13 +255,17 @@ public class PeerInfoStoreImpl<Handle, Identifier> implements
           Identifier subject = stringTranslator.readIdentifierFromString(parts[0]);
           Identifier originator = stringTranslator.readIdentifierFromString(parts[1]);
           long seq = Long.parseLong(parts[2]);
-  
-          if (suffix.equals("challenge")) {
-            markEvidenceAvailable(originator, subject, seq, false, null);
-          } else if (suffix.equals("proof")) {
-            markEvidenceAvailable(originator, subject, seq, true, null);
-          } else if (suffix.equals("response")){
-            markResponseAvailable(originator, subject, seq);
+
+          switch (suffix) {
+            case "challenge":
+              markEvidenceAvailable(originator, subject, seq, false, null);
+              break;
+            case "proof":
+              markEvidenceAvailable(originator, subject, seq, true, null);
+              break;
+            case "response":
+              markResponseAvailable(originator, subject, seq);
+              break;
           }
         }
       }
@@ -285,7 +282,7 @@ public class PeerInfoStoreImpl<Handle, Identifier> implements
     PeerInfoRecord<Handle, Identifier> ret = peerInfoRecords.get(id);
     
     if (ret == null && create) {
-      ret = new PeerInfoRecord<Handle, Identifier>(id, this);
+      ret = new PeerInfoRecord<>(id, this);
       peerInfoRecords.put(id, ret);
     }
     return ret;

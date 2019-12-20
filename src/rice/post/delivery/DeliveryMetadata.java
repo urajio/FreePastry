@@ -36,16 +36,8 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.delivery;
 
-import java.io.*;
-
-import rice.*;
-import rice.post.*;
-import rice.post.messaging.*;
-import rice.post.security.*;
-import rice.p2p.past.*;
-import rice.p2p.past.gc.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.multiring.*;
+import rice.p2p.past.gc.GCPastMetadata;
+import rice.post.PostEntityAddress;
 
 /**
  * The delivery metadata stored in Past

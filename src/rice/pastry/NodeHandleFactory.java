@@ -39,12 +39,12 @@ advised of the possibility of such damage.
  */
 package rice.pastry;
 
-import java.io.IOException;
-
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 
+import java.io.IOException;
+
 public interface NodeHandleFactory<NH extends NodeHandle> {
-  public NH readNodeHandle(InputBuffer buf) throws IOException;
+  NH readNodeHandle(InputBuffer buf) throws IOException;
   /**
    * Needed for legacy java deserialization of NodeHanlde because we aren't given any 
    * other way to do this properly such as a protected constructor.
@@ -52,8 +52,8 @@ public interface NodeHandleFactory<NH extends NodeHandle> {
    * @param handle
    * @return
    */
-  public NH coalesce(NH handle);
+  NH coalesce(NH handle);
   
-  public void addNodeHandleFactoryListener(NodeHandleFactoryListener<NH> listener);
-  public void removeNodeHandleFactoryListener(NodeHandleFactoryListener<NH> listener);
+  void addNodeHandleFactoryListener(NodeHandleFactoryListener<NH> listener);
+  void removeNodeHandleFactoryListener(NodeHandleFactoryListener<NH> listener);
 }

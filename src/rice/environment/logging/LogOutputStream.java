@@ -36,11 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.environment.logging;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-
 import rice.environment.Environment;
+
+import java.io.OutputStream;
 
 /**
  * This class constructs an output stream that will send its output to a logger, line
@@ -93,7 +91,7 @@ public class LogOutputStream extends OutputStream {
     this.level = level;
   }
 
-  public void write(int b) throws IOException {
+  public void write(int b) {
     if (b == '\n') {
       if ((offset > 0) && (buffer[offset-1] == '\r'))
         offset--;

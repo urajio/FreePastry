@@ -36,9 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.bandwidthmeasure;
 
-import java.util.Map;
-
 import rice.p2p.util.tuples.Tuple3;
+
+import java.util.Map;
 
 public interface BandwidthMeasurement<Identifier> {
   /**
@@ -46,5 +46,5 @@ public interface BandwidthMeasurement<Identifier> {
    * downstream bytes/sec, upstream bytes/sec, if the upstream was saturated
    * @return
    */
-  public Map<Identifier, Tuple3<Integer, Integer, Boolean>> getBandwidthUsed();
+  Map<Identifier, Tuple3<Integer, Integer, Boolean>> getBandwidthUsed();
 }

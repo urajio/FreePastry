@@ -36,14 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.util;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
+import java.io.*;
 
 public class FileOutputBuffer extends DataOutputStream implements OutputBuffer {
 

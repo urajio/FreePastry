@@ -36,22 +36,22 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.security.ca;
 
-import java.io.*;
-import java.net.*;
-import java.util.zip.*;
-import java.security.*;
-
-import java.util.*;
-
 import rice.environment.Environment;
-import rice.p2p.commonapi.*;
-import rice.p2p.multiring.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.multiring.MultiringIdFactory;
+import rice.p2p.util.MathUtils;
+import rice.p2p.util.SecurityUtils;
+import rice.p2p.util.XMLObjectInputStream;
+import rice.p2p.util.XMLObjectOutputStream;
+import rice.pastry.commonapi.PastryIdFactory;
+import rice.post.PostUserAddress;
+import rice.post.security.PostCertificate;
 
-import rice.post.*;
-import rice.post.security.*;
-
-import rice.pastry.commonapi.*;
-import rice.p2p.util.*;
+import java.io.*;
+import java.security.KeyPair;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * This class starts generates a new certificate for the given username using
@@ -79,10 +79,10 @@ public class CACertificateGenerator {
   }
 
   public static boolean getFlagArg(String[] args, String argType) {
-    for (int i = 0; i < args.length; i++) {
-      if (args[i].startsWith(argType)) {
+    for (String arg : args) {
+      if (arg.startsWith(argType)) {
         return true;
-      } 
+      }
     } 
     return false;
   }
@@ -252,46 +252,34 @@ public class CACertificateGenerator {
   }
 
   public static void write(PostCertificate cert, KeyPair keypair, String password, OutputStream os) throws IOException {
-    ObjectOutputStream oos = null;
-    
-    try {
-      oos = new XMLObjectOutputStream(new BufferedOutputStream(new GZIPOutputStream(os)));
+
+    try (ObjectOutputStream oos = new XMLObjectOutputStream(new BufferedOutputStream(new GZIPOutputStream(os)))) {
       oos.writeObject(cert);
-    
+
       byte[] cipher = SecurityUtils.encryptSymmetric(SecurityUtils.serialize(keypair), SecurityUtils.hash(password.getBytes()));
       oos.writeInt(cipher.length);
       oos.write(cipher);
-    } finally {
-      oos.close();
     }
   }
   
   public static PostCertificate readCertificate(File file) throws IOException, ClassNotFoundException {
-    ObjectInputStream ois = null;
-    
-    try {
-      ois = new XMLObjectInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(file))));
-    
+
+    try (ObjectInputStream ois = new XMLObjectInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(file))))) {
+
       return (PostCertificate) ois.readObject();
-    } finally {
-      ois.close();
     }
   }
   
   public static KeyPair readKeyPair(File file, String password) throws IOException, SecurityException, ClassNotFoundException {
-    ObjectInputStream ois = null;
-    
-    try {
-      ois = new XMLObjectInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(file))));
+
+    try (ObjectInputStream ois = new XMLObjectInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(file))))) {
       ois.readObject();
-    
+
       int length = ois.readInt();
       byte[] cipher = new byte[length];
       ois.readFully(cipher);
-    
+
       return (KeyPair) SecurityUtils.deserialize(SecurityUtils.decryptSymmetric(cipher, SecurityUtils.hash(password.getBytes())));
-    } finally {
-      ois.close();
     }
   }
   

@@ -36,28 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.testing.transportlayer;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mpisws.p2p.transport.ErrorHandler;
 import org.mpisws.p2p.transport.P2PSocket;
 import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.liveness.LivenessListener;
-import org.mpisws.p2p.transport.liveness.LivenessProvider;
-import org.mpisws.p2p.transport.liveness.LivenessTransportLayerImpl;
-import org.mpisws.p2p.transport.liveness.PingListener;
-import org.mpisws.p2p.transport.liveness.Pinger;
+import org.mpisws.p2p.transport.liveness.*;
 import org.mpisws.p2p.transport.multiaddress.MultiInetAddressTransportLayer;
 import org.mpisws.p2p.transport.multiaddress.MultiInetAddressTransportLayerImpl;
 import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
@@ -72,12 +56,19 @@ import org.mpisws.p2p.transport.sourceroute.manager.SourceRouteManagerImpl;
 import org.mpisws.p2p.transport.sourceroute.manager.SourceRouteStrategy;
 import org.mpisws.p2p.transport.wire.WireTransportLayerImpl;
 import org.mpisws.p2p.transport.wire.magicnumber.MagicNumberTransportLayer;
-
 import rice.environment.Environment;
 import rice.environment.logging.CloneableLogManager;
 import rice.environment.params.Parameters;
 import rice.selector.Timer;
 import rice.selector.TimerTask;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.*;
+
+import static org.junit.Assert.assertTrue;
 
 public class SRManagerTest extends TLTest<MultiInetSocketAddress> {
   /**
@@ -170,12 +161,12 @@ public class SRManagerTest extends TLTest<MultiInetSocketAddress> {
     if (name.equals("carol")) carol_tap = srtl;
 
     TestLivenessTransportLayerImpl temp = new TestLivenessTransportLayerImpl(srtl,env_a, null);
-    MinRTTProximityProvider<SourceRoute<MultiInetSocketAddress>> prox = 
-      new MinRTTProximityProvider<SourceRoute<MultiInetSocketAddress>>(temp, env_a);
+    MinRTTProximityProvider<SourceRoute<MultiInetSocketAddress>> prox =
+            new MinRTTProximityProvider<>(temp, env_a);
     if (name.equals("bob")) bob_prox = prox;
     
-    return new SourceRouteManagerImpl<MultiInetSocketAddress>(srFactory, temp, temp, prox, env_a, 
-        new TestSRS(temp.getLocalIdentifier().getLastHop()));
+    return new SourceRouteManagerImpl<>(srFactory, temp, temp, prox, env_a,
+            new TestSRS(temp.getLocalIdentifier().getLastHop()));
   }
   
   static boolean connectionAllowed(MultiInetSocketAddress a, MultiInetSocketAddress b, String context) {
@@ -186,10 +177,8 @@ public class SRManagerTest extends TLTest<MultiInetSocketAddress> {
       }      
     }
     if (b.equals(alice_addr)) {
-      if (a.equals(bob_addr)) {
-//        System.out.println("Bob rejects Alice for "+context);
-        return false;
-      }      
+      //        System.out.println("Bob rejects Alice for "+context);
+      return !a.equals(bob_addr);
     }
 //    System.out.println(b+"->"+a+":"+context);
     return true; 
@@ -203,7 +192,7 @@ public class SRManagerTest extends TLTest<MultiInetSocketAddress> {
     }
 
     public Collection<SourceRoute<MultiInetSocketAddress>> getSourceRoutes(MultiInetSocketAddress destination) {
-      ArrayList<MultiInetSocketAddress> eList = new ArrayList<MultiInetSocketAddress>();
+      ArrayList<MultiInetSocketAddress> eList = new ArrayList<>();
       eList.add((MultiInetSocketAddress)alice.getLocalIdentifier());
       eList.add((MultiInetSocketAddress)bob.getLocalIdentifier());
       eList.add((MultiInetSocketAddress)carol.getLocalIdentifier());
@@ -211,14 +200,14 @@ public class SRManagerTest extends TLTest<MultiInetSocketAddress> {
       eList.remove(local);
       eList.remove(destination);
       
-      ArrayList<SourceRoute<MultiInetSocketAddress>> srList = new ArrayList<SourceRoute<MultiInetSocketAddress>>();
-      ArrayList<MultiInetSocketAddress> path = new ArrayList<MultiInetSocketAddress>(2);
+      ArrayList<SourceRoute<MultiInetSocketAddress>> srList = new ArrayList<>();
+      ArrayList<MultiInetSocketAddress> path = new ArrayList<>(2);
       path.add(local);
       path.add(destination);
       srList.add(srFactory.getSourceRoute(path));
       
       for (MultiInetSocketAddress eAddr : eList) {
-        path = new ArrayList<MultiInetSocketAddress>(3);
+        path = new ArrayList<>(3);
         path.add(local);
         path.add(eAddr);
         path.add(destination);
@@ -263,7 +252,7 @@ public class SRManagerTest extends TLTest<MultiInetSocketAddress> {
   
   @Test
   public void testProximity() throws Exception {
-    final Map<MultiInetSocketAddress, Tupel> pingResponse = new HashMap<MultiInetSocketAddress, Tupel>();
+    final Map<MultiInetSocketAddress, Tupel> pingResponse = new HashMap<>();
     final Object lock = new Object();
     
     PingListener<MultiInetSocketAddress> pl = new PingListener<MultiInetSocketAddress>() {    
@@ -317,7 +306,7 @@ public class SRManagerTest extends TLTest<MultiInetSocketAddress> {
     LivenessProvider<MultiInetSocketAddress> alice = (LivenessProvider<MultiInetSocketAddress>)SRManagerTest.alice;
     MultiInetSocketAddress daveAddress = (MultiInetSocketAddress)dave.getLocalIdentifier();
 //    SourceRoute aliceToDave = getIdentifier(alice, dave);
-    final List<Tupel> tupels = new ArrayList<Tupel>(3);
+    final List<Tupel> tupels = new ArrayList<>(3);
     final Object lock = new Object();
     
     alice.addLivenessListener(new LivenessListener<MultiInetSocketAddress>() {    

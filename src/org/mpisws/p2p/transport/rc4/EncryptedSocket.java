@@ -36,20 +36,18 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.rc4;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Map;
-
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.ShortBufferException;
-
 import org.mpisws.p2p.transport.ClosedChannelException;
 import org.mpisws.p2p.transport.ErrorHandler;
 import org.mpisws.p2p.transport.P2PSocket;
 import org.mpisws.p2p.transport.util.SocketWrapperSocket;
-
 import rice.environment.logging.Logger;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.ShortBufferException;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 public class EncryptedSocket<Identifier> extends SocketWrapperSocket<Identifier, Identifier>{
 
@@ -70,7 +68,7 @@ public class EncryptedSocket<Identifier> extends SocketWrapperSocket<Identifier,
    * the eWB while it is in a socket.write() call.
    */
   byte[] encryptedBytes;
-  ByteBuffer encryptedWriteBuffer;
+  final ByteBuffer encryptedWriteBuffer;
   
   public EncryptedSocket(Identifier identifier, P2PSocket<Identifier> socket,
       Logger logger, ErrorHandler<Identifier> handler, Map<String, Object> options, Cipher encryptCipher, Cipher decryptCipher, int writeBufferSize) {

@@ -36,18 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.transport;
 
-import java.io.IOException;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.pastry.Id;
+import rice.pastry.messaging.Message;
+import rice.pastry.socket.TransportLayerNodeHandle;
+
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-
-
-import rice.p2p.commonapi.rawserialization.OutputBuffer;
-import rice.pastry.Id;
-import rice.pastry.NodeHandle;
-import rice.pastry.messaging.Message;
-import rice.pastry.socket.TransportLayerNodeHandle;
 
 public class BogusNodeHandle extends TransportLayerNodeHandle<Collection<InetSocketAddress>> {
   public Collection<InetSocketAddress> addresses;
@@ -102,7 +99,7 @@ public class BogusNodeHandle extends TransportLayerNodeHandle<Collection<InetSoc
   }
 
   @Override
-  public void serialize(OutputBuffer buf) throws IOException {
+  public void serialize(OutputBuffer buf) {
     throw new IllegalStateException("This NodeHandle is Bogus, don't use it.");
   }
 

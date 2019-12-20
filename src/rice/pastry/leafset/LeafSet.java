@@ -37,12 +37,15 @@ advised of the possibility of such damage.
 
 package rice.pastry.leafset;
 
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.pastry.*;
-import rice.pastry.routing.*;
+import rice.pastry.routing.RoutingTable;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.*;
-import java.io.*;
 
 /**
  * A class for representing and manipulating the leaf set.
@@ -131,8 +134,7 @@ public class LeafSet extends Observable implements Serializable, Iterable<NodeHa
     if (nid.equals(baseId)) return false;
     if (member(handle)) return false;
 
-    boolean res = cwSet.put(handle, suppressNotification) | ccwSet.put(handle, suppressNotification);
-    return res;
+    return cwSet.put(handle, suppressNotification) | ccwSet.put(handle, suppressNotification);
   }
 
   /**
@@ -165,8 +167,7 @@ public class LeafSet extends Observable implements Serializable, Iterable<NodeHa
 
   public boolean isComplete() {
     if (size() == maxSize()) return true;
-    if (overlaps()) return true;
-    return false;
+    return overlaps();
   }
 
   /**
@@ -505,7 +506,7 @@ public class LeafSet extends Observable implements Serializable, Iterable<NodeHa
    * @return
    */
   public Collection<NodeHandle> getUniqueSet() {
-    HashSet<NodeHandle> superset = new HashSet<NodeHandle>();
+    HashSet<NodeHandle> superset = new HashSet<>();
     superset.addAll(cwSet.getCollection());
     superset.addAll(ccwSet.getCollection());
     return superset;         
@@ -640,7 +641,7 @@ public class LeafSet extends Observable implements Serializable, Iterable<NodeHa
     int ccwSize = remotels.ccwSize();
     
     // this is the only way to get the notification correct
-    Set<NodeHandle> myInsertedHandles = new HashSet<NodeHandle>();
+    Set<NodeHandle> myInsertedHandles = new HashSet<>();
 
     // merge the received leaf set into our own
     // to minimize inserts/removes, we do this from nearest to farthest nodes
@@ -810,10 +811,9 @@ public class LeafSet extends Observable implements Serializable, Iterable<NodeHa
       }
     }
 
-    Iterator<NodeHandle> i = myInsertedHandles.iterator();
-    while(i.hasNext()) {
-      cwSet.notifyListeners(i.next(), true); 
-    }
+      for (NodeHandle myInsertedHandle : myInsertedHandles) {
+          cwSet.notifyListeners(myInsertedHandle, true);
+      }
     
     return result;
   }
@@ -1011,10 +1011,10 @@ public class LeafSet extends Observable implements Serializable, Iterable<NodeHa
    *   
    */  
   public synchronized void serialize(OutputBuffer buf) throws IOException {
-    HashSet<NodeHandle> superset = new HashSet<NodeHandle>();
+    HashSet<NodeHandle> superset = new HashSet<>();
     superset.addAll(cwSet.getCollection());
     superset.addAll(ccwSet.getCollection());    
-    ArrayList<NodeHandle> list = new ArrayList<NodeHandle>(superset);
+    ArrayList<NodeHandle> list = new ArrayList<>(superset);
         
     buf.writeByte((byte)theSize);
     buf.writeByte((byte)list.size());
@@ -1022,12 +1022,10 @@ public class LeafSet extends Observable implements Serializable, Iterable<NodeHa
     buf.writeByte((byte)ccwSize());
 
     baseHandle.serialize(buf);
-    
-    Iterator<NodeHandle> it = list.iterator();
-    while(it.hasNext()) {
-      NodeHandle nh = (NodeHandle)it.next(); 
-      nh.serialize(buf);
-    }
+
+      for (NodeHandle nh : list) {
+          nh.serialize(buf);
+      }
     
     for (int i = 0; i < cwSet.size(); i++) {
       buf.writeByte((byte)list.indexOf(cwSet.get(i))); 
@@ -1045,7 +1043,7 @@ public class LeafSet extends Observable implements Serializable, Iterable<NodeHa
    * @return list of NodeHandle
    */
   public synchronized List<NodeHandle> asList() {
-    List<NodeHandle> l = new ArrayList<NodeHandle>();
+    List<NodeHandle> l = new ArrayList<>();
     for (int i=-ccwSize(); i<=cwSize(); i++) {
       if (i != 0) {
         l.add(get(i));

@@ -37,14 +37,19 @@ advised of the possibility of such damage.
 
 package rice.p2p.past.messaging;
 
-import java.io.IOException;
-
-import rice.*;
+import rice.Continuation;
 import rice.environment.Environment;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.past.*;
-import rice.p2p.past.rawserialization.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.past.PastContent;
+import rice.p2p.past.rawserialization.JavaSerializedPastContent;
+import rice.p2p.past.rawserialization.PastContentDeserializer;
+import rice.p2p.past.rawserialization.RawPastContent;
+
+import java.io.IOException;
 
 /**
  * @(#) CacheMessage.java
@@ -124,12 +129,10 @@ public class CacheMessage extends PastMessage {
   
   public static CacheMessage build(InputBuffer buf, Endpoint endpoint, PastContentDeserializer pcd) throws IOException {
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        return new CacheMessage(buf, endpoint, pcd);
-      default:
-        throw new IOException("Unknown Version: "+version);        
-    }
+      if (version == 0) {
+          return new CacheMessage(buf, endpoint, pcd);
+      }
+      throw new IOException("Unknown Version: " + version);
   }
   
   private CacheMessage(InputBuffer buf, Endpoint endpoint, PastContentDeserializer pcd) throws IOException {

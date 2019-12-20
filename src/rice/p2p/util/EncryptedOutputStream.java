@@ -37,9 +37,10 @@ advised of the possibility of such damage.
 
 package rice.p2p.util;
 
-import java.io.*;
-import java.security.*;
-import java.util.*;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.PublicKey;
 
 /**
  * @(#) EncryptedOutputStream.java
@@ -123,7 +124,7 @@ public class EncryptedOutputStream extends OutputStream {
    * @param      off   the start offset in the data.
    * @param      len   the number of bytes to write.
    */
-  public void write(byte b[], int off, int len) throws IOException {
+  public void write(byte[] b, int off, int len) throws IOException {
     if (b == null) {
       throw new NullPointerException();
     } else if ((off < 0) || (off > b.length) || (len < 0) ||

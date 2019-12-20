@@ -35,11 +35,8 @@ advised of the possibility of such damage.
 
 *******************************************************************************/ 
 package rice.testing.routeconsistent.viewer;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+
+import java.io.*;
 
 /*
  * Created on Apr 5, 2004
@@ -68,7 +65,7 @@ public class JeffReader implements Runnable {
     new Thread(this,"Reader Thread").start();    
   }
   
-  Object pauseLock = new Object();
+  final Object pauseLock = new Object();
   boolean paused = false;
   boolean firstTime = true;
   

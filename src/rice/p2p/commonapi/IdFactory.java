@@ -37,9 +37,10 @@ advised of the possibility of such damage.
 
 package rice.p2p.commonapi;
 
-import java.util.*;
-
 import rice.environment.random.RandomSource;
+
+import java.util.Random;
+import java.util.SortedMap;
 
 /**
  * @(#) IdFactory.java This interface provides applications with a way of generating Ids in a
@@ -57,7 +58,7 @@ public interface IdFactory {
    * @param material The material to use
    * @return The built Id.
    */
-  public Id buildId(byte[] material);
+  Id buildId(byte[] material);
 
   /**
    * Builds a protocol-specific Id given the source data.
@@ -65,7 +66,7 @@ public interface IdFactory {
    * @param material The material to use
    * @return The built Id.
    */
-  public Id buildId(int[] material);
+  Id buildId(int[] material);
 
   /**
    * Builds a protocol-specific Id by using the hash of the given string as source data.
@@ -73,7 +74,7 @@ public interface IdFactory {
    * @param string The string to use as source data
    * @return The built Id.
    */
-  public Id buildId(String string);
+  Id buildId(String string);
 
   /**
    * Builds a random protocol-specific Id.
@@ -81,8 +82,8 @@ public interface IdFactory {
    * @param rng A random number generator
    * @return The built Id.
    */
-  public Id buildRandomId(Random rng);
-  public Id buildRandomId(RandomSource rng);
+  Id buildRandomId(Random rng);
+  Id buildRandomId(RandomSource rng);
   
   /**
    * Builds an Id by converting the given toString() output back to an Id.  Should
@@ -91,7 +92,7 @@ public interface IdFactory {
    * @param string The toString() representation of an Id
    * @return The built Id.
    */
-  public Id buildIdFromToString(String string);
+  Id buildIdFromToString(String string);
   
   /**
    * Builds an Id by converting the given toString() output back to an Id.  Should
@@ -102,7 +103,7 @@ public interface IdFactory {
    * @param length The length to read
    * @return The built Id.
    */
-  public Id buildIdFromToString(char[] chars, int offset, int length);
+  Id buildIdFromToString(char[] chars, int offset, int length);
   
   /**
    * Builds an IdRange based on a prefix.  Any id which has this prefix should
@@ -112,14 +113,14 @@ public interface IdFactory {
    * @param string The toString() representation of an Id
    * @return The built Id.
    */
-  public IdRange buildIdRangeFromPrefix(String string);
+  IdRange buildIdRangeFromPrefix(String string);
   
   /**
    * Returns the length a Id.toString should be.
    *
    * @return The correct length;
    */
-  public int getIdToStringLength();
+  int getIdToStringLength();
 
   /**
    * Builds a protocol-specific Id.Distance given the source data.
@@ -127,7 +128,7 @@ public interface IdFactory {
    * @param material The material to use
    * @return The built Id.Distance.
    */
-  public Id.Distance buildIdDistance(byte[] material);
+  Id.Distance buildIdDistance(byte[] material);
 
   /**
    * Creates an IdRange given the CW and CCW ids.
@@ -136,14 +137,14 @@ public interface IdFactory {
    * @param ccw The counterclockwise Id
    * @return An IdRange with the appropriate delimiters.
    */
-  public IdRange buildIdRange(Id cw, Id ccw);
+  IdRange buildIdRange(Id cw, Id ccw);
   
   /**
    * Creates an empty IdSet.
    *
    * @return an empty IdSet
    */
-  public IdSet buildIdSet();
+  IdSet buildIdSet();
   
   /**
    * Creates an empty IdSet.
@@ -151,13 +152,13 @@ public interface IdFactory {
    * @Param map The map which to take the keys from to create the IdSet's elements
    * @return an empty IdSet
    */
-  public IdSet buildIdSet(SortedMap map);
+  IdSet buildIdSet(SortedMap map);
   
   /**
    * Creates an empty NodeHandleSet.
    *
    * @return an empty NodeHandleSet
    */
-  public NodeHandleSet buildNodeHandleSet();
+  NodeHandleSet buildNodeHandleSet();
 }
 

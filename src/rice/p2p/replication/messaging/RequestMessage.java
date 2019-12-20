@@ -37,12 +37,14 @@ advised of the possibility of such damage.
 
 package rice.p2p.replication.messaging;
 
-import java.io.IOException;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.IdRange;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.util.IdBloomFilter;
 
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.replication.*;
-import rice.p2p.util.*;
+import java.io.IOException;
 
 /**
  * @(#) RequestMessage.java
@@ -108,24 +110,22 @@ public class RequestMessage extends ReplicationMessage {
     super.serialize(buf);
 
     buf.writeInt(filters.length);
-    for (int i = 0; i < filters.length; i++) {
-      filters[i].serialize(buf); 
+    for (IdBloomFilter filter : filters) {
+      filter.serialize(buf);
     }
 
     buf.writeInt(ranges.length);
-    for (int i = 0; i < ranges.length; i++) {
-      ranges[i].serialize(buf); 
+    for (IdRange range : ranges) {
+      range.serialize(buf);
     }
   }
   
   public static RequestMessage build(InputBuffer buf, Endpoint endpoint) throws IOException {
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        return new RequestMessage(buf, endpoint);
-      default:
-        throw new IOException("Unknown Version: "+version);
-    }
+      if (version == 0) {
+          return new RequestMessage(buf, endpoint);
+      }
+      throw new IOException("Unknown Version: " + version);
   }
     
   private RequestMessage(InputBuffer buf, Endpoint endpoint) throws IOException {

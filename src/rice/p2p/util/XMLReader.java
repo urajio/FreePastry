@@ -37,12 +37,12 @@ advised of the possibility of such damage.
 
 package rice.p2p.util;
 
-import java.io.*;
-import java.util.*;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
 
 /**
  * XMLReader is a utility class used by XMLObjectInputStreamm to perform the actual
@@ -316,9 +316,8 @@ public class XMLReader {
    */
   public String getAttribute(String name) throws IOException {
     assertEvent(xpp.START_TAG);
-    String result = xpp.getAttributeValue(null, name);
-      
-    return result;
+
+    return xpp.getAttributeValue(null, name);
   }
   
   /**

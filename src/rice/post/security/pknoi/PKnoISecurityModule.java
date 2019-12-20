@@ -36,15 +36,17 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.security.pknoi;
 
-import java.io.*;
-import java.security.*;
+import rice.Continuation;
+import rice.post.Post;
+import rice.post.PostClient;
+import rice.post.PostUserAddress;
+import rice.post.log.Log;
+import rice.post.messaging.NotificationMessage;
+import rice.post.security.PostCertificate;
+import rice.post.security.SecurityModule;
+import rice.post.storage.ContentHashReference;
 
-import rice.*;
-import rice.post.*;
-import rice.post.log.*;
-import rice.post.storage.*;
-import rice.post.messaging.*;
-import rice.post.security.*;
+import java.security.PublicKey;
 
 /**
  * This class is the security module which implements the PKnoI (web of trust) based
@@ -113,7 +115,7 @@ public class PKnoISecurityModule extends PostClient implements SecurityModule {
     try {
       PKnoIPostCertificate cert = (PKnoIPostCertificate) certificate;
       
-      command.receiveResult(new Boolean(true));
+      command.receiveResult(Boolean.TRUE);
     } catch (Exception e) {
       throw new SecurityException("InvalidKeyException verifying object: " + e);
     }
@@ -127,7 +129,7 @@ public class PKnoISecurityModule extends PostClient implements SecurityModule {
    * @param nm The incoming notification.
    */
   public void notificationReceived(NotificationMessage nm, Continuation command) {
-    command.receiveResult(new Boolean(true));
+    command.receiveResult(Boolean.TRUE);
     // NOTHING NOW
   }
   

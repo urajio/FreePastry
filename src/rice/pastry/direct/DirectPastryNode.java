@@ -37,28 +37,9 @@ advised of the possibility of such damage.
 package rice.pastry.direct;
 
 
-import java.util.Hashtable;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.SocketRequestHandle;
-
-import rice.environment.Environment;
-import rice.environment.logging.Logger;
-import rice.p2p.commonapi.appsocket.AppSocketReceiver;
-import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.pastry.Id;
-import rice.pastry.NodeHandle;
 import rice.pastry.PastryNode;
-import rice.pastry.ReadyStrategy;
-import rice.pastry.ScheduledMessage;
-import rice.pastry.client.PastryAppl;
-import rice.pastry.join.InitiateJoin;
-import rice.pastry.messaging.Message;
-import rice.pastry.routing.RouteMessage;
-import rice.pastry.transport.PMessageNotification;
-import rice.pastry.transport.PMessageReceipt;
-import rice.selector.SelectorManager;
-import rice.selector.Timer;
+
+import java.util.Hashtable;
 
 /**
  * Direct pastry node. Subclasses PastryNode, and does about nothing else.
@@ -73,7 +54,7 @@ public class DirectPastryNode {
    * Used for proximity calculation of DirectNodeHandle. This will probably go
    * away when we switch to a byte-level protocol.
    */
-  static private Hashtable<Thread, PastryNode> currentNode = new Hashtable<Thread, PastryNode>();
+  static private Hashtable<Thread, PastryNode> currentNode = new Hashtable<>();
   
   /**
    * Returns the previous one.
@@ -94,8 +75,7 @@ public class DirectPastryNode {
   
   public static synchronized PastryNode getCurrentNode() {
     Thread current = Thread.currentThread();
-    PastryNode ret = currentNode.get(current);
-    return ret;    
+    return currentNode.get(current);
   }  
 }
 

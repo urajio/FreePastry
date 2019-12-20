@@ -36,10 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.bandwidthlimit;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import org.mpisws.p2p.transport.TransportLayer;
+
+import java.nio.ByteBuffer;
 
 /**
  * Can Limit Bandwidth of a node.  Will queue messages, then drop them.

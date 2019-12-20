@@ -6,20 +6,11 @@
   <property name="license.dir" value="license"/>
   <property name="build.dir" value="classes" />  
   <property name="lib.dir" value="lib" />
-  <property name="pretty.dir" value="pretty" />
-  <property name="pretty.lib.dir" value="pretty/lib" />
   <property name="docs.dir" value="docs" />
   <property name="javadoc.dir" value="${docs.dir}/javadoc" />
   <property name="license.file" value="License.txt"/>
   <property name="license.path" value="${license.dir}/${license.file}"/>
 
-  
-  <!-- Jars that Pretty package needs -->
-  <path id="pretty.classpath">
-    <fileset dir="${pretty.lib.dir}">
-      <include name="**/*.jar"/>
-    </fileset>
-  </path>
 
   <!-- The classpath -->
   <path id="project.classpath">
@@ -43,7 +34,8 @@
   </target>
 
   <target name="compile" depends="init">
-    <javac srcdir="${src.dir}"
+    <javac includeantruntime="false"
+           srcdir="${src.dir}"
            destdir="${build.dir}"
            classpathref="project.classpath"
            includes="**/*.java"
@@ -52,80 +44,6 @@
            debug="true">           
     </javac>
   </target>
-
-  <!-- Environment variables for the Checker Framework -->
-  <!-- Override on the command line, e.g.:  ant -Djsr308.dir=$HOME/jsr308  -->
-  <property environment="env"/>
-  <property name="jsr308.dir" value="C:/jsr308"/>
-  <property name="jsr308.checkers.dir" value="${jsr308.dir}/checkers"/>
-  <property name="jsr308.javac" value="${jsr308.dir}/jdk1.7.0/bin/javac"/>
-  <property name="jsr308.processor" value="checkers.interning.InterningChecker"/>
-
-  <!-- The classpath for using the Checker Framework -->
-  <path id="checkers.classpath">
-    <fileset dir="${lib.dir}">
-      <include name="**/*.jar"/>
-    </fileset>
-    <fileset dir="${jsr308.checkers.dir}">
-      <include name="checkers.jar"/>
-    </fileset>
-    <pathelement path="${build.dir}"/>
-  </path>
-
-  <!-- Running a checker from the Checker Framework -->
-  <!--
-    "clean" target is because the javac target doesn't re-compile .java
-    files for which a .class file already exists.
-    "executable" and "fork" fields ensure we call an external program, not
-    just run javac via a Java method call.  That's because the JSR 308
-    compiler might not be the one that is running Ant.
-  -->
-  <target name="checker" depends="clean,init">
-    <javac srcdir="${src.dir}"
-       destdir="${build.dir}"
-       classpathref="checkers.classpath"
-       includes="**/*.java"
-       deprecation="no"
-       debuglevel="lines,vars,source"
-       fork="yes"
-       executable="${jsr308.javac}"
-       debug="true">
-      <compilerarg value="-version"/>
-      <compilerarg value="-processor"/>
-      <compilerarg value="${jsr308.processor}"/>
-    </javac>
-  </target>
-
-
-  <target name="etags" depends="tags">
-  </target>
-  <target name="tags" description="Create Emacs TAGS table">
-    <exec executable="/bin/sh">
-      <arg value="-c"/>
-      <arg value="etags `find -name '*.java' | sort-directory-order.pl`"/>
-    </exec>
-  </target>
-
-
-  <target name="compileappend" depends="init">
-    <javac srcdir="${pretty.lib.dir}"
-           destdir="."
-           deprecation="yes"
-           debuglevel="lines,vars,source"
-           debug="true">
-    </javac>
-  </target> 
-
-  
-  <target name="appendlicense" depends="compileappend">
-    <taskdef name="append" 
-             classname="Append"
-             classpath="."/>
-    <append srcfile="${license.path}">      
-      <fileset dir="${src.dir}" includes="**/*.java"/> 
-    </append>
-  </target>  
-  
 
 
   <!-- todo add *.html, *.htm -->
@@ -153,7 +71,6 @@
         <exclude name="rice/pastry/socket/testing/*.java"/>
         <include name="rice/persistence/**/*.java"/>
         <include name="rice/selector/**/*.java"/>
-        <include name="rice/tutorial/**/*.java"/>
       </fileset>
        <doctitle>Rice Pastry API</doctitle>
        <header>Rice Pastry API</header>
@@ -191,7 +108,6 @@
         <exclude name="rice/pastry/socket/testing/*.class"/>
         <include name="rice/persistence/**/*.class"/>
         <include name="rice/selector/**/*.class"/>
-        <include name="rice/tutorial/**/*.class"/>
       </fileset>
       <fileset dir="${jar.dir}/freepastry" includes="freepastry.params"/>
     </jar>
@@ -218,7 +134,6 @@
         <exclude name="rice/pastry/socket/testing/*.class"/>
         <include name="rice/persistence/**/*.class"/>
         <include name="rice/selector/**/*.class"/>
-        <include name="rice/tutorial/**/*.class"/>
       </fileset>
       <fileset dir="${jar.dir}/freepastry" includes="freepastry.params"/>
     </jar>
@@ -290,7 +205,7 @@
     </jar>
   </target>
 
-  <target name="freepastry-release" depends="freepastry-jar,javadoc,freepastry-tutorial">
+  <target name="freepastry-release" depends="freepastry-jar,javadoc">
     <move file="pastry.jar" tofile="FreePastry-${freepastry-version}.jar"/>
  <!--
     <tar destfile="FreePastry-${freepastry-version}-all.tgz" compression="gzip">
@@ -320,7 +235,6 @@
         <exclude name="rice/pastry/socket/testing/*.java"/>
         <include name="rice/persistence/**/*.java"/>
         <include name="rice/selector/**/*.java"/>
-        <include name="rice/tutorial/**/*.java"/>
       </tarfileset>
       <tarfileset dir="ant" includes="**/*" prefix="pastry-${freepastry-version}/ant"/>
       <tarfileset dir="html" includes="**/*" prefix="pastry-${freepastry-version}/html"/>
@@ -358,7 +272,6 @@
         <exclude name="rice/pastry/socket/testing/*.java"/>
         <include name="rice/persistence/**/*.java"/>
         <include name="rice/selector/**/*.java"/>
-        <include name="rice/tutorial/**/*.java"/>
       </zipfileset>
       <zipfileset dir="ant" includes="**/*" prefix="pastry-${freepastry-version}/ant" />
       <zipfileset dir="html" includes="**/*" prefix="pastry-${freepastry-version}/html" />
@@ -400,15 +313,4 @@
       </fileset>
     </checksum>
   </target>
-
-  <!-- perform variable substitutions to the tutorial -->
-  <target name="freepastry-tutorial">
-    <copy todir="tutorial">
-    	  <fileset dir="html/rawtutorial" excludes="tutorial.variables"/>
-      <filterset>
-	    <filtersfile file="html/rawtutorial/tutorial.variables"/>
-      </filterset>
-    </copy>
-  </target>
-
 </project>

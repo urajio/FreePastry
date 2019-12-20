@@ -39,13 +39,12 @@ advised of the possibility of such damage.
  */
 package rice.environment;
 
-import java.io.IOException;
-import java.util.*;
-
 import rice.Destructable;
 import rice.environment.exception.ExceptionStrategy;
 import rice.environment.exception.simple.SimpleExceptionStrategy;
-import rice.environment.logging.*;
+import rice.environment.logging.CloneableLogManager;
+import rice.environment.logging.LogManager;
+import rice.environment.logging.Logger;
 import rice.environment.logging.file.FileLogManager;
 import rice.environment.logging.simple.SimpleLogManager;
 import rice.environment.params.Parameters;
@@ -58,8 +57,11 @@ import rice.environment.random.simple.SimpleRandomSource;
 import rice.environment.time.TimeSource;
 import rice.environment.time.simple.SimpleTimeSource;
 import rice.environment.time.simulated.DirectTimeSource;
-import rice.pastry.Id;
 import rice.selector.SelectorManager;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 
 /**
@@ -82,7 +84,7 @@ public class Environment implements Destructable {
   private Logger logger;
   private ExceptionStrategy exceptionStrategy;
 
-  private HashSet<Destructable> destructables = new HashSet<Destructable>();
+  private HashSet<Destructable> destructables = new HashSet<>();
   
   /**
    * Constructor.  You can provide null values for all/any paramenters, which will result
@@ -151,9 +153,8 @@ public class Environment implements Destructable {
     SelectorManager selector = generateDefaultSelectorManager(dts,lm,rs);
     dts.setSelectorManager(selector);
     Processor proc = new SimProcessor(selector);
-    Environment ret = new Environment(selector,proc,rs,dts,lm,
+    return new Environment(selector,proc,rs,dts,lm,
         params, generateDefaultExceptionStrategy(lm));
-    return ret;
   }
   
   public Environment(String paramFileName) {
@@ -277,9 +278,7 @@ public class Environment implements Destructable {
   }
   
   private void callDestroyOnDestructables() {
-    Iterator<Destructable> i = new ArrayList<Destructable>(destructables).iterator();
-    while(i.hasNext()) {
-      Destructable d = (Destructable)i.next();
+    for (Destructable d : new ArrayList<>(destructables)) {
       d.destroy();
     }
     selectorManager.destroy();

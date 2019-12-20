@@ -36,13 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.history.logentry;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
-
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
+import java.io.IOException;
 
 /**
  * EVT_SENDSIGN

@@ -37,12 +37,13 @@ advised of the possibility of such damage.
 package rice.pastry.testing;
 
 import rice.environment.Environment;
-import rice.pastry.*;
+import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
 import rice.pastry.direct.*;
-import rice.pastry.standard.*;
+import rice.pastry.standard.RandomNodeIdFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.NoSuchElementException;
 
 /**
  * PastryRegrTest
@@ -62,7 +63,7 @@ public class DirectPastryRegrTest extends PastryRegrTest {
   /**
    * constructor
    */
-  private DirectPastryRegrTest() throws IOException {
+  private DirectPastryRegrTest() {
     super(Environment.directEnvironment());
     simulator = new SphereNetwork(environment);
     factory = new DirectPastryNodeFactory(new RandomNodeIdFactory(environment), 
@@ -136,7 +137,7 @@ public class DirectPastryRegrTest extends PastryRegrTest {
   /**
    * main. just create the object and call PastryNode's main.
    */
-  public static void main(String args[]) throws IOException {
+  public static void main(String[] args) throws IOException {
     DirectPastryRegrTest pt = new DirectPastryRegrTest();
     mainfunc(pt, args, 500 /* n */, 100/* d */, 10/* k */, 100/* m */, 1/* conc */);
   }

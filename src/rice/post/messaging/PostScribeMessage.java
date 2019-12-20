@@ -36,12 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.messaging;
 
-import java.io.*;
-
 import rice.p2p.commonapi.Endpoint;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.scribe.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.p2p.scribe.rawserialization.RawScribeContent;
+
+import java.io.IOException;
 
 /**
  * This is a wrapper message for all Post messages which

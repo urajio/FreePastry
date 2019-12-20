@@ -37,37 +37,37 @@ advised of the possibility of such damage.
 
 package rice.p2p.commonapi.testing;
 
-import rice.*;
-
 import rice.environment.Environment;
-import rice.environment.logging.*;
-import rice.environment.logging.simple.SimpleLogManager;
+import rice.environment.logging.LogManager;
+import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
 import rice.environment.params.simple.SimpleParameters;
 import rice.environment.processing.Processor;
 import rice.environment.processing.sim.SimProcessor;
 import rice.environment.random.RandomSource;
-import rice.environment.random.simple.SimpleRandomSource;
 import rice.environment.time.TimeSource;
 import rice.environment.time.simple.SimpleTimeSource;
 import rice.environment.time.simulated.DirectTimeSource;
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.commonapi.Message;
+import rice.p2p.commonapi.Node;
 import rice.p2p.commonapi.NodeHandle;
-
-import rice.pastry.*;
-import rice.pastry.commonapi.*;
+import rice.pastry.NodeIdFactory;
+import rice.pastry.PastryNode;
+import rice.pastry.PastryNodeFactory;
+import rice.pastry.commonapi.PastryIdFactory;
 import rice.pastry.direct.*;
-import rice.pastry.dist.*;
-import rice.pastry.leafset.BroadcastLeafSet;
-import rice.pastry.leafset.RequestLeafSet;
+import rice.pastry.dist.DistPastryNodeFactory;
 import rice.pastry.socket.SocketPastryNodeFactory;
 import rice.pastry.socket.nat.rendezvous.RendezvousSocketPastryNodeFactory;
-import rice.pastry.standard.*;
+import rice.pastry.standard.RandomNodeIdFactory;
 import rice.selector.SelectorManager;
 
-import java.util.*;
-import java.net.*;
-import java.io.*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
 
 /**
  * Provides regression testing setup for applications written on top of the
@@ -509,7 +509,7 @@ public abstract class CommonAPITest {
    * @param start The string
    * @return The result.
    */
-  private final String pad(String start) {
+  private String pad(String start) {
     if (start.length() >= PAD_SIZE) {
       return start.substring(0, PAD_SIZE);
     } else {
@@ -549,11 +549,11 @@ public abstract class CommonAPITest {
   /**
    * process command line args
    */
-  public static Environment parseArgs(String args[]) throws IOException {
+  public static Environment parseArgs(String[] args) throws IOException {
     // process command line arguments
 
-    for (int i = 0; i < args.length; i++) {
-      if (args[i].equals("-help")) {
+    for (String arg : args) {
+      if (arg.equals("-help")) {
         System.out.println("Usage: DistCommonAPITest [-params paramsfile] [-port p] [-protocol (direct|socket)] [-bootstrap host[:port]] [-help]");
         System.exit(1);
       }

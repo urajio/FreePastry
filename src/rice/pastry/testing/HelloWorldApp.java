@@ -38,13 +38,12 @@ package rice.pastry.testing;
 
 import rice.environment.logging.Logger;
 import rice.environment.random.RandomSource;
-import rice.pastry.*;
-import rice.pastry.client.*;
-import rice.pastry.messaging.*;
-import rice.pastry.routing.*;
-
-import java.util.*;
-import java.io.*;
+import rice.pastry.Id;
+import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
+import rice.pastry.client.PastryAppl;
+import rice.pastry.messaging.Message;
+import rice.pastry.routing.SendOptions;
 
 /**
  * A hello world example for pastry. This is the per-node app object.

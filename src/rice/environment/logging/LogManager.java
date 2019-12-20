@@ -56,5 +56,5 @@ public interface LogManager {
    * @param instance the instance-name associated with this logger.
    * @return the logger.
    */
-  public Logger getLogger(Class clazz, String instance);
+  Logger getLogger(Class clazz, String instance);
 }

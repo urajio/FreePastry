@@ -36,21 +36,18 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.scribe.testing;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.*;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.environment.params.simple.SimpleParameters;
-import rice.environment.time.simulated.DirectTimeSource;
 import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.rawserialization.MessageDeserializer;
+import rice.p2p.commonapi.rawserialization.RawMessage;
 import rice.p2p.commonapi.testing.CommonAPITest;
 import rice.p2p.scribe.*;
 import rice.p2p.scribe.messaging.SubscribeMessage;
-import rice.p2p.util.tuples.Tuple;
 import rice.pastry.PastryNode;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @(#) DistScribeRegrTest.java Provides regression testing for the Scribe service using distributed
@@ -77,7 +74,7 @@ public class ScribeRegrTest extends CommonAPITest {
   /**
    * The scribe policies
    */
-  protected TestScribePolicy policies[];
+  protected TestScribePolicy[] policies;
 
   /**
    * Constructor which sets up all local variables
@@ -108,7 +105,7 @@ public class ScribeRegrTest extends CommonAPITest {
    *
    * @param args DESCRIBE THE PARAMETER
    */
-  public static void main(String args[]) throws IOException {
+  public static void main(String[] args) throws IOException {
 //    System.setOut(new PrintStream("srt.log"));
 //    System.setErr(System.out);
     
@@ -382,7 +379,7 @@ public class ScribeRegrTest extends CommonAPITest {
       // build antipodal topics so they are guaranteed to have different parents   
       // TODO: Randomize this
       TestScribeClient[] clients = new TestScribeClient[NUM_NODES];
-      List<Topic> topics = new ArrayList<Topic>(NUM_TOPICS);
+      List<Topic> topics = new ArrayList<>(NUM_TOPICS);
       int[] id1 = {0, 0, 0, 0, 0x80000000};
       int[] id2 = {0, 0, 0, 0, 0};
       topics.add(new Topic(FACTORY.buildId(id1)));
@@ -837,7 +834,7 @@ public class ScribeRegrTest extends CommonAPITest {
   }
 
   public static List<Topic> buildListOf1(Topic topic) {
-    List<Topic> ret = new ArrayList<Topic>(1);
+    List<Topic> ret = new ArrayList<>(1);
     ret.add(topic);
     return ret;
   }    

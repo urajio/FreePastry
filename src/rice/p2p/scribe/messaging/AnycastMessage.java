@@ -37,14 +37,20 @@ advised of the possibility of such damage.
 
 package rice.p2p.scribe.messaging;
 
-import java.io.IOException;
-import java.util.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.scribe.ScribeContent;
+import rice.p2p.scribe.Topic;
+import rice.p2p.scribe.rawserialization.JavaSerializedScribeContent;
+import rice.p2p.scribe.rawserialization.RawScribeContent;
+import rice.p2p.scribe.rawserialization.ScribeContentDeserializer;
 
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.scribe.*;
-import rice.p2p.scribe.rawserialization.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * @(#) AnycastMessage.java The anycast message.
@@ -89,8 +95,8 @@ public class AnycastMessage extends ScribeMessage {
     this.initialRequestor = source;
 //    if (content == null) throw new IllegalArgumentException
     this.content = content;
-    this.visited = new ArrayList<NodeHandle>();
-    this.toVisit = new LinkedList<NodeHandle>();
+    this.visited = new ArrayList<>();
+    this.toVisit = new LinkedList<>();
 
     addVisited(source);
   }
@@ -300,12 +306,10 @@ public class AnycastMessage extends ScribeMessage {
   
   public static AnycastMessage build(InputBuffer buf, Endpoint endpoint, ScribeContentDeserializer scd) throws IOException {
     byte version = buf.readByte();
-    switch(version) {
-      case 1:
-        return new AnycastMessage(buf, endpoint, scd);
-      default:
-        throw new IOException("Unknown Version: "+version);
-    }
+      if (version == 1) {
+          return new AnycastMessage(buf, endpoint, scd);
+      }
+      throw new IOException("Unknown Version: " + version);
   }
   
   /**
@@ -318,14 +322,14 @@ public class AnycastMessage extends ScribeMessage {
 
     initialRequestor = endpoint.readNodeHandle(buf);
     
-    toVisit = new LinkedList<NodeHandle>();
+    toVisit = new LinkedList<>();
     int toVisitLength = buf.readInt();
     for (int i = 0; i < toVisitLength; i++) {
       toVisit.addLast(endpoint.readNodeHandle(buf)); 
     }
     
     int visitedLength = buf.readInt();
-    visited = new ArrayList<NodeHandle>(visitedLength);
+    visited = new ArrayList<>(visitedLength);
     for (int i = 0; i < visitedLength; i++) {
       visited.add(endpoint.readNodeHandle(buf)); 
     }

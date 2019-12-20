@@ -46,7 +46,7 @@ import java.util.Map;
  */
 public interface PrimarySocketListener<Identifier> {
 
-  public void notifyPrimarySocketOpened(Identifier i, Map<String, Object> options);
+  void notifyPrimarySocketOpened(Identifier i, Map<String, Object> options);
   
-  public void notifyPrimarySocketClosed(Identifier i);
+  void notifyPrimarySocketClosed(Identifier i);
 }

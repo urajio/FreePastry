@@ -45,14 +45,16 @@ package rice.persistence.testing;
  *
  * @version $Id$
  */
-import java.io.IOException;
-import java.util.*;
 
-import rice.*;
+import rice.Continuation;
 import rice.environment.Environment;
-import rice.persistence.*;
-import rice.p2p.commonapi.*;
-import rice.pastry.commonapi.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.commonapi.IdSet;
+import rice.pastry.commonapi.PastryIdFactory;
+import rice.persistence.Cache;
+import rice.persistence.LRUCache;
+import rice.persistence.MemoryStorage;
 
 /**
  * This class is a class which tests the Cache class
@@ -90,14 +92,14 @@ public class LRUCacheTest extends Test {
   public void setUp(final Continuation c) {
     final Continuation put4 = new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(false))) {
+        if (o.equals(Boolean.FALSE)) {
           stepDone(SUCCESS);
         } else {
           stepDone(FAILURE);
         }
 
         sectionEnd();
-        c.receiveResult(new Boolean(true));
+        c.receiveResult(Boolean.TRUE);
       }
 
       public void receiveException(Exception e) {
@@ -107,7 +109,7 @@ public class LRUCacheTest extends Test {
 
     final Continuation put3 = new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           stepDone(SUCCESS);
         } else {
           stepDone(FAILURE);
@@ -124,7 +126,7 @@ public class LRUCacheTest extends Test {
 
     final Continuation put2 = new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           stepDone(SUCCESS);
         } else {
           stepDone(FAILURE);
@@ -141,7 +143,7 @@ public class LRUCacheTest extends Test {
 
     Continuation put1 = new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           stepDone(SUCCESS);
         } else {
           stepDone(FAILURE);
@@ -165,7 +167,7 @@ public class LRUCacheTest extends Test {
   private void testExists(final Continuation c) {
     setUp(new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           sectionStart("Checking for Objects");
           stepStart("Checking for First Object");
           if (cache.exists(data[1])) stepDone(SUCCESS); else stepDone(FAILURE);
@@ -179,7 +181,7 @@ public class LRUCacheTest extends Test {
           if (cache.exists(data[5])) stepDone(SUCCESS); else stepDone(FAILURE);
           sectionEnd();
           
-          c.receiveResult(new Boolean(true));
+          c.receiveResult(Boolean.TRUE);
         } else {
           throw new RuntimeException("SetUp did not complete correctly!");
         }
@@ -202,13 +204,13 @@ public class LRUCacheTest extends Test {
 
         sectionEnd();
 
-        c.receiveResult(new Boolean(true));
+        c.receiveResult(Boolean.TRUE);
       }
     };
 
     final Continuation query = new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           stepDone(SUCCESS);
         } else {
           stepDone(FAILURE);
@@ -250,7 +252,7 @@ public class LRUCacheTest extends Test {
 
     Continuation insertString = new Continuation() {
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           sectionStart("Testing Scan");
 
           stepStart("Inserting String as Key");
@@ -281,7 +283,7 @@ public class LRUCacheTest extends Test {
 
       public void receiveResult(Object o) {
         stepStart("Checking object deletion");
-        int NUM_DELETED = ((Integer) o).intValue();
+        int NUM_DELETED = (Integer) o;
         int length = cache.scan(FACTORY.buildIdRange(data[13 + START_NUM], data[13 + END_NUM + SKIP])).numElements();
         
         int desired = NUM_ELEMENTS - NUM_DELETED;
@@ -290,7 +292,7 @@ public class LRUCacheTest extends Test {
           stepDone(SUCCESS);
           
           sectionEnd();
-          c.receiveResult(new Boolean(true));
+          c.receiveResult(Boolean.TRUE);
         } else {
           stepDone(FAILURE, "Expected " + desired + " objects after deletes, found " + length + ".");
           return;
@@ -313,14 +315,14 @@ public class LRUCacheTest extends Test {
           stepStart("Removing random subset of objects");
         }
 
-        if (o.equals(new Boolean(false))) {
+        if (o.equals(Boolean.FALSE)) {
           stepDone(FAILURE, "Deletion of " + count + " failed.");
           return;
         }
 
         if (count == END_NUM) {
           stepDone(SUCCESS);
-          checkRandom.receiveResult(new Integer(num_deleted));
+          checkRandom.receiveResult(num_deleted);
           return;
         }
 
@@ -329,7 +331,7 @@ public class LRUCacheTest extends Test {
           cache.uncache(data[13 + (count += SKIP)], this);
         } else {
           count += SKIP;
-          receiveResult(new Boolean(true));
+          receiveResult(Boolean.TRUE);
         }
       }
 
@@ -343,10 +345,10 @@ public class LRUCacheTest extends Test {
         stepStart("Checking exists for all 50 objects");
         
         for (int count = START_NUM - SKIP; count < END_NUM; count+=SKIP) {
-          Boolean b = new Boolean(cache.exists(data[13 + count]));
+          Boolean b = cache.exists(data[13 + count]);
           
-          if (b.equals(new Boolean(count < LAST_NUM_REMAINING))) {
-            if (b.booleanValue()) {
+          if (b.equals(count < LAST_NUM_REMAINING)) {
+            if (b) {
               stepDone(FAILURE, "Element " + count + " did exist - should not have.");
               return;
             } else {
@@ -357,7 +359,7 @@ public class LRUCacheTest extends Test {
         }
         
         stepDone(SUCCESS);
-        removeRandom.receiveResult(new Boolean(true));
+        removeRandom.receiveResult(Boolean.TRUE);
       }
 
       public void receiveException(Exception e) {
@@ -371,7 +373,7 @@ public class LRUCacheTest extends Test {
       private int count = START_NUM;
 
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(false))) {
+        if (o.equals(Boolean.FALSE)) {
           stepDone(FAILURE, "Insertion of " + count + " failed.");
           return;
         }
@@ -383,7 +385,7 @@ public class LRUCacheTest extends Test {
 
         if (count > END_NUM) {
           stepDone(SUCCESS);
-          checkExists.receiveResult(new Boolean(true));
+          checkExists.receiveResult(Boolean.TRUE);
           return;
         }
 
@@ -401,7 +403,7 @@ public class LRUCacheTest extends Test {
     final Continuation setSize = new Continuation() {
       public void receiveResult(Object o) {
 
-        if (o.equals(new Boolean(false))) {
+        if (o.equals(Boolean.FALSE)) {
           stepDone(FAILURE, "Testing of scan failed");
           return;
         }
@@ -425,7 +427,7 @@ public class LRUCacheTest extends Test {
     final Continuation validateNullValue = new Continuation() {
 
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           stepDone(FAILURE, "Null value should return false");
           return;
         }
@@ -443,7 +445,7 @@ public class LRUCacheTest extends Test {
     final Continuation insertNullValue = new Continuation() {
 
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(true))) {
+        if (o.equals(Boolean.TRUE)) {
           stepDone(FAILURE, "Null key should return false");
           return;
         }
@@ -463,7 +465,7 @@ public class LRUCacheTest extends Test {
     final Continuation insertNullKey = new Continuation() {
 
       public void receiveResult(Object o) {
-        if (o.equals(new Boolean(false))) {
+        if (o.equals(Boolean.FALSE)) {
           stepDone(FAILURE, "Randon insert tests failed.");
           return;
         }
@@ -486,7 +488,7 @@ public class LRUCacheTest extends Test {
     testErrors();
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
     LRUCacheTest test = new LRUCacheTest(new Environment());
 
     test.start();

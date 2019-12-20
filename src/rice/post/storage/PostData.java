@@ -36,11 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.storage;
 
-import java.io.*;
-import java.security.*;
+import rice.p2p.commonapi.Id;
 
-import rice.p2p.commonapi.*;
-import rice.p2p.past.*;
+import java.io.Serializable;
 
 /**
  * This interface is designed to serve as an abstraction of a
@@ -61,7 +59,7 @@ public interface PostData extends Serializable {
    * @param location The location of the data
    * @return A pointer to the data
    */
-  public SignedReference buildSignedReference(Id location);
+  SignedReference buildSignedReference(Id location);
 
   /**
    * This method dynamically builds an appropriate ContentHashReference
@@ -71,7 +69,7 @@ public interface PostData extends Serializable {
    * @param key The for the data
    * @return A pointer to the data
    */
-  public ContentHashReference buildContentHashReference(Id[] locations, byte[][] keys);
+  ContentHashReference buildContentHashReference(Id[] locations, byte[][] keys);
 
   /**
     * This method dynamically builds an appropriate SecureReference
@@ -81,5 +79,5 @@ public interface PostData extends Serializable {
    * @param key The for the data
    * @return A pointer to the data
    */
-  public SecureReference buildSecureReference(Id location, byte[] key);  
+  SecureReference buildSecureReference(Id location, byte[] key);
 }

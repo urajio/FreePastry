@@ -36,11 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.filetransfer;
 
+import rice.Continuation;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-
-import rice.Continuation;
 
 public interface FileTransfer {
   /**
@@ -54,10 +54,10 @@ public interface FileTransfer {
    * @param c who to notify when it is done
    * @return
    */
-  public FileReceipt sendFile(File f, ByteBuffer metadata, byte priority, long offset, long length, Continuation<FileReceipt, Exception> c) throws IOException;
-  public FileReceipt sendFile(File f, ByteBuffer metadata, byte priority, Continuation<FileReceipt, Exception> c) throws IOException;
+  FileReceipt sendFile(File f, ByteBuffer metadata, byte priority, long offset, long length, Continuation<FileReceipt, Exception> c) throws IOException;
+  FileReceipt sendFile(File f, ByteBuffer metadata, byte priority, Continuation<FileReceipt, Exception> c) throws IOException;
   
-  public BBReceipt sendMsg(ByteBuffer bb, byte priority, Continuation<BBReceipt, Exception> c);
-  public void addListener(FileTransferListener listener);
-  public void removeListener(FileTransferListener listener);
+  BBReceipt sendMsg(ByteBuffer bb, byte priority, Continuation<BBReceipt, Exception> c);
+  void addListener(FileTransferListener listener);
+  void removeListener(FileTransferListener listener);
 }

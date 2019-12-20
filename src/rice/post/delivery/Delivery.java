@@ -37,19 +37,24 @@ advised of the possibility of such damage.
 
 package rice.post.delivery;
 
-import java.io.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.multiring.MultiringIdFactory;
+import rice.p2p.multiring.RingId;
+import rice.p2p.past.ContentHashPastContent;
+import rice.p2p.past.gc.GCPast;
+import rice.p2p.past.gc.GCPastContentHandle;
+import rice.p2p.past.gc.GCPastMetadata;
+import rice.p2p.past.gc.rawserialization.RawGCPastContent;
+import rice.p2p.util.SecurityUtils;
+import rice.post.messaging.EncryptedNotificationMessage;
+import rice.post.messaging.SignedPostMessage;
 
-import rice.*;
-import rice.post.*;
-import rice.post.messaging.*;
-import rice.post.security.*;
-import rice.p2p.past.*;
-import rice.p2p.past.gc.*;
-import rice.p2p.past.gc.rawserialization.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.multiring.*;
-import rice.p2p.util.*;
+import java.io.IOException;
 
 /**
  * The delivery stored in Past

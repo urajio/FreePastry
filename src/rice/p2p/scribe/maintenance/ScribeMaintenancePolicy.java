@@ -37,21 +37,17 @@ advised of the possibility of such damage.
 
 package rice.p2p.scribe.maintenance;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.p2p.commonapi.Endpoint;
 import rice.p2p.commonapi.NodeHandle;
-import rice.p2p.scribe.Scribe;
-import rice.p2p.scribe.ScribeContent;
 import rice.p2p.scribe.Topic;
 import rice.p2p.scribe.messaging.SubscribeMessage;
 import rice.p2p.scribe.rawserialization.RawScribeContent;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 public interface ScribeMaintenancePolicy {
   /**
@@ -60,7 +56,7 @@ public interface ScribeMaintenancePolicy {
    * Can be specified in millis by by the parameter: 
    *   p2p_scribe_maintenance_interval (default 180000) // 3 minutes
    */
-  public void doMaintenance(MaintainableScribe scribe);
+  void doMaintenance(MaintainableScribe scribe);
   
   /**
    * Called when membership changes "near" the local node, in overlay space.  
@@ -78,7 +74,7 @@ public interface ScribeMaintenancePolicy {
    * @param handle
    * @param membership
    */
-  public void noLongerRoot(MaintainableScribe scribe, List<Topic> topics); 
+  void noLongerRoot(MaintainableScribe scribe, List<Topic> topics);
   
   /**
    * When anyone in any Topic (child or parent) is detected faulty.
@@ -92,7 +88,7 @@ public interface ScribeMaintenancePolicy {
    * </pre>
    * 
    */
-  public void nodeFaulty(MaintainableScribe scribe, NodeHandle node, List<Topic> nodeWasParent, List<Topic> nodeWasChild); // when liveness changes
+  void nodeFaulty(MaintainableScribe scribe, NodeHandle node, List<Topic> nodeWasParent, List<Topic> nodeWasChild); // when liveness changes
 
   /**
    * The subscription failed.  This is called if no particular client requested the Subscription.
@@ -101,7 +97,7 @@ public interface ScribeMaintenancePolicy {
    * 
    * @param failedTopics
    */
-  public void subscribeFailed(MaintainableScribe scribe, List<Topic> failedTopics);
+  void subscribeFailed(MaintainableScribe scribe, List<Topic> failedTopics);
 
   /**
    * Called when subscribing for maintenance or tree rearrangement (such as parent death).
@@ -113,9 +109,9 @@ public interface ScribeMaintenancePolicy {
    * @param topics the topics we are implicitly subscribing to
    * @return the ScribeContent to put into the SubscribeMessage (null is ok)
    */
-  public RawScribeContent implicitSubscribe(List<Topic> topics);
+  RawScribeContent implicitSubscribe(List<Topic> topics);
     
-  public class DefaultScribeMaintenancePolicy implements
+  class DefaultScribeMaintenancePolicy implements
       ScribeMaintenancePolicy {
 
     Logger logger;
@@ -125,7 +121,7 @@ public interface ScribeMaintenancePolicy {
     }
 
     public void doMaintenance(MaintainableScribe scribe) {
-      HashMap<NodeHandle, List<Topic>> manifest = new HashMap<NodeHandle, List<Topic>>();
+      HashMap<NodeHandle, List<Topic>> manifest = new HashMap<>();
       
       // for each topic, make sure our parent is still alive      
       for (Topic topic : scribe.getTopics()) {
@@ -135,7 +131,7 @@ public interface ScribeMaintenancePolicy {
         if (parent != null) {
           List<Topic> topics = manifest.get(parent);
           if (topics == null) {
-            topics = new ArrayList<Topic>();
+            topics = new ArrayList<>();
             manifest.put(parent,topics);
           }
           topics.add(topic);

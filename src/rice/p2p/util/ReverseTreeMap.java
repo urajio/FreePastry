@@ -37,9 +37,9 @@ advised of the possibility of such damage.
 
 package rice.p2p.util;
 
-import java.io.*;
-import java.math.*;
-import java.util.*;
+import java.io.Serializable;
+import java.util.Set;
+import java.util.SortedMap;
 
 /**
  * @(#) ReverseTreeMap.java
@@ -287,10 +287,8 @@ public class ReverseTreeMap implements Serializable {
    */
   protected SortedMap convert(SortedMap map) {
     SortedMap result = new RedBlackMap();
-    Iterator i = map.keySet().iterator();
-    
-    while (i.hasNext()) 
-      result.putAll((SortedMap) map.get(i.next()));
+
+      for (Object o : map.keySet()) result.putAll((SortedMap) map.get(o));
       
     return result;
   }

@@ -35,9 +35,8 @@ advised of the possibility of such damage.
 
 *******************************************************************************/ 
 package rice.testharness.messaging;
-import rice.p2p.commonapi.*;
 
-import rice.testharness.*;
+import rice.p2p.commonapi.NodeHandle;
 
 /**
  * A message in the TestHarness system

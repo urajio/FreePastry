@@ -37,10 +37,11 @@ advised of the possibility of such damage.
 
 package org.mpisws.p2p.transport.sourceroute;
 
-import java.io.*;
-import java.util.*;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
-import rice.p2p.commonapi.rawserialization.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class which represets a source route to a remote IP address.
@@ -63,7 +64,7 @@ public abstract class SourceRoute<Identifier> {
    * @param address DESCRIBE THE PARAMETER
    */
   protected SourceRoute(List<Identifier> path) {
-    this.path = new ArrayList<Identifier>(path);
+    this.path = new ArrayList<>(path);
     
     // assertion
     for (Identifier i : this.path) {
@@ -72,12 +73,12 @@ public abstract class SourceRoute<Identifier> {
   }  
 
   protected SourceRoute(Identifier address) {
-    this.path = new ArrayList<Identifier>(1);
+    this.path = new ArrayList<>(1);
     path.add(address);
   }  
   
   protected SourceRoute(Identifier local, Identifier remote) {
-    this.path = new ArrayList<Identifier>(2);
+    this.path = new ArrayList<>(2);
     path.add(local);
     path.add(remote);
   }  
@@ -168,7 +169,7 @@ public abstract class SourceRoute<Identifier> {
    * @return THe string
    */
   public String toString() {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     result.append("{");
     
     for (int i=0; i<path.size(); i++) {

@@ -36,13 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.storage;
 
-import java.security.*;
-import java.io.*;
-import java.util.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.past.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * This class serves as a reference to a PostObject
@@ -103,9 +105,8 @@ public class ContentHashReference implements Serializable {
   
   public int hashCode() {
     int result = 383727781;
-    
-    for (int i=0; i<locations.length; i++)
-      result ^= locations[i].hashCode();
+
+    for (Id location : locations) result ^= location.hashCode();
     
     return result;
   }
@@ -120,11 +121,10 @@ public class ContentHashReference implements Serializable {
   }
 
   public String toString() {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     result.append("[ContentHashRef ");
-    
-    for (int i=0; i<locations.length; i++)
-      result.append(locations[i].toString());
+
+    for (Id location : locations) result.append(location.toString());
     
     result.append(" ]");
     
@@ -169,15 +169,15 @@ public class ContentHashReference implements Serializable {
   
   public void serialize(OutputBuffer buf) throws IOException {
     buf.writeInt(locations.length);
-    for (int i = 0; i < locations.length; i++) {
-      buf.writeShort(locations[i].getType());
-      locations[i].serialize(buf);
+    for (Id location : locations) {
+      buf.writeShort(location.getType());
+      location.serialize(buf);
     }
     
     buf.writeInt(keys.length);
-    for (int i = 0; i < keys.length; i++) {
-      buf.writeInt(keys[i].length);
-      buf.write(keys[i], 0, keys[i].length);
+    for (byte[] key : keys) {
+      buf.writeInt(key.length);
+      buf.write(key, 0, key.length);
     }
   }
 }

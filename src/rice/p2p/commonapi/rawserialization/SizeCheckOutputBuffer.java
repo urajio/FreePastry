@@ -36,9 +36,7 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.commonapi.rawserialization;
 
-import java.io.IOException;
-
 public interface SizeCheckOutputBuffer extends OutputBuffer {
-  public void writeSpecial(Object o) throws IOException;
-  public int bytesWritten();
+  void writeSpecial(Object o);
+  int bytesWritten();
 }

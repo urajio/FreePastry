@@ -36,28 +36,16 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.*;
-
-import org.mpisws.p2p.transport.ClosedChannelException;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.liveness.LivenessListener;
 import org.mpisws.p2p.transport.liveness.LivenessProvider;
 import org.mpisws.p2p.transport.priority.PriorityTransportLayer;
 import org.mpisws.p2p.transport.proximity.ProximityListener;
 import org.mpisws.p2p.transport.proximity.ProximityProvider;
 import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
-
-import rice.*;
+import rice.Continuation;
+import rice.Destructable;
+import rice.Executable;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.appsocket.AppSocketReceiver;
@@ -72,13 +60,23 @@ import rice.pastry.join.JoinProtocol;
 import rice.pastry.leafset.InitiateLeafSetMaintenance;
 import rice.pastry.leafset.LeafSet;
 import rice.pastry.leafset.LeafSetProtocol;
-import rice.pastry.messaging.*;
-import rice.pastry.routing.*;
-import rice.pastry.transport.Deserializer;
+import rice.pastry.messaging.Message;
+import rice.pastry.messaging.MessageDispatch;
+import rice.pastry.messaging.PJavaSerializedMessage;
+import rice.pastry.messaging.PRawMessage;
+import rice.pastry.routing.InitiateRouteSetMaintenance;
+import rice.pastry.routing.RouteSetProtocol;
+import rice.pastry.routing.Router;
+import rice.pastry.routing.RoutingTable;
 import rice.pastry.transport.PMessageNotification;
 import rice.pastry.transport.PMessageReceipt;
 import rice.pastry.transport.PMessageReceiptImpl;
 import rice.pastry.transport.SocketAdapter;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 /**
  * A Pastry node is single entity in the pastry network.
@@ -352,16 +350,14 @@ public class PastryNode extends Observable implements
       nodeIsReady(true);
 
       setChanged();
-      notifyObservers(Boolean.valueOf(true));
+      notifyObservers(Boolean.TRUE);
 
       if (neverBeenReady) {
         // notify applications
         // we iterate over private copy to allow addition of new apps in the
         // context of notifyReady()
         Vector<PastryAppl> tmpApps = new Vector(apps);
-        Iterator<PastryAppl> it = tmpApps.iterator();
-        while (it.hasNext())
-          ((PastryAppl) (it.next())).notifyReady();
+        for (PastryAppl tmpApp : tmpApps) tmpApp.notifyReady();
         neverBeenReady = false;
       }
 
@@ -373,7 +369,7 @@ public class PastryNode extends Observable implements
     } else {
       nodeIsReady(false);
       setChanged();
-      notifyObservers(new Boolean(false));
+      notifyObservers(Boolean.FALSE);
 
       //        Vector tmpApps = new Vector(apps);
       //        Iterator it = tmpApps.iterator();
@@ -393,10 +389,7 @@ public class PastryNode extends Observable implements
    */
   public boolean isClosest(Id key) {
 
-    if (leafSet.mostSimilar(key) == 0)
-      return true;
-    else
-      return false;
+    return leafSet.mostSimilar(key) == 0;
   }
 
   public LeafSet getLeafSet() {
@@ -600,7 +593,7 @@ public class PastryNode extends Observable implements
     }
   }
 
-  HashSet<Destructable> destructables = new HashSet<Destructable>();
+  HashSet<Destructable> destructables = new HashSet<>();
   
   /**
    * Method which kills a PastryNode.  Note, this doesn't implicitly kill the environment.
@@ -611,11 +604,9 @@ public class PastryNode extends Observable implements
     if (isDestroyed) return;
     if (logger.level <= Logger.INFO) logger.log("Destroying "+this);
     isDestroyed = true;
-    Iterator<Destructable> i = destructables.iterator();
-    while(i.hasNext()) {
-      Destructable d = i.next();
-      if (logger.level <= Logger.INFO - 5) logger.log("Destroying "+d);
-      d.destroy(); 
+    for (Destructable d : destructables) {
+      if (logger.level <= Logger.INFO - 5) logger.log("Destroying " + d);
+      d.destroy();
     }
     getEnvironment().removeDestructable(this);
     if (getEnvironment().getSelectorManager().isSelectorThread()) {
@@ -643,7 +634,7 @@ public class PastryNode extends Observable implements
     
 //    final SocketNodeHandle i = (SocketNodeHandle)i2;
     
-    final SocketRequestHandleImpl<NodeHandle> handle = new SocketRequestHandleImpl<NodeHandle>(i, null, logger);
+    final SocketRequestHandleImpl<NodeHandle> handle = new SocketRequestHandleImpl<>(i, null, logger);
 
     Runnable r = new Runnable() {
       public void run() {
@@ -687,8 +678,8 @@ public class PastryNode extends Observable implements
                         if (socket.read(answer) == -1) {
                           deliverSocketToMe.receiveException(new SocketAdapter(socket, getEnvironment()), new ClosedChannelException("Remote node closed socket while opening.  Try again."));
                           return;
-                        };
-                        
+                        }
+
                         if (answer.hasRemaining()) {
                           socket.register(true, false, this);
                         } else {
@@ -813,12 +804,12 @@ public class PastryNode extends Observable implements
     livenessProvider.addLivenessListener(this);
   }
 
-  Map<String, Object> vars = new HashMap<String, Object>();
+  Map<String, Object> vars = new HashMap<>();
   public Map<String, Object> getVars() {
     return vars;
   }
   
-  public void incomingSocket(P2PSocket<NodeHandle> s) throws IOException {
+  public void incomingSocket(P2PSocket<NodeHandle> s) {
     
     // read the appId
     final ByteBuffer appIdBuffer = ByteBuffer.allocate(4);
@@ -1000,9 +991,9 @@ public class PastryNode extends Observable implements
       // already has the priority;
     } else {
       if (tempOptions == null) {
-        tempOptions = new HashMap<String, Object>(); 
+        tempOptions = new HashMap<>();
       } else {
-        tempOptions = new HashMap<String, Object>(tempOptions);
+        tempOptions = new HashMap<>(tempOptions);
       }
       tempOptions.put(PriorityTransportLayer.OPTION_PRIORITY, msg.getPriority());
     }
@@ -1071,7 +1062,7 @@ public class PastryNode extends Observable implements
     return ret;
   }
   
-  public void messageReceived(NodeHandle i, RawMessage m, Map<String, Object> options) throws IOException {
+  public void messageReceived(NodeHandle i, RawMessage m, Map<String, Object> options) {
     if (m.getType() == 0 && (m instanceof PJavaSerializedMessage)) {
       receiveMessage(((PJavaSerializedMessage)m).getMessage());
     } else {
@@ -1140,7 +1131,7 @@ public class PastryNode extends Observable implements
     notifyLivenessListeners((NodeHandle)i, val, options);
   }
   
-  Collection<LivenessListener<NodeHandle>> livenessListeners = new ArrayList<LivenessListener<NodeHandle>>();
+  final Collection<LivenessListener<NodeHandle>> livenessListeners = new ArrayList<>();
   public void addLivenessListener(LivenessListener<NodeHandle> name) {
     synchronized(livenessListeners) {
       livenessListeners.add(name);
@@ -1157,7 +1148,7 @@ public class PastryNode extends Observable implements
     if (logger.level <= Logger.FINE) logger.log("notifyLivenessListeners("+i+","+val+")"); 
     ArrayList<LivenessListener<NodeHandle>> temp;
     synchronized(livenessListeners) {
-      temp = new ArrayList<LivenessListener<NodeHandle>>(livenessListeners);
+      temp = new ArrayList<>(livenessListeners);
     }
     for (LivenessListener<NodeHandle> ll : temp) {
       ll.livenessChanged(i, val, options);
@@ -1233,7 +1224,7 @@ public class PastryNode extends Observable implements
   
   /******************* network listeners *********************/
   // the list of network listeners
-  private ArrayList<NetworkListener> networkListeners = new ArrayList<NetworkListener>();
+  private final ArrayList<NetworkListener> networkListeners = new ArrayList<>();
 
   public void addNetworkListener(NetworkListener listener) {
     synchronized(networkListeners) {
@@ -1249,7 +1240,7 @@ public class PastryNode extends Observable implements
   
   protected Iterable<NetworkListener> getNetworkListeners() {
     synchronized(networkListeners) {
-      return new ArrayList<NetworkListener>(networkListeners);
+      return new ArrayList<>(networkListeners);
     }
   }
   

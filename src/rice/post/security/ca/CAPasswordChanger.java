@@ -36,21 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.security.ca;
 
-import java.io.*;
-import java.net.*;
-import java.util.zip.*;
-import java.security.*;
+import rice.post.security.PostCertificate;
 
-import java.util.*;
-
-import rice.p2p.commonapi.*;
-import rice.p2p.multiring.*;
-
-import rice.post.*;
-import rice.post.security.*;
-
-import rice.pastry.commonapi.*;
-import rice.p2p.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.security.KeyPair;
 
 /**
  * This class starts changes the password on an existing certificate

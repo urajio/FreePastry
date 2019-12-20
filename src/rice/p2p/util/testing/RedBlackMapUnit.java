@@ -38,15 +38,14 @@ package rice.p2p.util.testing;
 
 import rice.environment.Environment;
 import rice.environment.random.RandomSource;
-import rice.environment.random.simple.SimpleRandomSource;
-import rice.p2p.commonapi.*;
-import rice.p2p.multiring.*;
-import rice.p2p.past.gc.*;
-import rice.pastry.commonapi.*;
-import rice.p2p.util.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.util.RedBlackMap;
+import rice.pastry.commonapi.PastryIdFactory;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.SortedMap;
 
 @SuppressWarnings("unchecked")
 public class RedBlackMapUnit {
@@ -58,15 +57,13 @@ public class RedBlackMapUnit {
     Environment env = new Environment();
     
     RandomSource random = env.getRandomSource();
-    PastryIdFactory pFactory = new PastryIdFactory(env);
-    IdFactory factory = pFactory; //new MultiringIdFactory(pFactory.buildRandomId(random), pFactory);
-    
+
     Id[] array = new Id[n];
     Long[] values = new Long[n];
     RedBlackMap map = new RedBlackMap();
     
     for (int i=0; i<array.length; i++) {
-      array[i] = factory.buildRandomId(random);
+      array[i] = ((IdFactory) new PastryIdFactory(env)).buildRandomId(random);
       //values[i] = new Long(random.nextLong());
       
       map.put(array[i], values[i]);
@@ -77,15 +74,14 @@ public class RedBlackMapUnit {
     printMap(map);
     
     testRemove(map);
-    testSortedMap(t, map, factory, random, 2);
+    testSortedMap(t, map, new PastryIdFactory(env), random, 2);
   }
   
   protected static void testRemove(SortedMap map) {
     Id[] sorted = (Id[]) map.keySet().toArray(new Id[0]);
     Arrays.sort(sorted);
-    
-    for (int i=0; i<sorted.length; i++)
-      testRemove(map, sorted, sorted[i]);
+
+    for (Id id : sorted) testRemove(map, sorted, id);
   }
   
   protected static void testRemove(SortedMap map, Id[] sorted, Id remove) {
@@ -114,17 +110,14 @@ public class RedBlackMapUnit {
 
   
   protected static void printMap(Id[] id) {
-    for (int i=0; i<id.length; i++)
-      System.out.print(" " + id[i] + ",");
+    for (Id value : id) System.out.print(" " + value + ",");
     
     System.out.println();
   }
   
   protected static void printMap(SortedMap map) {
-    Iterator i = map.keySet().iterator();
-    
-    while (i.hasNext())
-      System.out.print(" " + i.next() + ",");
+
+    for (Object o : map.keySet()) System.out.print(" " + o + ",");
                        
     System.out.println();
   }

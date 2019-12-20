@@ -36,21 +36,17 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.audit;
 
+import org.mpisws.p2p.transport.peerreview.history.HashProvider;
+import rice.environment.logging.Logger;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-
-import org.mpisws.p2p.transport.peerreview.history.HashProvider;
-import org.mpisws.p2p.transport.util.Serializer;
-
-import rice.environment.logging.Logger;
-import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.p2p.commonapi.rawserialization.OutputBuffer;
-import rice.p2p.commonapi.rawserialization.RawSerializable;
 
 /**
   long long firstSeq
@@ -112,7 +108,7 @@ public class LogSnippet {
     if (buf.readByte() != 0) throw new IOException("Unexpected extInfo");
     baseHash = new byte[hashSize];
     buf.read(baseHash);
-    entries = new ArrayList<SnippetEntry>();
+    entries = new ArrayList<>();
     SnippetEntry prev = new SnippetEntry(buf,firstSeq,hashSize);
     entries.add(prev);
     while(buf.bytesRemaining() == -2 || buf.bytesRemaining() > 0) {

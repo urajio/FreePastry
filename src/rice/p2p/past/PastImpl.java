@@ -37,27 +37,38 @@ advised of the possibility of such damage.
 
 package rice.p2p.past;
 
-import java.io.*;
-import java.nio.ByteBuffer;
-import java.util.*;
-import java.util.logging.*;
-
-import rice.*;
-import rice.Continuation.*;
+import rice.Continuation;
+import rice.Continuation.ListenerContinuation;
+import rice.Continuation.NamedContinuation;
+import rice.Continuation.StandardContinuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
 import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.appsocket.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.past.PastPolicy.*;
+import rice.p2p.commonapi.appsocket.AppSocket;
+import rice.p2p.commonapi.appsocket.AppSocketReceiver;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.MessageDeserializer;
+import rice.p2p.past.PastPolicy.DefaultPastPolicy;
 import rice.p2p.past.messaging.*;
 import rice.p2p.past.rawserialization.*;
-import rice.p2p.replication.*;
-import rice.p2p.replication.manager.*;
+import rice.p2p.replication.Replication;
+import rice.p2p.replication.manager.ReplicationManager;
+import rice.p2p.replication.manager.ReplicationManagerClient;
+import rice.p2p.replication.manager.ReplicationManagerImpl;
 import rice.p2p.util.MathUtils;
-import rice.p2p.util.rawserialization.*;
-import rice.persistence.*;
+import rice.p2p.util.rawserialization.SimpleInputBuffer;
+import rice.p2p.util.rawserialization.SimpleOutputBuffer;
+import rice.persistence.Cache;
+import rice.persistence.LockManager;
+import rice.persistence.LockManagerImpl;
+import rice.persistence.StorageManager;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.nio.ByteBuffer;
+import java.util.Hashtable;
+import java.util.WeakHashMap;
 
 /**
  * @(#) PastImpl.java
@@ -552,8 +563,8 @@ public class PastImpl implements Past, Application, ReplicationManagerClient {
    */
   private void insertPending(int uid, CancellableTask timer, Continuation command) {
     if (logger.level <= Logger.FINER) logger.log("Loading continuation " + uid + " into pending table");
-    timers.put(new Integer(uid), timer);
-    outstanding.put(new Integer(uid), command);
+    timers.put(uid, timer);
+    outstanding.put(uid, command);
   }
 
   /**
@@ -564,12 +575,12 @@ public class PastImpl implements Past, Application, ReplicationManagerClient {
    */
   private Continuation removePending(int uid) {
     if (logger.level <= Logger.FINER) logger.log("Removing and returning continuation " + uid + " from pending table");
-    CancellableTask timer = (CancellableTask) timers.remove(new Integer(uid));
+    CancellableTask timer = (CancellableTask) timers.remove(uid);
     
     if (timer != null)
       timer.cancel();
     
-    return (Continuation) outstanding.remove(new Integer(uid));
+    return (Continuation) outstanding.remove(uid);
   }
 
   /**
@@ -641,7 +652,7 @@ public class PastImpl implements Past, Application, ReplicationManagerClient {
     if ((content != null) && (! content.isMutable())) 
       storage.cache(content.getId(), null, content, command);
     else
-      command.receiveResult(new Boolean(true));
+      command.receiveResult(Boolean.TRUE);
   }
   
   /**
@@ -686,7 +697,7 @@ public class PastImpl implements Past, Application, ReplicationManagerClient {
           public Object getResult() {
             Boolean[] b = new Boolean[result.length];
             for (int i=0; i<b.length; i++)
-              b[i] = new Boolean((result[i] == null) || Boolean.TRUE.equals(result[i]));
+              b[i] = (result[i] == null) || Boolean.TRUE.equals(result[i]);
             
             return b;
           }
@@ -804,23 +815,23 @@ public class PastImpl implements Past, Application, ReplicationManagerClient {
                   public void receiveResult(Object o) {
                     PastContentHandle[] handles = (PastContentHandle[]) o;
 
-                    for (int i=0; i<handles.length; i++) {
-                      if (handles[i] != null) {
-                        fetch(handles[i], new StandardContinuation(parent) {
+                    for (PastContentHandle handle : handles) {
+                      if (handle != null) {
+                        fetch(handle, new StandardContinuation(parent) {
                           public void receiveResult(final Object o) {
                             // lastly, try and cache object locally for future use
                             if (cache) {
-                              cache((PastContent) o, new SimpleContinuation()  {
+                              cache((PastContent) o, new SimpleContinuation() {
                                 public void receiveResult(Object object) {
                                   command.receiveResult(o);
                                 }
                               });
                             } else {
-                              command.receiveResult(o);                            
+                              command.receiveResult(o);
                             }
                           }
                         });
-                        
+
                         return;
                       }
                     }
@@ -1046,7 +1057,7 @@ public class PastImpl implements Past, Application, ReplicationManagerClient {
             }
           });
         } else {
-          getResponseContinuation(msg).receiveResult(new Boolean(false));
+          getResponseContinuation(msg).receiveResult(Boolean.FALSE);
         }
       } else if (msg instanceof LookupMessage) {
         final LookupMessage lmsg = (LookupMessage) msg;
@@ -1140,7 +1151,7 @@ public class PastImpl implements Past, Application, ReplicationManagerClient {
       public void receiveResult(Object o) {
         if (o == null) {
           if (logger.level <= Logger.WARNING) logger.log("Could not fetch id " + id + " - policy returned null in namespace " + instance);
-          parent.receiveResult(new Boolean(false));
+          parent.receiveResult(Boolean.FALSE);
         } else {
           if (logger.level <= Logger.FINEST) logger.log("inserting replica of id " + id);
           
@@ -1211,9 +1222,9 @@ public class PastImpl implements Past, Application, ReplicationManagerClient {
   public void existsInOverlay(Id id, Continuation command) {
     lookupHandles(id, replicationFactor+1, new StandardContinuation(command) {
       public void receiveResult(Object result) {
-        Object results[] = (Object[]) result;
-        for (int i = 0; i< results.length; i++) {
-          if (results[i] instanceof PastContentHandle) {
+        Object[] results = (Object[]) result;
+        for (Object o : results) {
+          if (o instanceof PastContentHandle) {
             parent.receiveResult(Boolean.TRUE);
             return;
           }
@@ -1228,9 +1239,9 @@ public class PastImpl implements Past, Application, ReplicationManagerClient {
       public void receiveResult(final Object o) {
         insert((PastContent)o, new StandardContinuation(parent) {
           public void receiveResult(Object result) {
-            Boolean results[] = (Boolean[])result;
-            for (int i = 0; i < results.length; i++) {
-              if (results[i].booleanValue()) {
+            Boolean[] results = (Boolean[])result;
+            for (Boolean aBoolean : results) {
+              if (aBoolean) {
                 parent.receiveResult(Boolean.TRUE);
                 return;
               }
@@ -1268,7 +1279,7 @@ public class PastImpl implements Past, Application, ReplicationManagerClient {
    * Class which builds a message
    */
   public interface MessageBuilder {
-    public PastMessage buildMessage();
+    PastMessage buildMessage();
   }
   
   public String getInstance() {

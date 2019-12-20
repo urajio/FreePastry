@@ -36,10 +36,8 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.messaging;
 
-import java.io.*;
-
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.commonapi.rawserialization.RawMessage;
 
 /**
  * This is a message  reminding POST to synchroize it's delivery message
@@ -56,7 +54,7 @@ public class SynchronizeMessage implements RawMessage {
     return TYPE;
   }
 
-  public void serialize(OutputBuffer buf) throws IOException {
+  public void serialize(OutputBuffer buf) {
     // empty  
   }
   

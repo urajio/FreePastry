@@ -37,9 +37,9 @@ advised of the possibility of such damage.
 
 package rice.p2p.past.gc;
 
-import java.io.*;
-
-import rice.p2p.past.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 
 /**
  * @(#) GCPastMetadata.java
@@ -100,11 +100,10 @@ public class GCPastMetadata implements Serializable, Comparable<GCPastMetadata> 
    * @return the comparison
    */
   public int compareTo(GCPastMetadata other) {
-    GCPastMetadata metadata = (GCPastMetadata) other;
-    
-    if (metadata.expiration > expiration) 
+
+    if (other.expiration > expiration)
       return -1;
-    else if (metadata.expiration < expiration) 
+    else if (other.expiration < expiration)
       return 1;
     else
       return 0;

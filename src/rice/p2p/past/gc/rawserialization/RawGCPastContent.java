@@ -39,9 +39,6 @@ advised of the possibility of such damage.
  */
 package rice.p2p.past.gc.rawserialization;
 
-import java.io.IOException;
-
-import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.p2p.past.gc.GCPastContent;
 import rice.p2p.past.rawserialization.RawPastContent;
 

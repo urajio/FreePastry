@@ -36,18 +36,18 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.log;
 
-import java.io.*;
-import java.security.*;
-import java.util.*;
-
-import rice.*;
-import rice.Continuation.*;
+import rice.Continuation;
 import rice.environment.logging.Logger;
-import rice.p2p.commonapi.*;
-import rice.p2p.util.*;
-import rice.post.*;
-import rice.post.storage.*;
-import rice.post.security.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.util.SecurityUtils;
+import rice.post.Post;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.security.KeyPair;
+import java.util.Set;
+import java.util.Vector;
 
 /**
  * Class which represents an encrypted and coalesced log in the POST system.

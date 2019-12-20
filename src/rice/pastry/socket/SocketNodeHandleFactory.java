@@ -36,36 +36,33 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.socket;
 
+import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
+import org.mpisws.p2p.transport.util.Serializer;
+import rice.environment.logging.Logger;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.pastry.Id;
+import rice.pastry.NodeHandleFactory;
+import rice.pastry.NodeHandleFactoryListener;
+import rice.pastry.PastryNode;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-
-import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
-import org.mpisws.p2p.transport.util.Serializer;
-
-import rice.environment.logging.Logger;
-import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.p2p.commonapi.rawserialization.OutputBuffer;
-import rice.pastry.Id;
-import rice.pastry.NodeHandle;
-import rice.pastry.NodeHandleFactory;
-import rice.pastry.NodeHandleFactoryListener;
-import rice.pastry.PastryNode;
 
 public class SocketNodeHandleFactory implements NodeHandleFactory<SocketNodeHandle>, Serializer<SocketNodeHandle> {
   protected PastryNode pn;
   protected Map<SocketNodeHandle, SocketNodeHandle> handleSet;
-  protected Collection<NodeHandleFactoryListener<SocketNodeHandle>> listeners = new ArrayList<NodeHandleFactoryListener<SocketNodeHandle>>();
+  protected Collection<NodeHandleFactoryListener<SocketNodeHandle>> listeners = new ArrayList<>();
   Logger logger;
   
   public SocketNodeHandleFactory(PastryNode pn) {
     this.pn = pn;
     this.logger = pn.getEnvironment().getLogManager().getLogger(SocketNodeHandleFactory.class, null);
     
-    handleSet = new HashMap<SocketNodeHandle, SocketNodeHandle>();
+    handleSet = new HashMap<>();
   }
   
   
@@ -88,16 +85,15 @@ public class SocketNodeHandleFactory implements NodeHandleFactory<SocketNodeHand
   }
   
   public SocketNodeHandle coalesce(SocketNodeHandle h) {
-    SocketNodeHandle handle = (SocketNodeHandle)h;
-    if (handleSet.containsKey(handle)) {
-      return handleSet.get(handle);
+    if (handleSet.containsKey(h)) {
+      return handleSet.get(h);
     }
     
-    handle.setLocalNode(pn);
+    h.setLocalNode(pn);
     
-    handleSet.put(handle, handle);
-    notifyListeners(handle);
-    return handle;
+    handleSet.put(h, h);
+    notifyListeners(h);
+    return h;
   }
   
   /**
@@ -106,7 +102,7 @@ public class SocketNodeHandleFactory implements NodeHandleFactory<SocketNodeHand
   protected void notifyListeners(SocketNodeHandle nh) {
     Collection<NodeHandleFactoryListener<SocketNodeHandle>> temp = listeners;
     synchronized (listeners) {      
-      temp = new ArrayList<NodeHandleFactoryListener<SocketNodeHandle>>(listeners);      
+      temp = new ArrayList<>(listeners);
     }
     for (NodeHandleFactoryListener<SocketNodeHandle> foo:temp) {
       foo.nodeHandleFound(nh);

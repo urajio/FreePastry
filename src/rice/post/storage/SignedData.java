@@ -36,16 +36,17 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.storage;
 
-import java.io.*;
-import java.math.*;
-import java.security.*;
-import java.util.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.past.PastContent;
+import rice.p2p.util.MathUtils;
 
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.past.*;
-import rice.p2p.past.gc.*;
-import rice.p2p.util.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Arrays;
 
 /**
  * This class is used internally by the storage package to
@@ -141,7 +142,7 @@ public class SignedData extends StorageServiceData {
    * @return null, if the operation is not allowed; else, the new
    * object to be stored on the local node.
    */
-  public PastContent checkInsert(rice.p2p.commonapi.Id id, PastContent existingContent) throws PastException {
+  public PastContent checkInsert(rice.p2p.commonapi.Id id, PastContent existingContent) {
     return this;
   }
 

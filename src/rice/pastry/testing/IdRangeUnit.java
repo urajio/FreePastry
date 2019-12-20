@@ -38,8 +38,8 @@ package rice.pastry.testing;
 
 import rice.environment.random.RandomSource;
 import rice.environment.random.simple.SimpleRandomSource;
-import rice.pastry.*;
-import java.util.*;
+import rice.pastry.Id;
+import rice.pastry.IdRange;
 
 /**
  * IdRangeUnit tests the IdRange class.
@@ -495,7 +495,7 @@ public class IdRangeUnit {
 
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     IdRangeUnit niu = new IdRangeUnit();
   }
 }

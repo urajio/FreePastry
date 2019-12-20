@@ -37,16 +37,17 @@ advised of the possibility of such damage.
 
 package rice.p2p.scribe.messaging;
 
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.scribe.Topic;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.scribe.*;
-import rice.p2p.scribe.rawserialization.ScribeContentDeserializer;
 
 /**
  * @(#) SubscribeAckMessage.java
@@ -161,15 +162,15 @@ public class SubscribeAckMessage extends AbstractSubscribeMessage {
     super(buf, endpoint);
     
     int numTopics = buf.readInt();
-    topics = new ArrayList<Topic>(numTopics);
-    pathsToRoot = new ArrayList<List<Id>>(numTopics);
+    topics = new ArrayList<>(numTopics);
+    pathsToRoot = new ArrayList<>(numTopics);
     
     // note: make sure to start at 1 so we don't overflow
     for (int i = 0; i < numTopics; i++) {
       topics.add(new Topic(buf, endpoint));
       
       int length = buf.readInt();
-      List<Id> pathToRoot = new ArrayList<Id>(length);
+      List<Id> pathToRoot = new ArrayList<>(length);
       for (int j = 0; j < length; j++) {
         pathToRoot.add(endpoint.readId(buf, buf.readShort()));
       }      

@@ -36,17 +36,17 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.aggregation;
 
-import java.util.Hashtable;
-import java.util.Enumeration;
-import java.util.Date;
-import java.util.Vector;
-import java.io.*;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Id;
 import rice.p2p.commonapi.IdFactory;
 import rice.p2p.glacier.VersionKey;
+
+import java.io.*;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 @SuppressWarnings("unchecked")
 public class AggregateList {
@@ -131,89 +131,103 @@ public class AggregateList {
           if (logger.level <= Logger.FINE) logger.log(
               "Replaying log entry #"+thisSerial);
           entriesReplayed ++;
-        
-          if (parts[3].equals("setRoot")) {
-            if (parts[4].equals("null")) {
-              rootKey = null;
+
+          switch (parts[3]) {
+            case "setRoot":
+              if (parts[4].equals("null")) {
+                rootKey = null;
+                if (logger.level <= Logger.FINER) logger.log(
+                        "  - rootKey = null");
+              } else {
+                rootKey = factory.buildIdFromToString(parts[4]);
+                if (logger.level <= Logger.FINE) logger.log(
+                        "  - rootKey = " + rootKey.toStringFull());
+              }
+
+              break;
+            case "setAL": {
+              Id adcKey = factory.buildIdFromToString(parts[4]);
+              long lifetime = Long.parseLong(parts[5]);
+              AggregateDescriptor adc = (AggregateDescriptor) aggregateList.get(adcKey);
+              if (adc == null)
+                throw new AggregationException("Cannot find aggregate (" + adcKey.toStringFull() + ": " + line);
+              adc.currentLifetime = lifetime;
               if (logger.level <= Logger.FINER) logger.log(
-                "  - rootKey = null");
-            } else {
-              rootKey = factory.buildIdFromToString(parts[4]);
-              if (logger.level <= Logger.FINE) logger.log(
-                  "  - rootKey = "+rootKey.toStringFull());
+                      "  - lifetime=" + lifetime + " in ADC " + adcKey.toStringFull());
+
+              break;
             }
-            
-          } else if (parts[3].equals("setAL")) {
-            Id adcKey = factory.buildIdFromToString(parts[4]);
-            long lifetime = Long.parseLong(parts[5]);
-            AggregateDescriptor adc = (AggregateDescriptor) aggregateList.get(adcKey);
-            if (adc == null)
-              throw new AggregationException("Cannot find aggregate ("+adcKey.toStringFull()+": "+line);
-            adc.currentLifetime = lifetime;
-            if (logger.level <= Logger.FINER) logger.log(
-                "  - lifetime="+lifetime+" in ADC "+adcKey.toStringFull());
-            
-          } else if (parts[3].equals("setOCL")) {
-            Id adcKey = factory.buildIdFromToString(parts[4]);
-            int index = Integer.parseInt(parts[5]);
-            long lifetime = Long.parseLong(parts[6]);
-            AggregateDescriptor adc = (AggregateDescriptor) aggregateList.get(adcKey);
-            if (adc == null)
-              throw new AggregationException("Cannot find aggregate ("+adcKey.toStringFull()+": "+line);
-            if (adc.objects.length <= index)
-              throw new AggregationException("Object index mismatch ("+index+"/"+adc.objects.length+"): "+line);
-            adc.objects[index].currentLifetime = lifetime;
-            if (logger.level <= Logger.FINER) logger.log(
-                "  - currentLifetime="+lifetime+" in ADC "+adcKey.toStringFull()+" index "+index);
-            
-          } else if (parts[3].equals("setORL")) {
-            Id adcKey = factory.buildIdFromToString(parts[4]);
-            int index = Integer.parseInt(parts[5]);
-            long lifetime = Long.parseLong(parts[6]);
-            AggregateDescriptor adc = (AggregateDescriptor) aggregateList.get(adcKey);
-            if (adc == null)
-              throw new AggregationException("Cannot find aggregate ("+adcKey.toStringFull()+": "+line);
-            if (adc.objects.length <= index)
-              throw new AggregationException("Object index mismatch ("+index+"/"+adc.objects.length+"): "+line);
-            adc.objects[index].refreshedLifetime = lifetime;
-            if (logger.level <= Logger.FINER) logger.log(
-                "  - refreshedLifetime="+lifetime+" in ADC "+adcKey.toStringFull()+" index "+index);
-            
-          } else if (parts[3].equals("refresh")) {
-            Id adcKey = factory.buildIdFromToString(parts[4]);
-            long lifetime = Long.parseLong(parts[5]);
-            AggregateDescriptor adc = (AggregateDescriptor) aggregateList.get(adcKey);
-            if (adc == null)
-              throw new AggregationException("Cannot find aggregate ("+adcKey.toStringFull()+": "+line);
-            
-            adc.currentLifetime = lifetime;
-            for (int i=0; i<adc.objects.length; i++) 
-              adc.objects[i].currentLifetime = adc.objects[i].refreshedLifetime;
-            if (logger.level <= Logger.FINER) logger.log(
-                " - refresh="+lifetime+" in ADC "+adcKey.toStringFull());
-          
-          } else if (parts[3].equals("removeAggregate")) {
-            Id adcKey = factory.buildIdFromToString(parts[4]);
-            AggregateDescriptor adc = (AggregateDescriptor) aggregateList.get(adcKey);
-            if (adc == null)
-              throw new AggregationException("Cannot find aggregate ("+adcKey.toStringFull()+": "+line);
-            
-            removeAggregateDescriptor(adc, false);
-            if (logger.level <= Logger.FINER) logger.log(
-                " - remove ADC "+adcKey.toStringFull());
-          
-          } else if (parts[3].equals("addAggregate")) {
-            Id adcKey = factory.buildIdFromToString(parts[4]);
-            AggregateDescriptor adc = (AggregateDescriptor) aggregateList.get(adcKey);
-            if (adc != null)
-              throw new AggregationException("Aggregate already present ("+adcKey.toStringFull()+": "+line);
-            
-            adc = readAggregate(logFile, adcKey);
-            addAggregateDescriptor(adc, false);
-            if (logger.level <= Logger.FINER) logger.log(
-                " - add ADC "+adcKey.toStringFull());
-          } else {
-            throw new AggregationException("Unknown command ("+parts[3]+"): "+line);
+            case "setOCL": {
+              Id adcKey = factory.buildIdFromToString(parts[4]);
+              int index = Integer.parseInt(parts[5]);
+              long lifetime = Long.parseLong(parts[6]);
+              AggregateDescriptor adc = (AggregateDescriptor) aggregateList.get(adcKey);
+              if (adc == null)
+                throw new AggregationException("Cannot find aggregate (" + adcKey.toStringFull() + ": " + line);
+              if (adc.objects.length <= index)
+                throw new AggregationException("Object index mismatch (" + index + "/" + adc.objects.length + "): " + line);
+              adc.objects[index].currentLifetime = lifetime;
+              if (logger.level <= Logger.FINER) logger.log(
+                      "  - currentLifetime=" + lifetime + " in ADC " + adcKey.toStringFull() + " index " + index);
+
+              break;
+            }
+            case "setORL": {
+              Id adcKey = factory.buildIdFromToString(parts[4]);
+              int index = Integer.parseInt(parts[5]);
+              long lifetime = Long.parseLong(parts[6]);
+              AggregateDescriptor adc = (AggregateDescriptor) aggregateList.get(adcKey);
+              if (adc == null)
+                throw new AggregationException("Cannot find aggregate (" + adcKey.toStringFull() + ": " + line);
+              if (adc.objects.length <= index)
+                throw new AggregationException("Object index mismatch (" + index + "/" + adc.objects.length + "): " + line);
+              adc.objects[index].refreshedLifetime = lifetime;
+              if (logger.level <= Logger.FINER) logger.log(
+                      "  - refreshedLifetime=" + lifetime + " in ADC " + adcKey.toStringFull() + " index " + index);
+
+              break;
+            }
+            case "refresh": {
+              Id adcKey = factory.buildIdFromToString(parts[4]);
+              long lifetime = Long.parseLong(parts[5]);
+              AggregateDescriptor adc = (AggregateDescriptor) aggregateList.get(adcKey);
+              if (adc == null)
+                throw new AggregationException("Cannot find aggregate (" + adcKey.toStringFull() + ": " + line);
+
+              adc.currentLifetime = lifetime;
+              for (int i = 0; i < adc.objects.length; i++)
+                adc.objects[i].currentLifetime = adc.objects[i].refreshedLifetime;
+              if (logger.level <= Logger.FINER) logger.log(
+                      " - refresh=" + lifetime + " in ADC " + adcKey.toStringFull());
+
+              break;
+            }
+            case "removeAggregate": {
+              Id adcKey = factory.buildIdFromToString(parts[4]);
+              AggregateDescriptor adc = (AggregateDescriptor) aggregateList.get(adcKey);
+              if (adc == null)
+                throw new AggregationException("Cannot find aggregate (" + adcKey.toStringFull() + ": " + line);
+
+              removeAggregateDescriptor(adc, false);
+              if (logger.level <= Logger.FINER) logger.log(
+                      " - remove ADC " + adcKey.toStringFull());
+
+              break;
+            }
+            case "addAggregate": {
+              Id adcKey = factory.buildIdFromToString(parts[4]);
+              AggregateDescriptor adc = (AggregateDescriptor) aggregateList.get(adcKey);
+              if (adc != null)
+                throw new AggregationException("Aggregate already present (" + adcKey.toStringFull() + ": " + line);
+
+              adc = readAggregate(logFile, adcKey);
+              addAggregateDescriptor(adc, false);
+              if (logger.level <= Logger.FINER) logger.log(
+                      " - add ADC " + adcKey.toStringFull());
+              break;
+            }
+            default:
+              throw new AggregationException("Unknown command (" + parts[3] + "): " + line);
           } 
           
           nextSerial ++;
@@ -370,8 +384,8 @@ public class AggregateList {
       /* References from excluded aggregates don't count */
       
       if (excludes != null)
-        for (int i=0; i<excludes.length; i++)
-          if (excludes[i].equals(aggr.key))
+        for (Id exclude : excludes)
+          if (exclude.equals(aggr.key))
             aggr.marker = true;
     }
     
@@ -472,7 +486,7 @@ public class AggregateList {
           break;
         }
 
-        String[] aggrKeyS = aggrKeyLine.split("\\[|\\]");
+        String[] aggrKeyS = aggrKeyLine.split("\\[|]");
         Id aggrKey = factory.buildIdFromToString(aggrKeyS[1]);
         AggregateDescriptor adc = readAggregate(configFile, aggrKey);
 
@@ -567,8 +581,8 @@ public class AggregateList {
         
         boolean isExcluded = false;
         if (excludes != null)
-          for (int i=0; i<excludes.length; i++)
-            if (excludes[i].equals(aggr.key))
+          for (Id exclude : excludes)
+            if (exclude.equals(aggr.key))
               isExcluded = true;
               
         if ((aggr.referenceCount < referenceThreshold) && (pointers.size() < max) && !isExcluded)

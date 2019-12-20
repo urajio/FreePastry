@@ -37,10 +37,7 @@ advised of the possibility of such damage.
 package org.mpisws.p2p.transport;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Map;
-
-import rice.p2p.commonapi.rawserialization.InputBuffer;
 
 /**
  * Used to receive incoming messages/sockets.
@@ -59,12 +56,12 @@ public interface TransportLayerCallback<Identifier, MessageType> {
    * @param options describe how the message arrived (udp/tcp, encrypted etc)
    * @throws IOException if there is a problem decoding the message
    */
-  public void messageReceived(Identifier i, MessageType m, Map<String, Object> options) throws IOException;
+  void messageReceived(Identifier i, MessageType m, Map<String, Object> options) throws IOException;
   /**
    * Notification of a new socket.
    * 
    * @param s the incoming socket
    * @throws IOException
    */
-  public void incomingSocket(P2PSocket<Identifier> s) throws IOException;
+  void incomingSocket(P2PSocket<Identifier> s) throws IOException;
 }

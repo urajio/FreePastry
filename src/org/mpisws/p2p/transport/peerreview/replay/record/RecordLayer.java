@@ -36,19 +36,7 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.replay.record;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.ClosedChannelException;
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
 import org.mpisws.p2p.transport.peerreview.history.SecureHistory;
 import org.mpisws.p2p.transport.peerreview.history.SecureHistoryFactoryImpl;
@@ -56,7 +44,6 @@ import org.mpisws.p2p.transport.peerreview.history.stub.NullHashProvider;
 import org.mpisws.p2p.transport.util.DefaultErrorHandler;
 import org.mpisws.p2p.transport.util.Serializer;
 import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
-
 import rice.environment.Environment;
 import rice.environment.logging.CloneableLogManager;
 import rice.environment.logging.LogManager;
@@ -73,6 +60,10 @@ import rice.environment.time.simulated.DirectTimeSource;
 import rice.p2p.util.MathUtils;
 import rice.p2p.util.rawserialization.SimpleOutputBuffer;
 import rice.selector.SelectorManager;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 public class RecordLayer<Identifier> implements PeerReviewConstants,
   TransportLayer<Identifier, ByteBuffer>,
@@ -121,12 +112,12 @@ public class RecordLayer<Identifier> implements PeerReviewConstants,
     
     this.tl = tl;
     this.tl.setCallback(this);
-    this.history = shf.create(name, 0, nhp.EMPTY_HASH);
+    this.history = shf.create(name, 0, NullHashProvider.EMPTY_HASH);
     
     this.environment = env;
     this.lastLogEntry = -1;
     
-    this.handler = new DefaultErrorHandler<Identifier>(logger);
+    this.handler = new DefaultErrorHandler<>(logger);
 
 //    env.addDestructable(this);  // TransportLayer will alrady call this.
     
@@ -175,7 +166,7 @@ public class RecordLayer<Identifier> implements PeerReviewConstants,
       if (logger.level <= Logger.WARNING) logger.logException("openSocket("+i+")",ioe); 
     }
 
-    final SocketRequestHandleImpl<Identifier> ret = new SocketRequestHandleImpl<Identifier>(i, options, logger);
+    final SocketRequestHandleImpl<Identifier> ret = new SocketRequestHandleImpl<>(i, options, logger);
     
     ret.setSubCancellable(tl.openSocket(i, new SocketCallback<Identifier>(){
       public void receiveResult(SocketRequestHandle<Identifier> cancellable, P2PSocket<Identifier> sock) {
@@ -186,7 +177,7 @@ public class RecordLayer<Identifier> implements PeerReviewConstants,
           if (logger.level <= Logger.WARNING) logger.logException("error logging in openSocket("+i+")",ioe); 
         }
         socketIdBuffer.clear();
-        deliverSocketToMe.receiveResult(ret, new RecordSocket<Identifier>(i, sock, logger, options, socketId, socketIdBuffer, RecordLayer.this));
+        deliverSocketToMe.receiveResult(ret, new RecordSocket<>(i, sock, logger, options, socketId, socketIdBuffer, RecordLayer.this));
       }
       public void receiveException(SocketRequestHandle<Identifier> s, Exception ex) {
         socketIdBuffer.clear();
@@ -215,7 +206,7 @@ public class RecordLayer<Identifier> implements PeerReviewConstants,
       if (logger.level <= Logger.WARNING) logger.logException("incomingSocket("+s.getIdentifier()+")",ioe); 
     }
     
-    callback.incomingSocket(new RecordSocket<Identifier>(s.getIdentifier(), s, logger, s.getOptions(), socketId, socketIdBuffer, RecordLayer.this));
+    callback.incomingSocket(new RecordSocket<>(s.getIdentifier(), s, logger, s.getOptions(), socketId, socketIdBuffer, RecordLayer.this));
   }
   
   public MessageRequestHandle<Identifier, ByteBuffer> sendMessage(Identifier i, ByteBuffer m, MessageCallback<Identifier, ByteBuffer> deliverAckToMe, Map<String, Object> options) {
@@ -228,14 +219,14 @@ public class RecordLayer<Identifier> implements PeerReviewConstants,
     }
     // If the 'RELEVANT_MSG' flag is set to false, the message is passed through to the transport
     // layer. This is used e.g. for liveness/proximity pings in Pastry. 
-    if (options == null || !options.containsKey(PR_RELEVANT_MSG) || ((Integer)options.get(PR_RELEVANT_MSG)).intValue() != 0) {
+    if (options == null || !options.containsKey(PR_RELEVANT_MSG) || (Integer) options.get(PR_RELEVANT_MSG) != 0) {
       int position = m.position(); // mark the current position
       
       int relevantLen = m.remaining();
     
       // If someone sets relevantLen=-1, it means the whole message is relevant.
-      if (options != null && options.containsKey(PR_RELEVANT_LEN) && ((Integer)options.get(PR_RELEVANT_LEN)).intValue() >= 0) {
-        relevantLen = ((Integer)options.get(PR_RELEVANT_LEN)).intValue();
+      if (options != null && options.containsKey(PR_RELEVANT_LEN) && (Integer) options.get(PR_RELEVANT_LEN) >= 0) {
+        relevantLen = (Integer) options.get(PR_RELEVANT_LEN);
       }
       
       try {
@@ -329,50 +320,50 @@ public class RecordLayer<Identifier> implements PeerReviewConstants,
     SelectorManager selector = new RecordSM("Default", new SimpleTimeSource(), dts,lm,rs);
     dts.setSelectorManager(selector);
     Processor proc = new SimProcessor(selector);
-    Environment ret = new Environment(selector,proc,rs,dts,lm,
+    return new Environment(selector,proc,rs,dts,lm,
         params, Environment.generateDefaultExceptionStrategy(lm)) {
-      
+
       public Environment cloneEnvironment(String prefix, boolean cloneSelector, boolean cloneProcessor) {
         // new logManager
-        DirectTimeSource dts = new DirectTimeSource(getTimeSource().currentTimeMillis());
+        DirectTimeSource dts1 = new DirectTimeSource(getTimeSource().currentTimeMillis());
         LogManager lman = getLogManager();
         if (lman instanceof CloneableLogManager) {
-          lman = ((CloneableLogManager) getLogManager()).clone(prefix,dts);          
-        }                
-        dts.setLogManager(lman);
-        
+          lman = ((CloneableLogManager) getLogManager()).clone(prefix, dts1);
+        }
+        dts1.setLogManager(lman);
+
         // new random source
         RandomSource rand = cloneRandomSource(lman);
-        
+
         // new selector
-        SelectorManager sman = cloneSelectorManager(prefix, dts, rand, lman, cloneSelector);
-        
+        SelectorManager sman = cloneSelectorManager(prefix, dts1, rand, lman, cloneSelector);
+
         // new processor
-        Processor proc = cloneProcessor(prefix, lman, cloneProcessor);
-            
+        Processor proc1 = cloneProcessor(prefix, lman, cloneProcessor);
+
         // build the environment
-        Environment ret = new Environment(sman, proc, rand, dts, lman,
+        Environment ret1 = new Environment(sman, proc1, rand, dts1, lman,
             getParameters(), getExceptionStrategy());
-      
+
         // gain shared fate with the rootEnvironment
-        addDestructable(ret);     
-          
-        return ret;
+        addDestructable(ret1);
+
+        return ret1;
       }
 
 
-      
+
       // get the new environment to be separate from the old one
       @Override
       public Environment cloneEnvironment(String prefix) {
         return cloneEnvironment(prefix, true, true);
       }
-      
+
       @Override
-      protected SelectorManager cloneSelectorManager(String prefix, TimeSource ts, RandomSource rs, LogManager lman, boolean cloneSelector) {
+      protected SelectorManager cloneSelectorManager(String prefix, TimeSource ts, RandomSource rs1, LogManager lman, boolean cloneSelector) {
         SelectorManager sman = getSelectorManager();
         if (cloneSelector) {
-          sman = new RecordSM(prefix + " Selector", new SimpleTimeSource(), (DirectTimeSource)ts,lman,rs);
+          sman = new RecordSM(prefix + " Selector", new SimpleTimeSource(), (DirectTimeSource)ts,lman, rs1);
         }
         return sman;
       }
@@ -382,7 +373,6 @@ public class RecordLayer<Identifier> implements PeerReviewConstants,
         throw new RuntimeException("Operation not allowed.  Use the overridden clone method.");
       }
     };
-    return ret;
   }
   
   public void logSocketException(ByteBuffer socketId, Exception ioe) throws IOException {

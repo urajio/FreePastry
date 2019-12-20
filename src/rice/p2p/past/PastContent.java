@@ -37,10 +37,9 @@ advised of the possibility of such damage.
 
 package rice.p2p.past;
 
-import java.io.Serializable;
+import rice.p2p.commonapi.Id;
 
-import rice.*;
-import rice.p2p.commonapi.*;
+import java.io.Serializable;
 
 
 /**
@@ -76,7 +75,7 @@ public interface PastContent extends Serializable {
    * @return null, if the operation is not allowed; else, the new
    * object to be stored on the local node.
    */
-  public PastContent checkInsert(Id id, PastContent existingContent) throws PastException;
+  PastContent checkInsert(Id id, PastContent existingContent) throws PastException;
 
   /**
    * Produces a handle for this content object. The handle is retrieved and returned to the
@@ -85,21 +84,21 @@ public interface PastContent extends Serializable {
    * @param The local Past service which the content is on.
    * @return the handle
    */
-  public PastContentHandle getHandle(Past local);
+  PastContentHandle getHandle(Past local);
 
   /**
    * Returns the Id under which this object is stored in Past.
    *
    * @return the id
    */
-  public Id getId();
+  Id getId();
 
   /**
    * States if this content object is mutable. Mutable objects are not subject to dynamic caching in Past.
    *
    * @return true if this object is mutable, else false
    */
-  public boolean isMutable();
+  boolean isMutable();
 
 }
 

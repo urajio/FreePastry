@@ -36,27 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.testing.transportlayer;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
 import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.liveness.LivenessListener;
-import org.mpisws.p2p.transport.liveness.LivenessProvider;
-import org.mpisws.p2p.transport.liveness.LivenessTransportLayerImpl;
-import org.mpisws.p2p.transport.liveness.PingListener;
-import org.mpisws.p2p.transport.liveness.Pinger;
+import org.mpisws.p2p.transport.liveness.*;
 import org.mpisws.p2p.transport.multiaddress.MultiInetAddressTransportLayerImpl;
 import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
 import org.mpisws.p2p.transport.proximity.MinRTTProximityProvider;
@@ -68,12 +52,22 @@ import org.mpisws.p2p.transport.sourceroute.SourceRouteTransportLayerImpl;
 import org.mpisws.p2p.transport.sourceroute.factory.MultiAddressSourceRouteFactory;
 import org.mpisws.p2p.transport.wire.WireTransportLayerImpl;
 import org.mpisws.p2p.transport.wire.magicnumber.MagicNumberTransportLayer;
-
 import rice.environment.Environment;
 import rice.environment.logging.CloneableLogManager;
 import rice.environment.params.Parameters;
 import rice.selector.Timer;
 import rice.selector.TimerTask;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertTrue;
 
 public class LivenessTest extends SRTest {
   static TransportLayer dave; // going to be the middle hop for alice/bob
@@ -90,14 +84,14 @@ public class LivenessTest extends SRTest {
 
     if (a.equals(carol) || b.equals(carol)) {
       
-      List<MultiInetSocketAddress> retArr = new ArrayList<MultiInetSocketAddress>(2);
+      List<MultiInetSocketAddress> retArr = new ArrayList<>(2);
       retArr.add(src.getFirstHop());
       retArr.add(dest.getFirstHop());
       
       return srFactory.getSourceRoute(retArr);      
     }
     
-    List<MultiInetSocketAddress> retArr = new ArrayList<MultiInetSocketAddress>(3);
+    List<MultiInetSocketAddress> retArr = new ArrayList<>(3);
     retArr.add(src.getFirstHop());
     retArr.add(intermediate.getFirstHop());
     retArr.add(dest.getFirstHop());
@@ -135,7 +129,7 @@ public class LivenessTest extends SRTest {
     bob = buildTL("bob", addr, startPort+1, env);
     carol = buildTL("carol", addr, startPort+2, env);
     dave = buildTL("dave", addr, startPort+3, env);
-    bob_prox = new MinRTTProximityProvider<SourceRoute>((LivenessTransportLayerImpl<SourceRoute>)bob, env);
+    bob_prox = new MinRTTProximityProvider<>((LivenessTransportLayerImpl<SourceRoute>) bob, env);
   }
 
   private static TransportLayer buildTL(String name, InetAddress addr, int port, Environment env) throws IOException {
@@ -195,7 +189,7 @@ public class LivenessTest extends SRTest {
   
   @Test
   public void testProximity() throws Exception {
-    final Map<MultiInetSocketAddress, Tupel> pingResponse = new HashMap<MultiInetSocketAddress, Tupel>();
+    final Map<MultiInetSocketAddress, Tupel> pingResponse = new HashMap<>();
     final Object lock = new Object();
     
     PingListener<SourceRoute<MultiInetSocketAddress>> pl = new PingListener<SourceRoute<MultiInetSocketAddress>>() {    
@@ -249,7 +243,7 @@ public class LivenessTest extends SRTest {
     LivenessProvider<SourceRoute<MultiInetSocketAddress>> alice = (LivenessProvider<SourceRoute<MultiInetSocketAddress>>)LivenessTest.alice;
     SourceRoute<MultiInetSocketAddress> aliceToDave = getIdentifier(
         (TransportLayer<SourceRoute<MultiInetSocketAddress>, ByteBuffer>)LivenessTest.alice, dave);
-    final List<Tupel> tupels = new ArrayList<Tupel>(3);
+    final List<Tupel> tupels = new ArrayList<>(3);
     final Object lock = new Object();
     
     alice.addLivenessListener(new LivenessListener<SourceRoute<MultiInetSocketAddress>>() {    

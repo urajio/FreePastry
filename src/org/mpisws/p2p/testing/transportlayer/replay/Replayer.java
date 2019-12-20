@@ -36,19 +36,8 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.testing.transportlayer.replay;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import org.mpisws.p2p.transport.TransportLayer;
 import org.mpisws.p2p.transport.direct.EventSimulator;
-import org.mpisws.p2p.transport.liveness.LivenessProvider;
-import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
 import org.mpisws.p2p.transport.peerreview.history.HashProvider;
 import org.mpisws.p2p.transport.peerreview.history.SecureHistory;
 import org.mpisws.p2p.transport.peerreview.history.SecureHistoryFactory;
@@ -58,29 +47,25 @@ import org.mpisws.p2p.transport.peerreview.replay.BasicEntryDeserializer;
 import org.mpisws.p2p.transport.peerreview.replay.EventCallback;
 import org.mpisws.p2p.transport.peerreview.replay.playback.ReplayLayer;
 import org.mpisws.p2p.transport.peerreview.replay.playback.ReplaySM;
-import org.mpisws.p2p.transport.proximity.ProximityProvider;
 import org.mpisws.p2p.transport.simpleidentity.InetSocketAddressSerializer;
 import org.mpisws.p2p.transport.util.Serializer;
-
 import rice.environment.Environment;
 import rice.environment.logging.LogManager;
 import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
-import rice.environment.params.simple.SimpleParameters;
-import rice.environment.processing.Processor;
-import rice.environment.processing.sim.SimProcessor;
 import rice.environment.random.RandomSource;
-import rice.environment.time.simulated.DirectTimeSource;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.pastry.Id;
-import rice.pastry.NodeHandle;
-import rice.pastry.NodeIdFactory;
-import rice.pastry.NodeHandleFactory;
-import rice.pastry.PastryNode;
-import rice.pastry.PastryNodeFactory;
+import rice.pastry.*;
 import rice.pastry.socket.SocketNodeHandle;
 import rice.pastry.socket.SocketPastryNodeFactory;
-import rice.selector.SelectorManager;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Replayer implements MyEvents, EventCallback {
   InetSocketAddress bootaddress;
@@ -105,7 +90,7 @@ public class Replayer implements MyEvents, EventCallback {
     
     final Logger simLogger = env.getLogManager().getLogger(EventSimulator.class, null);
     
-    final List<ReplayLayer<InetSocketAddress>> replayers = new ArrayList<ReplayLayer<InetSocketAddress>>();
+    final List<ReplayLayer<InetSocketAddress>> replayers = new ArrayList<>();
     
     
     SocketPastryNodeFactory factory = new SocketPastryNodeFactory(new NodeIdFactory() {    
@@ -145,7 +130,7 @@ public class Replayer implements MyEvents, EventCallback {
         String logName = "0x"+id.toStringFull().substring(0,6);
         SecureHistory hist = shFactory.open(logName, "r");
         
-        ReplayLayer<InetSocketAddress> replay = new ReplayLayer<InetSocketAddress>(serializer,hashProv,hist,addr,pn.getEnvironment());
+        ReplayLayer<InetSocketAddress> replay = new ReplayLayer<>(serializer, hashProv, hist, addr, pn.getEnvironment());
         replay.registerEvent(Replayer.this, EVT_BOOT, EVT_SUBSCRIBE, EVT_PUBLISH);
         replayers.add(replay);
         return replay;
@@ -226,12 +211,12 @@ public class Replayer implements MyEvents, EventCallback {
 //    System.out.println(args[0]+" "+args[1]+" "+args[2]+" "+args[3]);
     String hex = args[0];
     InetAddress a = InetAddress.getByName(args[1]);
-    int startPort = Integer.decode(args[2]).intValue();
-    int bootPort = Integer.decode(args[3]).intValue();
+    int startPort = Integer.decode(args[2]);
+    int bootPort = Integer.decode(args[3]);
     InetSocketAddress addr = new InetSocketAddress(a,startPort);
     InetSocketAddress bootaddress = new InetSocketAddress(a,bootPort);
-    long startTime = Long.decode(args[4]).longValue();
-    long randSeed = Long.decode(args[5]).longValue();
+    long startTime = Long.decode(args[4]);
+    long randSeed = Long.decode(args[5]);
     
     replayNode(Id.build(hex), addr, bootaddress, startTime, randSeed);
 

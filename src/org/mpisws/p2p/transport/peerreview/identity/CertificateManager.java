@@ -36,17 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.identity;
 
-import java.nio.ByteBuffer;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.security.cert.X509Certificate;
-import java.util.Map;
-
-
 import rice.Continuation;
 import rice.p2p.commonapi.Cancellable;
+
+import java.security.cert.X509Certificate;
+import java.util.Map;
 
 /**
  * Stores some Certificates, sign/verify, can fetch Certificates
@@ -55,9 +49,9 @@ import rice.p2p.commonapi.Cancellable;
  * @param <Identifier>
  */
 public interface CertificateManager<Handle, Identifier> {
-  public byte[] sign(byte[] bytes);
-  public int verify(Identifier id, byte[] msg, byte[] signature);
-  public boolean hasCertificate(Identifier id);
-  public Cancellable requestCertificate(Handle source, Identifier certHolder, Continuation<X509Certificate, Exception> c, Map<String, Object> options);
-  public short getSignatureSizeBytes();
+  byte[] sign(byte[] bytes);
+  int verify(Identifier id, byte[] msg, byte[] signature);
+  boolean hasCertificate(Identifier id);
+  Cancellable requestCertificate(Handle source, Identifier certHolder, Continuation<X509Certificate, Exception> c, Map<String, Object> options);
+  short getSignatureSizeBytes();
 }

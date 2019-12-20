@@ -44,12 +44,12 @@ public interface Receipt extends Cancellable {
    * Also used to disambiguate the priority of 2 items of the same priority
    * @return
    */
-  public int getUID();
-  public long getSize();
+  int getUID();
+  long getSize();
   
   /**
    * Unknown on receiver.
    * @return
    */
-  public byte getPriority();  
+  byte getPriority();
 }

@@ -36,21 +36,19 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.challenge;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.peerreview.infostore.StatusChangeListener;
 import org.mpisws.p2p.transport.peerreview.message.ChallengeMessage;
 import org.mpisws.p2p.transport.peerreview.message.PeerReviewMessage;
 import org.mpisws.p2p.transport.peerreview.message.UserDataMessage;
-
 import rice.p2p.commonapi.rawserialization.RawSerializable;
 
+import java.io.IOException;
+import java.util.Map;
+
 public interface ChallengeResponseProtocol<Handle extends RawSerializable, Identifier extends RawSerializable> extends StatusChangeListener<Identifier> {
-  public void challengeSuspectedNode(Handle handle);  
-  public void handleChallenge(Handle source, ChallengeMessage<Identifier> challenge, Map<String, Object> options) throws IOException;
-  public void handleIncomingMessage(Handle source, UserDataMessage<Handle> udm, Map<String, Object> options) throws IOException;
-  public void handleStatement(Handle source, PeerReviewMessage m, Map<String, Object> options) throws IOException;
+  void challengeSuspectedNode(Handle handle);
+  void handleChallenge(Handle source, ChallengeMessage<Identifier> challenge, Map<String, Object> options) throws IOException;
+  void handleIncomingMessage(Handle source, UserDataMessage<Handle> udm, Map<String, Object> options) throws IOException;
+  void handleStatement(Handle source, PeerReviewMessage m, Map<String, Object> options) throws IOException;
 
 }

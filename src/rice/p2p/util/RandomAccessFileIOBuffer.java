@@ -36,15 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.util;
 
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
-public class RandomAccessFileIOBuffer extends RandomAccessFile implements
-    InputBuffer, OutputBuffer {
+public class RandomAccessFileIOBuffer extends RandomAccessFile implements InputBuffer, OutputBuffer {
 
   public RandomAccessFileIOBuffer(File file, String mode) throws FileNotFoundException {
     super(file, mode);

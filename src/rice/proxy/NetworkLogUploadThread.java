@@ -42,16 +42,18 @@ advised of the possibility of such damage.
  */
 package rice.proxy;
 
-import java.io.*;
-import java.net.*;
-import java.security.PublicKey;
-import java.util.zip.GZIPOutputStream;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
 import rice.p2p.util.EncryptedOutputStream;
 import rice.p2p.util.MathUtils;
+
+import java.io.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.security.PublicKey;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * @author jstewart
@@ -142,43 +144,40 @@ public class NetworkLogUploadThread extends Thread {
       if (logger.level <= Logger.INFO) logger.log( "No new log files found; skipping upload");
       return;
     }
-    
-    for (int i=0; i<files.length; i++) 
-      sendFile(files[i], true);
+
+      for (File value : files) sendFile(value, true);
     
     // for old nohup.out logs
     if (params.contains("log_network_upload_old_filenames")) {
-      final String other[] = params.getStringArray("log_network_upload_old_filenames");
+      final String[] other = params.getStringArray("log_network_upload_old_filenames");
 
       files = new File(".").listFiles(new FilenameFilter() {
         public boolean accept(File parent, String file) {
-          for (int i=0; i<other.length; i++)
-            if (file.startsWith(other[i]))
-              return true;
+            for (String s : other)
+                if (file.startsWith(s))
+                    return true;
           
           return false;
         }
       });
-      
-      for (int i=0; i<files.length; i++) 
-        sendFile(files[i], true);
+
+        for (File file : files) sendFile(file, true);
     }
 
     if (params.contains("log_network_upload_other_filenames")) {
-      final String other[] = params.getStringArray("log_network_upload_other_filenames");
+      final String[] other = params.getStringArray("log_network_upload_other_filenames");
 
       files = new File(".").listFiles(new FilenameFilter() {
         public boolean accept(File parent, String file) {
-          for (int i=0; i<other.length; i++)
-            if (file.startsWith(other[i]))
-              return true;
+            for (String s : other)
+                if (file.startsWith(s))
+                    return true;
           
           return false;
         }
       });
-      
-      for (int i=0; i<files.length; i++) 
-        sendFile(files[i], false);
+
+        for (File file : files) sendFile(file, false);
     }
   
   }

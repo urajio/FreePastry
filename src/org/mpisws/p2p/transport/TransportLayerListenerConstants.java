@@ -40,18 +40,18 @@ public interface TransportLayerListenerConstants {
   /**
    * Transport type
    */
-  public int UNKNOWN = -1;
-  public int UDP = 0;
-  public int TCP = 1;
-  public int ENCRYPTED = 2;
-  public int AUTHENTICATED = 4;
+  int UNKNOWN = -1;
+  int UDP = 0;
+  int TCP = 1;
+  int ENCRYPTED = 2;
+  int AUTHENTICATED = 4;
   
   /**
    * Traffic due to this layer.
    */
-  public int OVERHEAD = 0;
+  int OVERHEAD = 0;
   /**
    * Traffic due to another layer.
    */
-  public int PASSTHROUGH = 1;
+  int PASSTHROUGH = 1;
 }

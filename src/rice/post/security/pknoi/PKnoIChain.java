@@ -36,11 +36,7 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.security.pknoi;
 
-import java.io.*;
-import java.security.*;
-
-import rice.post.*;
-import rice.post.security.*;
+import java.io.Serializable;
 
 /**
  * This class is the notion of a chain of "vouches" from one user to another in the

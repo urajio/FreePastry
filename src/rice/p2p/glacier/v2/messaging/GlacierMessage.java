@@ -36,12 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.glacier.v2.messaging;
 
-import java.io.IOException;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.commonapi.rawserialization.RawMessage;
 
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.glacier.*;
+import java.io.IOException;
 
 public abstract class GlacierMessage implements RawMessage {
   

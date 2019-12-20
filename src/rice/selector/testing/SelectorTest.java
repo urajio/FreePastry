@@ -42,8 +42,6 @@ advised of the possibility of such damage.
  */
 package rice.selector.testing;
 
-import java.io.IOException;
-
 import rice.environment.Environment;
 import rice.selector.SelectorManager;
 import rice.selector.Timer;
@@ -60,7 +58,7 @@ public class SelectorTest {
   public static boolean logIssues = true;
   public static Environment environment;
   
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
     environment = new Environment();
     
     System.out.println("hello world <selector test>");

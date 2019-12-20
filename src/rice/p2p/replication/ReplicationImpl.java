@@ -37,20 +37,24 @@ advised of the possibility of such damage.
 
 package rice.p2p.replication;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.logging.*;
-
-import rice.*;
-import rice.Continuation.*;
+import rice.Continuation.ListenerContinuation;
+import rice.Continuation.MultiContinuation;
+import rice.Destructable;
+import rice.Executable;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
 import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.replication.ReplicationPolicy.*;
-import rice.p2p.replication.messaging.*;
-import rice.p2p.util.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.MessageDeserializer;
+import rice.p2p.replication.ReplicationPolicy.DefaultReplicationPolicy;
+import rice.p2p.replication.messaging.ReminderMessage;
+import rice.p2p.replication.messaging.RequestMessage;
+import rice.p2p.replication.messaging.ResponseMessage;
+import rice.p2p.util.IdBloomFilter;
+
+import java.io.IOException;
+import java.util.Iterator;
 
 /**
  * @(#) ReplicationImpl.java
@@ -349,8 +353,8 @@ public class ReplicationImpl implements Replication, Application, Destructable {
       for (int i=0; i<rm.getIdSets().length; i++) {
         IdSet temp = factory.buildIdSet();
         Id[] tempA = rm.getIdSets()[i];
-        for (int j = 0; j < tempA.length; j++) {
-          temp.addId(tempA[j]); 
+        for (Id value : tempA) {
+          temp.addId(value);
         }
         
         IdSet fetch = policy.difference(client.scan(rm.getRanges()[i]), temp, factory);

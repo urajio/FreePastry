@@ -37,20 +37,31 @@ advised of the possibility of such damage.
 
 package rice.p2p.past.gc;
 
-import java.io.*;
-import java.util.*;
-
-import rice.*;
-import rice.Continuation.*;
-import rice.environment.Environment;
+import rice.Continuation;
+import rice.Continuation.ListenerContinuation;
+import rice.Continuation.NamedContinuation;
+import rice.Continuation.StandardContinuation;
+import rice.Executable;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.past.*;
-import rice.p2p.past.messaging.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.past.PastContent;
+import rice.p2p.past.PastException;
+import rice.p2p.past.PastImpl;
+import rice.p2p.past.PastPolicy;
+import rice.p2p.past.gc.messaging.GCCollectMessage;
+import rice.p2p.past.gc.messaging.GCInsertMessage;
+import rice.p2p.past.gc.messaging.GCLookupHandlesMessage;
+import rice.p2p.past.gc.messaging.GCRefreshMessage;
+import rice.p2p.past.messaging.FetchHandleMessage;
+import rice.p2p.past.messaging.PastMessage;
 import rice.p2p.past.rawserialization.SocketStrategy;
-import rice.p2p.past.gc.messaging.*;
-import rice.persistence.*;
+import rice.persistence.Cache;
+import rice.persistence.StorageManager;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * @(#) GCPastImpl.java
@@ -286,16 +297,16 @@ public class GCPastImpl extends PastImpl implements GCPast {
           public Object execute() {
             if (logger.level <= Logger.FINE) logger.log( "REFRESH: ON PROCESSING THREAD!");
 
-            for (int i=0; i<array.length; i++) {
-              GCId id = (GCId) array[i];
-              
-              NodeHandleSet replicas = endpoint.replicaSet(id.getId(), replicationFactor+1, set.getHandle(set.size()-1), set);
-              
+            for (Id value : array) {
+              GCId id = (GCId) value;
+
+              NodeHandleSet replicas = endpoint.replicaSet(id.getId(), replicationFactor + 1, set.getHandle(set.size() - 1), set);
+
               // if we have all of the replicas, go ahead and refresh this item
-              if ((replicas != null) && ((replicas.size() == set.size()) || (replicas.size() == replicationFactor+1))) {
-                for (int j=0; j<replicas.size(); j++) 
+              if ((replicas != null) && ((replicas.size() == set.size()) || (replicas.size() == replicationFactor + 1))) {
+                for (int j = 0; j < replicas.size(); j++)
                   map.addReplica(replicas.getHandle(j), id);
-                
+
                 refreshed++;
                 ids.removeId(id);
               }
@@ -399,7 +410,7 @@ public class GCPastImpl extends PastImpl implements GCPast {
             }
           });
         } else {
-          getResponseContinuation(msg).receiveResult(new Boolean(false));
+          getResponseContinuation(msg).receiveResult(Boolean.FALSE);
         }
       } else if (msg instanceof GCRefreshMessage) {
         final GCRefreshMessage rmsg = (GCRefreshMessage) msg;        
@@ -438,7 +449,7 @@ public class GCPastImpl extends PastImpl implements GCPast {
                 if (trash != null) {
                   trash.getObject(id.getId(), new StandardContinuation(this) {
                     public void receiveResult(Object o) {
-                      if ((o != null) && (o instanceof GCPastContent)) {
+                      if ((o instanceof GCPastContent)) {
                         if (logger.level <= Logger.FINE) logger.log( 
                             "GCREFRESH: Restoring object " + id + " from trash!");
                         GCPastContent content = (GCPastContent) o;
@@ -585,7 +596,7 @@ public class GCPastImpl extends PastImpl implements GCPast {
         public void receiveResult(Object o) {
           if (o == null) {
             if (logger.level <= Logger.WARNING) logger.log( "Could not fetch id " + id + " - policy returned null in namespace " + instance);
-            parent.receiveResult(new Boolean(false));
+            parent.receiveResult(Boolean.FALSE);
           } else {
             GCPastContent content = (GCPastContent) o;
             if (logger.level <= Logger.FINEST) logger.log( "inserting replica of id " + id);
@@ -660,9 +671,9 @@ public class GCPastImpl extends PastImpl implements GCPast {
         public void receiveResult(final Object o) {
           insert((PastContent)o, ((GCId)id).getExpiration(), new StandardContinuation(parent) {
             public void receiveResult(Object result) {
-              Boolean results[] = (Boolean[])result;
-              for (int i = 0; i < results.length; i++) {
-                if (results[i].booleanValue()) {
+              Boolean[] results = (Boolean[])result;
+              for (Boolean aBoolean : results) {
+                if (aBoolean) {
                   parent.receiveResult(Boolean.TRUE);
                   return;
                 }

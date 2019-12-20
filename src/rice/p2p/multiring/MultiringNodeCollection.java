@@ -37,13 +37,12 @@ advised of the possibility of such damage.
 
 package rice.p2p.multiring;
 
-import java.util.*;
-
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.DeliveryNotification;
+import rice.p2p.commonapi.MessageReceipt;
 import rice.p2p.commonapi.rawserialization.RawMessage;
+
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * @(#) MultiringNodeCollection.java

@@ -36,9 +36,6 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.rendezvous;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Keeps track of tags, ephemeral identifiers, timestamps, highIdentifiers
  * 
@@ -46,7 +43,7 @@ import java.util.Map;
  *
  */
 public interface EphemeralDB<Identifier, HighIdentifier> {
-  public static final long NO_TAG = Long.MIN_VALUE;
+  long NO_TAG = Long.MIN_VALUE;
 
   /**
    * Get the existing tag, or make a new one if needed
@@ -54,7 +51,7 @@ public interface EphemeralDB<Identifier, HighIdentifier> {
    * @param addr
    * @return
    */
-  public long getTagForEphemeral(Identifier addr);
+  long getTagForEphemeral(Identifier addr);
   
   /**
    * Return a current valid Identifier for the tag, otherwise, return the default identifier
@@ -65,7 +62,7 @@ public interface EphemeralDB<Identifier, HighIdentifier> {
    * @param i the default identifier
    * @return
    */
-  public Identifier getEphemeral(long tag, Identifier i);
+  Identifier getEphemeral(long tag, Identifier i);
 
   /**
    * Tell the DB that the high identifier points to this tag
@@ -73,13 +70,13 @@ public interface EphemeralDB<Identifier, HighIdentifier> {
    * @param high
    * @param tag
    */
-  public void mapHighToTag(HighIdentifier high, long tag);
+  void mapHighToTag(HighIdentifier high, long tag);
   
   /**
    * Get the valid Identifier for this highIdentifier
    * @param high
    * @return null if there isn't a valid one
    */
-  public Identifier getEphemeral(HighIdentifier high);
+  Identifier getEphemeral(HighIdentifier high);
 
 }

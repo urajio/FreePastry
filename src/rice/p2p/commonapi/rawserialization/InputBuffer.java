@@ -42,7 +42,7 @@ package rice.p2p.commonapi.rawserialization;
 import java.io.IOException;
 
 public interface InputBuffer {
-  public static final int UNKNOWN = -2;
+  int UNKNOWN = -2;
   
   int read(byte[] b, int off, int len) throws IOException;
   int read(byte[] b) throws IOException;

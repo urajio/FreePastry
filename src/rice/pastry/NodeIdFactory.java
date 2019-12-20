@@ -51,6 +51,6 @@ public interface NodeIdFactory {
      *
      * @return a new node id.
      */
-    
-    public Id generateNodeId();
+
+    Id generateNodeId();
 }

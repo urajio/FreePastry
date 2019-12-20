@@ -36,8 +36,6 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.direct;
 
-import java.io.IOException;
-
 import rice.p2p.util.rawserialization.SizeChecker;
 
 
@@ -54,7 +52,7 @@ public class DirectSizeChecker extends SizeChecker {
   }
     
   @Override
-  public void writeSpecial(Object o) throws IOException {
+  public void writeSpecial(Object o) {
     if (o instanceof DirectNodeHandle) {
       count+=directNodeHandleSize;
     }

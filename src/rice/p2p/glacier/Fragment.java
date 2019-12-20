@@ -36,14 +36,18 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.glacier;
 
-import java.io.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
-import rice.p2p.commonapi.rawserialization.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 public class Fragment implements Serializable {
   private static final long serialVersionUID = -809948154556539350L;
   
-  public transient byte payload[];
+  public transient byte[] payload;
 
   public Fragment(int _size) {
     payload = new byte[_size];

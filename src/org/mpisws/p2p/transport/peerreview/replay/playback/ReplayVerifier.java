@@ -36,14 +36,6 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.replay.playback;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.ClosedChannelException;
 import org.mpisws.p2p.transport.peerreview.PeerReviewCallback;
 import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
@@ -53,11 +45,17 @@ import org.mpisws.p2p.transport.peerreview.history.SecureHistory;
 import org.mpisws.p2p.transport.peerreview.replay.EventCallback;
 import org.mpisws.p2p.transport.peerreview.replay.Verifier;
 import org.mpisws.p2p.transport.util.Serializer;
-
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.util.rawserialization.SimpleInputBuffer;
 import rice.p2p.util.rawserialization.SimpleOutputBuffer;
+
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class ReplayVerifier<Identifier> implements Verifier<Identifier>,  PeerReviewConstants {
 
@@ -96,7 +94,7 @@ public abstract class ReplayVerifier<Identifier> implements Verifier<Identifier>
       short signatureSizeBytes, 
       short hashSizeBytes, 
       int firstEntryToReplay, 
-      Logger logger) /* : ReplayWrapper() */ throws IOException {
+      Logger logger) /* : ReplayWrapper() */ {
     this.logger = logger;
     this.history = history;
 //    this->app = NULL;
@@ -123,10 +121,10 @@ public abstract class ReplayVerifier<Identifier> implements Verifier<Identifier>
   
   public boolean verifiedOK() { 
     return !foundFault; 
-  };
+  }
 
 
-  public IndexEntry getNextEvent() {
+    public IndexEntry getNextEvent() {
     return next;
   }
   
@@ -161,9 +159,9 @@ public abstract class ReplayVerifier<Identifier> implements Verifier<Identifier>
    */
   protected abstract void socketIO(int socketId, boolean canRead, boolean canWrite) throws IOException;
   
-  protected abstract void socketOpened(int socketId) throws IOException;
+  protected abstract void socketOpened(int socketId);
 
-  protected abstract void socketException(int socketId, IOException ioe) throws IOException;
+  protected abstract void socketException(int socketId, IOException ioe);
 
   public void setApplication(PeerReviewCallback app) {
     this.app = app;
@@ -636,7 +634,7 @@ public abstract class ReplayVerifier<Identifier> implements Verifier<Identifier>
   /**
    * Maps EVT_XXX -> EventCallback
    */
-  Map<Short, EventCallback> eventCallback = new HashMap<Short, EventCallback>();
+  Map<Short, EventCallback> eventCallback = new HashMap<>();
   
   /**
    * This binds specific event types to one of the handlers 
@@ -910,7 +908,7 @@ public abstract class ReplayVerifier<Identifier> implements Verifier<Identifier>
   
   public boolean isSuccess() {
     if (initialized && verifiedOK()) {
-      if (next == null) return true;
+      return next == null;
     }
 //    logger.log("i:"+initialized+" v:"+verifiedOK()+" n:"+nextEvent);
     return false;
@@ -938,16 +936,14 @@ public abstract class ReplayVerifier<Identifier> implements Verifier<Identifier>
       parameterTypes[0] = String.class;      
       try {
         Constructor ctor = c.getConstructor(parameterTypes);
-        IOException ioe = (IOException)ctor.newInstance(message);
-        return ioe;
+        return (IOException)ctor.newInstance(message);
 //      } catch (NoSuchMethodException nsme) {
 //      } catch (IllegalAccessException iae) {        
 //      } catch (InvocationTargetException ite) {
       } catch (Exception e) {
         try {
-          Constructor ctor = c.getConstructor(new Class[0]);
-          IOException ioe = (IOException)ctor.newInstance(message);
-          return ioe;
+          Constructor ctor = c.getConstructor();
+          return (IOException)ctor.newInstance(message);
         } catch (Exception e2) {
           throw new RuntimeException("Couldn't find constructor for"+className+" "+message);          
         }

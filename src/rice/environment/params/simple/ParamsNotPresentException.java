@@ -39,7 +39,7 @@ advised of the possibility of such damage.
  */
 package rice.environment.params.simple;
 
-import java.io.*;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 
 

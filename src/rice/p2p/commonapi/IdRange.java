@@ -37,9 +37,10 @@ advised of the possibility of such damage.
 
 package rice.p2p.commonapi;
 
-import java.io.*;
-
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * @(#) IdRange.java
@@ -59,58 +60,58 @@ public interface IdRange extends Serializable {
    * @param key the key
    * @return true if the key lies within this range, false otherwise
    */
-  public boolean containsId(Id key);
+  boolean containsId(Id key);
 
   /**
    * get counterclockwise edge of range
    *
    * @return the id at the counterclockwise edge of the range (inclusive)
    */
-  public Id getCCWId();
+  Id getCCWId();
 
   /**
    * get clockwise edge of range
    *
    * @return the id at the clockwise edge of the range (exclusive)
    */
-  public Id getCWId();
+  Id getCWId();
 
   /**
    * get the complement of this range
    *
    * @return This range's complement
    */
-  public IdRange getComplementRange();
+  IdRange getComplementRange();
   
   /**
    * merges the given range with this range
    *
    * @return The merge
    */
-  public IdRange mergeRange(IdRange range);
+  IdRange mergeRange(IdRange range);
   
   /**
     * diffs the given range with this range
    *
    * @return The merge
    */
-  public IdRange diffRange(IdRange range);
+  IdRange diffRange(IdRange range);
   
   /**
    * intersects the given range with this range
    *
    * @return The merge
    */
-  public IdRange intersectRange(IdRange range);
+  IdRange intersectRange(IdRange range);
   
   /**
    * returns whether or not this range is empty
    *
    * @return Whether or not this range is empty
    */
-  public boolean isEmpty();
+  boolean isEmpty();
   
-  public void serialize(OutputBuffer buf) throws IOException;
+  void serialize(OutputBuffer buf) throws IOException;
 }
 
 

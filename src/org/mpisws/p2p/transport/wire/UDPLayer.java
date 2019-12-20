@@ -36,34 +36,13 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.wire;
 
-import java.io.IOException;
+import org.mpisws.p2p.transport.MessageCallback;
+import org.mpisws.p2p.transport.MessageRequestHandle;
+import rice.Destructable;
+
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.DatagramChannel;
-import java.nio.channels.SelectionKey;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Queue;
-
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.MessageCallback;
-
-import rice.Continuation;
-import rice.Destructable;
-import rice.environment.Environment;
-import rice.environment.logging.Logger;
-import rice.environment.params.Parameters;
-import rice.p2p.commonapi.Cancellable;
-import rice.p2p.commonapi.rawserialization.RawMessage;
-import rice.p2p.util.rawserialization.SimpleInputBuffer;
-import rice.p2p.util.rawserialization.SimpleOutputBuffer;
-import rice.selector.SelectionKeyHandler;
 
 public interface UDPLayer extends Destructable {
 

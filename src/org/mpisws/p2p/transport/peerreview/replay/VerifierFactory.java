@@ -36,12 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.replay;
 
-import java.io.IOException;
-
 import org.mpisws.p2p.transport.peerreview.history.SecureHistory;
-
 import rice.p2p.commonapi.rawserialization.RawSerializable;
 
+import java.io.IOException;
+
 public interface VerifierFactory<Handle extends RawSerializable, Identifier extends RawSerializable> {
-  public Verifier<Handle> getVerifier(SecureHistory history, Handle localHandle, long firstEntryToReplay, long initialTime, Object extInfo) throws IOException;
+  Verifier<Handle> getVerifier(SecureHistory history, Handle localHandle, long firstEntryToReplay, long initialTime, Object extInfo) throws IOException;
 }

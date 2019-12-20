@@ -37,13 +37,17 @@ advised of the possibility of such damage.
 
 package rice.p2p.past.messaging;
 
-import java.io.IOException;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.past.PastContent;
+import rice.p2p.past.rawserialization.JavaSerializedPastContent;
+import rice.p2p.past.rawserialization.PastContentDeserializer;
+import rice.p2p.past.rawserialization.RawPastContent;
 
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.past.*;
-import rice.p2p.past.rawserialization.*;
+import java.io.IOException;
 
 /**
  * @(#) InsertMessage.java
@@ -144,7 +148,7 @@ public class InsertMessage extends ContinuationMessage {
   protected void serializeHelper(OutputBuffer buf) throws IOException {
     if (response != null && response instanceof Boolean) {
       super.serialize(buf, false); 
-      buf.writeBoolean(((Boolean)response).booleanValue());
+      buf.writeBoolean((Boolean) response);
     } else {
       super.serialize(buf, true);       
     }
@@ -158,19 +162,17 @@ public class InsertMessage extends ContinuationMessage {
   
   public static InsertMessage build(InputBuffer buf, Endpoint endpoint, PastContentDeserializer pcd) throws IOException {
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        return new InsertMessage(buf, endpoint, pcd);
-      default:
-        throw new IOException("Unknown Version: "+version);        
-    }
-  }  
+      if (version == 0) {
+          return new InsertMessage(buf, endpoint, pcd);
+      }
+      throw new IOException("Unknown Version: " + version);
+  }
   
   protected InsertMessage(InputBuffer buf, Endpoint endpoint, PastContentDeserializer pcd) throws IOException {
     super(buf, endpoint);
     
     if (serType == S_SUB) {
-      response = new Boolean(buf.readBoolean());
+      response = buf.readBoolean();
     }
         
     // this can be done lazilly to be more efficient, must cache remaining bits, endpoint, cd, and implement own InputBuffer

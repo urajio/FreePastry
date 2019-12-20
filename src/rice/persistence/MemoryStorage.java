@@ -45,13 +45,21 @@ package rice.persistence;
  * 
  * @version $Id$
  */
-import java.io.*;
-import java.util.*;
-import java.util.zip.*;
 
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.util.*;
+import rice.Continuation;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.commonapi.IdRange;
+import rice.p2p.commonapi.IdSet;
+import rice.p2p.util.ImmutableSortedMap;
+import rice.p2p.util.RedBlackMap;
+import rice.p2p.util.ReverseTreeMap;
+import rice.p2p.util.XMLObjectOutputStream;
+
+import java.io.*;
+import java.util.HashMap;
+import java.util.SortedMap;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * This class is an implementation of Storage which provides
@@ -115,7 +123,7 @@ public class MemoryStorage implements Storage {
    */
   public void rename(Id oldId, Id newId, Continuation c) {
     if (! idSet.isMemberId(oldId)) {
-      c.receiveResult(new Boolean(false));
+      c.receiveResult(Boolean.FALSE);
       return;
     }
     
@@ -128,7 +136,7 @@ public class MemoryStorage implements Storage {
     metadata.put(newId, metadata.get(oldId));
     metadata.remove(oldId);
     
-    c.receiveResult(new Boolean(true));
+    c.receiveResult(Boolean.TRUE);
   }
     
   /**
@@ -147,7 +155,7 @@ public class MemoryStorage implements Storage {
    */
   public void store(Id id, Serializable metadata, Serializable obj, Continuation c) {
     if (id == null || obj == null) {
-      c.receiveResult(new Boolean(false));
+      c.receiveResult(Boolean.FALSE);
       return;
     }
     
@@ -156,7 +164,7 @@ public class MemoryStorage implements Storage {
     this.storage.put(id, obj);
     this.metadata.put(id, metadata);
     idSet.addId(id);
-    c.receiveResult(new Boolean(true));
+    c.receiveResult(Boolean.TRUE);
   }
 
   /**
@@ -179,9 +187,9 @@ public class MemoryStorage implements Storage {
 
     if (stored != null) {
       currentSize -= getSize(stored);
-      c.receiveResult(new Boolean(true));
+      c.receiveResult(Boolean.TRUE);
     } else {
-      c.receiveResult(new Boolean(false));
+      c.receiveResult(Boolean.FALSE);
     }
   }
 
@@ -220,7 +228,7 @@ public class MemoryStorage implements Storage {
     if (exists(id)) 
       this.metadata.put(id, metadata);
 
-    command.receiveResult(new Boolean(exists(id)));
+    command.receiveResult(exists(id));
   }
 
   /**

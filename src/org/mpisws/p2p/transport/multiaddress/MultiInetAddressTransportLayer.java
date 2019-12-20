@@ -36,10 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.multiaddress;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import org.mpisws.p2p.transport.TransportLayer;
+
+import java.nio.ByteBuffer;
 
 /**
  * This transport layer that can allow a node behind a NAT to talk to nodes outside or inside the firewall.
@@ -51,5 +50,5 @@ import org.mpisws.p2p.transport.TransportLayer;
  *
  */
 public interface MultiInetAddressTransportLayer extends TransportLayer<MultiInetSocketAddress, ByteBuffer> {
-  public AddressStrategy getAddressStrategy();
+  AddressStrategy getAddressStrategy();
 }

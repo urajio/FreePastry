@@ -45,7 +45,7 @@ public interface GenericSimulatorListener<Identifier, MessageType> {
    * @param to the destination
    * @param delay when the message will be delivered (in millis)
    */
-  public void messageSent(MessageType m, Identifier from, Identifier to, int delay);
+  void messageSent(MessageType m, Identifier from, Identifier to, int delay);
   
   /**
    * Called for every message received over the network.
@@ -54,6 +54,6 @@ public interface GenericSimulatorListener<Identifier, MessageType> {
    * @param from the source.
    * @param to the destination
    */
-  public void messageReceived(MessageType m, Identifier from, Identifier to);
+  void messageReceived(MessageType m, Identifier from, Identifier to);
 
 }

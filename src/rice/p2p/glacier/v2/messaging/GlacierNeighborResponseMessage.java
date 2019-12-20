@@ -36,11 +36,13 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.glacier.v2.messaging;
 
-import java.io.IOException;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
+import java.io.IOException;
 
 public class GlacierNeighborResponseMessage extends GlacierMessage {
   public static final short TYPE = 4;
@@ -86,26 +88,24 @@ public class GlacierNeighborResponseMessage extends GlacierMessage {
     buf.writeByte((byte)0); // version    
     super.serialize(buf);
     buf.writeInt(lastSeen.length);
-    for (int i = 0; i < lastSeen.length; i++) {
-      buf.writeLong(lastSeen[i]); 
+    for (long l : lastSeen) {
+      buf.writeLong(l);
     }
     
     buf.writeInt(neighbors.length);
-    for (int i = 0; i < neighbors.length; i++) {
-      buf.writeShort(neighbors[i].getType());
-      neighbors[i].serialize(buf); 
+    for (Id neighbor : neighbors) {
+      buf.writeShort(neighbor.getType());
+      neighbor.serialize(buf);
     }
   }
   
   
   public static GlacierNeighborResponseMessage build(InputBuffer buf, Endpoint endpoint) throws IOException {
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        return new GlacierNeighborResponseMessage(buf, endpoint);
-      default:
-        throw new IOException("Unknown Version: "+version);
-    }
+      if (version == 0) {
+          return new GlacierNeighborResponseMessage(buf, endpoint);
+      }
+      throw new IOException("Unknown Version: " + version);
   }
     
   private GlacierNeighborResponseMessage(InputBuffer buf, Endpoint endpoint) throws IOException {

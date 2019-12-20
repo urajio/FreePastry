@@ -43,5 +43,5 @@ package org.mpisws.p2p.transport.identity;
  * @param <UpperIdentifier>
  */
 public interface SerializerListener<UpperIdentifier> {
-  public void nodeHandleFound(UpperIdentifier handle);
+  void nodeHandleFound(UpperIdentifier handle);
 }

@@ -39,36 +39,7 @@ advised of the possibility of such damage.
  */
 package rice.testing.routeconsistent;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.nio.channels.DatagramChannel;
-import java.nio.channels.ServerSocketChannel;
-import java.security.KeyStore;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.Security;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Random;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.mpisws.p2p.pki.x509.X509Serializer;
 import org.mpisws.p2p.pki.x509.X509SerializerImpl;
 import org.mpisws.p2p.transport.P2PSocket;
 import org.mpisws.p2p.transport.TransportLayer;
@@ -81,61 +52,50 @@ import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
 import org.mpisws.p2p.transport.peerreview.IdentifierExtractor;
 import org.mpisws.p2p.transport.peerreview.PeerReview;
 import org.mpisws.p2p.transport.peerreview.PeerReviewImpl;
-import org.mpisws.p2p.transport.peerreview.commitment.AuthenticatorSerializer;
-import org.mpisws.p2p.transport.peerreview.history.HashProvider;
-import org.mpisws.p2p.transport.peerreview.history.SecureHistory;
-import org.mpisws.p2p.transport.peerreview.history.SecureHistoryFactory;
-import org.mpisws.p2p.transport.peerreview.history.SecureHistoryFactoryImpl;
 import org.mpisws.p2p.transport.peerreview.history.hasher.SHA1HashProvider;
-import org.mpisws.p2p.transport.peerreview.history.stub.NullHashProvider;
 import org.mpisws.p2p.transport.peerreview.identity.IdentityTransport;
 import org.mpisws.p2p.transport.peerreview.identity.IdentityTransportLayerImpl;
-import org.mpisws.p2p.transport.peerreview.infostore.EvidenceSerializer;
 import org.mpisws.p2p.transport.peerreview.infostore.IdStrTranslator;
-import org.mpisws.p2p.transport.peerreview.replay.EventCallback;
-import org.mpisws.p2p.transport.peerreview.replay.playback.ReplayLayer;
-import org.mpisws.p2p.transport.peerreview.replay.playback.ReplaySM;
 import org.mpisws.p2p.transport.peerreview.replay.record.RecordLayer;
-import org.mpisws.p2p.transport.priority.PriorityTransportLayer;
 import org.mpisws.p2p.transport.proximity.ProximityProvider;
 import org.mpisws.p2p.transport.rendezvous.IncomingPilotListener;
 import org.mpisws.p2p.transport.rendezvous.OutgoingPilotListener;
 import org.mpisws.p2p.transport.rendezvous.PilotManager;
-import org.mpisws.p2p.transport.rendezvous.RendezvousTransportLayer;
-import org.mpisws.p2p.transport.simpleidentity.InetSocketAddressSerializer;
 import org.mpisws.p2p.transport.sourceroute.SourceRoute;
 import org.mpisws.p2p.transport.util.Serializer;
-
 import rice.Destructable;
 import rice.environment.Environment;
-import rice.environment.logging.LogManager;
 import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
-import rice.environment.random.RandomSource;
-import rice.environment.random.simple.SimpleRandomSource;
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.p2p.commonapi.rawserialization.RawMessage;
 import rice.p2p.splitstream.ChannelId;
 import rice.p2p.splitstream.testing.MySplitStreamClient;
-import rice.pastry.Id;
-import rice.pastry.NetworkListener;
-import rice.pastry.NodeHandle;
-import rice.pastry.NodeHandleFactory;
-import rice.pastry.NodeIdFactory;
-import rice.pastry.PastryNode;
+import rice.pastry.*;
 import rice.pastry.leafset.LeafSet;
 import rice.pastry.peerreview.CallbackFactory;
 import rice.pastry.peerreview.PeerReviewCallbackImpl;
 import rice.pastry.routing.RouteMessage;
-import rice.pastry.socket.SocketNodeHandle;
-import rice.pastry.socket.SocketNodeHandleFactory;
 import rice.pastry.socket.SocketPastryNodeFactory;
 import rice.pastry.socket.TransportLayerNodeHandle;
 import rice.pastry.socket.nat.rendezvous.RendezvousSocketNodeHandle;
 import rice.pastry.socket.nat.rendezvous.RendezvousSocketPastryNodeFactory;
-import rice.pastry.standard.RandomNodeIdFactory;
 import rice.selector.LoopObserver;
+
+import java.io.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.nio.channels.DatagramChannel;
+import java.nio.channels.ServerSocketChannel;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.Security;
+import java.security.cert.X509Certificate;
+import java.util.*;
 
 /**
  * @author Jeff Hoye
@@ -248,8 +208,7 @@ public class PRConsistencyPLTest implements Observer, LoopObserver, MyEvents {
 
   public void update(Observable observable, Object value) {
     if (value instanceof Boolean) {
-      Boolean b = (Boolean)value;    
-      boolean rdy = b.booleanValue();
+      boolean rdy = (Boolean)value;
       
       Environment env = localNode.getEnvironment();
       Parameters params = env.getParameters();
@@ -370,12 +329,12 @@ public class PRConsistencyPLTest implements Observer, LoopObserver, MyEvents {
     
     int killRingTime = 3*60; // minutes
     if (args.length > 0) {
-      killRingTime = Integer.valueOf(args[0]).intValue(); 
+      killRingTime = Integer.valueOf(args[0]);
     }    
     
     int artificialChurnTime = 0; // minutes
     if (args.length > 1) {
-      artificialChurnTime = Integer.valueOf(args[1]).intValue(); 
+      artificialChurnTime = Integer.valueOf(args[1]);
     }    
     
     if (args.length > 2) {
@@ -471,7 +430,7 @@ public class PRConsistencyPLTest implements Observer, LoopObserver, MyEvents {
   static boolean restartNode;
   public static void runNodes(
       boolean isBootNode, int bindport, InetSocketAddress bootaddress, 
-      long bootTime, int artificialChurnTime, int killRingTime) throws Exception {
+      long bootTime, int artificialChurnTime, int killRingTime) {
     restartNode = true;
     while(restartNode) { // to allow churn
       Environment env = RecordLayer.generateEnvironment();
@@ -553,11 +512,11 @@ public class PRConsistencyPLTest implements Observer, LoopObserver, MyEvents {
                   }                  
                 };
                 final IdentityTransport<TransportLayerNodeHandle<MultiInetSocketAddress>, Id> identityTL =
-                  new IdentityTransportLayerImpl<TransportLayerNodeHandle<MultiInetSocketAddress>, Id>(
-                      idSerializer, new X509SerializerImpl(), id, 
-                      (X509Certificate)store.getCertificateChain("private")[0], (PrivateKey)store.getKey("private", "".toCharArray()), 
-                      upper.getTransportLayer(), 
-                      new SHA1HashProvider(), pn.getEnvironment());
+                        new IdentityTransportLayerImpl<>(
+                                idSerializer, new X509SerializerImpl(), id,
+                                (X509Certificate) store.getCertificateChain("private")[0], (PrivateKey) store.getKey("private", "".toCharArray()),
+                                upper.getTransportLayer(),
+                                new SHA1HashProvider(), pn.getEnvironment());
                 
                 
                 Serializer<TransportLayerNodeHandle<MultiInetSocketAddress>> handleSerializer = 
@@ -569,28 +528,27 @@ public class PRConsistencyPLTest implements Observer, LoopObserver, MyEvents {
   
                     public Id extractIdentifier(
                         TransportLayerNodeHandle<MultiInetSocketAddress> h) {
-                      NodeHandle handle = (NodeHandle)h;
-                      return handle.getNodeId();
+                      return ((NodeHandle)h).getNodeId();
                     }
                   
                 };
                 
-                final PeerReview<TransportLayerNodeHandle<MultiInetSocketAddress>, Id> pr = 
-                  new PeerReviewImpl<TransportLayerNodeHandle<MultiInetSocketAddress>, Id>(
-                      identityTL,pn.getEnvironment(), handleSerializer,
-                      idSerializer,      
-                      identifierExtractor,
-                      new IdStrTranslator<Id>() {
-  
-                        public Id readIdentifierFromString(String s) {
-                          return Id.build(s);
-                        }
-  
-                        public String toString(Id id) {
-                          return id.toStringFull();                        
-                        }                      
-                      }
-                  );
+                final PeerReview<TransportLayerNodeHandle<MultiInetSocketAddress>, Id> pr =
+                        new PeerReviewImpl<>(
+                                identityTL, pn.getEnvironment(), handleSerializer,
+                                idSerializer,
+                                identifierExtractor,
+                                new IdStrTranslator<Id>() {
+
+                                  public Id readIdentifierFromString(String s) {
+                                    return Id.build(s);
+                                  }
+
+                                  public String toString(Id id) {
+                                    return id.toStringFull();
+                                  }
+                                }
+                        );
                 pn.getVars().put(PEER_REVIEW, pr);
                  
                 CallbackFactory factory = new CallbackFactory(pn.getEnvironment());
@@ -811,10 +769,8 @@ public class PRConsistencyPLTest implements Observer, LoopObserver, MyEvents {
       long bootTime, int artificialChurnTime, int killRingTime /*, final ArrayList<RecordLayer<InetSocketAddress>> historyHolder*/, final Id id) throws Exception {
     { // old while loop
 //      final Environment env = RecordLayer.generateEnvironment(); //new Environment();
-      
-      final Environment environment = env;
-            
-      Parameters params = environment.getParameters(); 
+
+      Parameters params = env.getParameters();
       
       if (isBootNode) {
         params.setBoolean("rice_socket_seed", true);
@@ -902,7 +858,7 @@ public class PRConsistencyPLTest implements Observer, LoopObserver, MyEvents {
 //      InetSocketAddress[] bootAddressCandidates = (InetSocketAddress[])bootAddresses.toArray(new InetSocketAddress[0]);
       // This will return null if we there is no node at that location
 //      NodeHandle bootHandle = ((SocketPastryNodeFactory)factory).getNodeHandle(bootAddressCandidates, 30000);
-      final Collection<InetSocketAddress> bootAddrCandidates = new ArrayList<InetSocketAddress>();
+      final Collection<InetSocketAddress> bootAddrCandidates = new ArrayList<>();
       bootAddrCandidates.add(bootaddress);
 //      synchronized(bootAddresses) {
 //        int ctr = 10;
@@ -919,7 +875,7 @@ public class PRConsistencyPLTest implements Observer, LoopObserver, MyEvents {
 //      final PastryNode node = factory.newNode();
       
       // need this mechanism to make the construction of the TL atomic, looking for better solution...
-      final ArrayList<PastryNode> holder = new ArrayList<PastryNode>();
+      final ArrayList<PastryNode> holder = new ArrayList<>();
       env.getSelectorManager().invoke(new Runnable(){    
         public void run() {
           synchronized(holder) {
@@ -963,9 +919,9 @@ public class PRConsistencyPLTest implements Observer, LoopObserver, MyEvents {
 //      }
 
       node.addLivenessListener(new LivenessListener<NodeHandle>() {   
-        HashMap<NodeHandle, Integer> lastVal = new HashMap<NodeHandle, Integer>();
-        HashMap<NodeHandle, Exception> lastStack = new HashMap<NodeHandle, Exception>();
-        HashMap<MultiInetSocketAddress, NodeHandle> up = new HashMap<MultiInetSocketAddress, NodeHandle>();
+        HashMap<NodeHandle, Integer> lastVal = new HashMap<>();
+        HashMap<NodeHandle, Exception> lastStack = new HashMap<>();
+        HashMap<MultiInetSocketAddress, NodeHandle> up = new HashMap<>();
 
         Logger logger = node.getEnvironment().getLogManager().getLogger(LivenessListener.class, null);
         public void livenessChanged(NodeHandle i2, int val, Map<String, Object> options) {
@@ -1007,7 +963,7 @@ public class PRConsistencyPLTest implements Observer, LoopObserver, MyEvents {
       
       final String nodeString = node.toString();
       Thread shutdownHook = new Thread() {
-        public void run() { System.out.println("SHUTDOWN "+environment.getTimeSource().currentTimeMillis()+" "+nodeString); }
+        public void run() { System.out.println("SHUTDOWN "+ env.getTimeSource().currentTimeMillis()+" "+nodeString); }
       };
       
       Runtime.getRuntime().addShutdownHook(shutdownHook);
@@ -1044,7 +1000,7 @@ public class PRConsistencyPLTest implements Observer, LoopObserver, MyEvents {
         }
       }
       
-      final ArrayList<MySplitStreamClient> appHolder = new ArrayList<MySplitStreamClient>();
+      final ArrayList<MySplitStreamClient> appHolder = new ArrayList<>();
       MySplitStreamClient app = null;
       if (useSplitStream) {
         app = new MySplitStreamClient(node, INSTANCE);      
@@ -1065,7 +1021,7 @@ public class PRConsistencyPLTest implements Observer, LoopObserver, MyEvents {
       // TODO: Implement
 
       final String dirName = "peerreview"; //-"+bindport;
-      environment.getSelectorManager().invoke(new Runnable() {
+      env.getSelectorManager().invoke(new Runnable() {
         public void run() {
           System.out.println("Booting "+bootAddrCandidates);
           PeerReview pr = (PeerReview)node.getVars().get(PEER_REVIEW);
@@ -1197,7 +1153,7 @@ public class PRConsistencyPLTest implements Observer, LoopObserver, MyEvents {
   }
   
   static class MyPilotListener implements OutgoingPilotListener<RendezvousSocketNodeHandle>, IncomingPilotListener<RendezvousSocketNodeHandle> {
-    Map<InetAddress, List<RendezvousSocketNodeHandle>> record = new HashMap<InetAddress, List<RendezvousSocketNodeHandle>>();
+    Map<InetAddress, List<RendezvousSocketNodeHandle>> record = new HashMap<>();
     Logger logger;
     int numPilots = 0;
     
@@ -1210,7 +1166,7 @@ public class PRConsistencyPLTest implements Observer, LoopObserver, MyEvents {
       InetAddress ia = isa.getAddress();
       List<RendezvousSocketNodeHandle> list = record.get(ia);
       if (list == null) {
-        list = new ArrayList<RendezvousSocketNodeHandle>();
+        list = new ArrayList<>();
         record.put(ia, list);
       }
       int numHandles = 0;

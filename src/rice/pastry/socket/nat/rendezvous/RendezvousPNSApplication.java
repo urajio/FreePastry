@@ -36,14 +36,7 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.socket.nat.rendezvous;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.mpisws.p2p.transport.rendezvous.ContactDirectStrategy;
-
-
 import rice.Continuation;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Cancellable;
@@ -52,6 +45,11 @@ import rice.pastry.PastryNode;
 import rice.pastry.leafset.LeafSet;
 import rice.pastry.pns.PNSApplication;
 import rice.pastry.routing.RouteSet;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Does not try to connect to NATted nodes during PNS.
@@ -111,8 +109,8 @@ public class RendezvousPNSApplication extends PNSApplication {
    */
   @Override
   protected List<NodeHandle> getNearHandlesHelper(List<NodeHandle> handles) {
-    ArrayList<NodeHandle> contactDirect = new ArrayList<NodeHandle>();
-    ArrayList<NodeHandle> notContactDirect = new ArrayList<NodeHandle>();
+    ArrayList<NodeHandle> contactDirect = new ArrayList<>();
+    ArrayList<NodeHandle> notContactDirect = new ArrayList<>();
     
     for (NodeHandle foo : handles) {
       RendezvousSocketNodeHandle rsnh = (RendezvousSocketNodeHandle)foo;
@@ -133,7 +131,7 @@ public class RendezvousPNSApplication extends PNSApplication {
   @Override
   public Cancellable getNearHandles(Collection<NodeHandle> bootHandles,
       Continuation<Collection<NodeHandle>, Exception> deliverResultToMe) {
-    ArrayList<NodeHandle> newBootHandles = new ArrayList<NodeHandle>();
+    ArrayList<NodeHandle> newBootHandles = new ArrayList<>();
     if (logger.level <= Logger.INFO) logger.log("Booting off of "+bootHandles.size()+" nodes. "+bootHandles);
     for (NodeHandle handle : bootHandles) {
       if (useHandle(handle)) {

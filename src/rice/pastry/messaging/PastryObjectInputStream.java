@@ -42,11 +42,12 @@ advised of the possibility of such damage.
  */
 package rice.pastry.messaging;
 
+import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-
-import rice.pastry.*;
 
 /**
  * coalesces NodeHandles on the fly during java deserialization
@@ -68,7 +69,7 @@ public class PastryObjectInputStream extends ObjectInputStream {
     enableResolveObject(true);
   }
 
-  protected Object resolveObject(Object input) throws IOException {
+  protected Object resolveObject(Object input) {
     if (input instanceof NodeHandle) {
 //      System.out.println("POIS.resolveObject("+input+"@"+System.identityHashCode(input)+"):"+node);
       if (node != null) {

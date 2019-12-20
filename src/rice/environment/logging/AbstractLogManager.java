@@ -40,16 +40,17 @@ advised of the possibility of such damage.
  */
 package rice.environment.logging;
 
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import javax.swing.text.DateFormatter;
-
-import rice.environment.logging.simple.SimpleLogger;
 import rice.environment.params.ParameterChangeListener;
 import rice.environment.params.Parameters;
 import rice.environment.time.TimeSource;
+
+import javax.swing.text.DateFormatter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.Hashtable;
 
 /**
  * @author jstewart
@@ -121,23 +122,22 @@ public abstract class AbstractLogManager implements LogManager {
       this.packageOnly = params.getBoolean("logging_packageOnly");
     }
 
-    this.loggers = new Hashtable<String, Logger>();
+    this.loggers = new Hashtable<>();
     this.globalLogLevel = parseVal("loglevel");
 
     params.addChangeListener(new ParameterChangeListener() {
       public void parameterChange(String paramName, String newVal) {
         if (paramName.equals("logging_enable")) {
-            enabled = Boolean.valueOf(newVal).booleanValue();
+            enabled = Boolean.valueOf(newVal);
         } else if (paramName.equals("loglevel")) {            
             synchronized(this) {
               // iterate over all loggers, if they are default loggers,
               // set the level
               globalLogLevel = parseVal(paramName);
-              Iterator<Logger> i = loggers.values().iterator();
-              while(i.hasNext()) {
-                HeirarchyLogger hl = (HeirarchyLogger)i.next();
+              for (Logger logger : loggers.values()) {
+                HeirarchyLogger hl = (HeirarchyLogger) logger;
                 if (hl.useDefault) {
-                  hl.level = globalLogLevel; 
+                  hl.level = globalLogLevel;
                 }
               }
             } // synchronized
@@ -147,12 +147,10 @@ public abstract class AbstractLogManager implements LogManager {
               // parameter "removed" 
               // a) set the logger to use defaultlevel, 
               // b) set the level 
-              Iterator<String> i = loggers.keySet().iterator();
-              while(i.hasNext()) {
-                String name = (String)i.next();
+              for (String name : loggers.keySet()) {
                 if (name.startsWith(loggerName)) {
 //              if (loggers.containsKey(loggerName)) { // perhaps we haven't even created such a logger yet
-                  HeirarchyLogger hl = (HeirarchyLogger)loggers.get(name);
+                  HeirarchyLogger hl = (HeirarchyLogger) loggers.get(name);
                   hl.useDefault = true;
                   hl.level = globalLogLevel;
                 }
@@ -160,15 +158,13 @@ public abstract class AbstractLogManager implements LogManager {
             } else {
               // a) set the logger to not use the defaultlevel, 
               // b) set the level 
-              Iterator<String> i = loggers.keySet().iterator();
-              while(i.hasNext()) {
-                String name = (String)i.next();
+              for (String name : loggers.keySet()) {
                 if (name.startsWith(loggerName)) {
 //              if (loggers.containsKey(loggerName)) { // perhaps we haven't even created such a logger yet
-                  HeirarchyLogger hl = (HeirarchyLogger)loggers.get(name);
+                  HeirarchyLogger hl = (HeirarchyLogger) loggers.get(name);
                   hl.useDefault = false;
                   hl.level = parseVal(paramName);
-                } 
+                }
               }
           }
         }
@@ -237,7 +233,7 @@ public abstract class AbstractLogManager implements LogManager {
     int level = globalLogLevel;
     boolean useDefault = true;    
     
-    String baseStr;
+    StringBuilder baseStr;
     
     // Ex: if clazz.getName() == rice.pastry.socket.PingManager, try:
     // 1) rice.pastry.socket.PingManager
@@ -254,9 +250,9 @@ public abstract class AbstractLogManager implements LogManager {
     for (int numParts = lastPart; numParts >= 0; numParts--) {     
       
       // build baseStr which is the prefix of the clazz up to numParts
-      baseStr = parts[0];
+      baseStr = new StringBuilder(parts[0]);
       for (int curPart = 1; curPart < numParts; curPart++) {
-        baseStr+="."+parts[curPart];   
+        baseStr.append(".").append(parts[curPart]);
       }
       
       
@@ -306,13 +302,13 @@ public abstract class AbstractLogManager implements LogManager {
   }
   
   private static class NullOutputStream extends OutputStream {
-    public void write(int arg0) throws IOException {
+    public void write(int arg0) {
       // do nothing
     }
-    public void write(byte[] buf) throws IOException {
+    public void write(byte[] buf) {
       // do nothing
     }
-    public void write(byte[] buf, int a, int b) throws IOException {
+    public void write(byte[] buf, int a, int b) {
       // do nothing
     }
     public void close() {

@@ -36,30 +36,18 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.table;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
-import org.mpisws.p2p.transport.util.BufferReader;
-import org.mpisws.p2p.transport.util.BufferWriter;
-import org.mpisws.p2p.transport.util.DefaultErrorHandler;
-import org.mpisws.p2p.transport.util.Serializer;
-import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
-
+import org.mpisws.p2p.transport.*;
+import org.mpisws.p2p.transport.util.*;
 import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Cancellable;
 import rice.p2p.util.rawserialization.SimpleInputBuffer;
 import rice.p2p.util.rawserialization.SimpleOutputBuffer;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 /**
  * @author Jeff Hoye
@@ -102,7 +90,7 @@ public class TableTransprotLayerImpl<Identifier, Key, Value> implements
     this.tl = tl;
     
     this.logger = env.getLogManager().getLogger(getClass(), null);
-    this.errorHandler = new DefaultErrorHandler<Identifier>(this.logger);
+    this.errorHandler = new DefaultErrorHandler<>(this.logger);
     
   }
   
@@ -133,49 +121,50 @@ public class TableTransprotLayerImpl<Identifier, Key, Value> implements
           
           // here, we are allocating the space for the size value
           sob2.writeInt(sob.getWritten()); 
-          sob2.write(sob.getBytes());          
-          
-          new BufferWriter<Identifier>(sob2.getByteBuffer(), sock, new Continuation<P2PSocket<Identifier>, Exception>() {
-  
-            public void receiveException(Exception exception) {
-              c.receiveException(exception);
-            }
-  
-            public void receiveResult(P2PSocket<Identifier> result) {
-              new BufferReader<Identifier>(result,new Continuation<ByteBuffer, Exception>() {
-              
-                public void receiveResult(ByteBuffer result) {
-                  try {
-                    SimpleInputBuffer sib = new SimpleInputBuffer(result);
-                    byte response = sib.readByte();
-                    switch(response) {
-                    case RESPONSE_SUCCESS:
-                      Value value = valueSerializer.deserialize(sib);
-                      
-                      if (logger.level <= Logger.FINER) logger.log("requestValue("+source+","+principal+") got value "+value);
+          sob2.write(sob.getBytes());
 
-                      knownValues.put(principal, value);
-                      c.receiveResult(value);
-                      break;
-                    case RESPONSE_FAILED:
-                      c.receiveException(new UnknownValueException(source, principal));
-                      break;
-                    default:
-                      c.receiveException(new IllegalStateException("Unknown response:"+response));    
-                      break;
-                    }
-                  } catch (Exception ioe) {
-                    c.receiveException(ioe);
-                  }
-                }
-              
+            new BufferWriter<>(sob2.getByteBuffer(), sock, new Continuation<P2PSocket<Identifier>, Exception>() {
+
                 public void receiveException(Exception exception) {
-                  c.receiveException(exception);
+                    c.receiveException(exception);
                 }
-              
-              });
-            }        
-          },false);
+
+                public void receiveResult(P2PSocket<Identifier> result) {
+                    new BufferReader<>(result, new Continuation<ByteBuffer, Exception>() {
+
+                        public void receiveResult(ByteBuffer result) {
+                            try {
+                                SimpleInputBuffer sib = new SimpleInputBuffer(result);
+                                byte response = sib.readByte();
+                                switch (response) {
+                                    case RESPONSE_SUCCESS:
+                                        Value value = valueSerializer.deserialize(sib);
+
+                                        if (logger.level <= Logger.FINER)
+                                            logger.log("requestValue(" + source + "," + principal + ") got value " + value);
+
+                                        knownValues.put(principal, value);
+                                        c.receiveResult(value);
+                                        break;
+                                    case RESPONSE_FAILED:
+                                        c.receiveException(new UnknownValueException(source, principal));
+                                        break;
+                                    default:
+                                        c.receiveException(new IllegalStateException("Unknown response:" + response));
+                                        break;
+                                }
+                            } catch (Exception ioe) {
+                                c.receiveException(ioe);
+                            }
+                        }
+
+                        public void receiveException(Exception exception) {
+                            c.receiveException(exception);
+                        }
+
+                    });
+                }
+            }, false);
         } catch (IOException ioe) {
           c.receiveException(ioe);
         }
@@ -191,7 +180,7 @@ public class TableTransprotLayerImpl<Identifier, Key, Value> implements
   
   public SocketRequestHandle<Identifier> openSocket(Identifier i,
       final SocketCallback<Identifier> deliverSocketToMe, Map<String, Object> options) {
-    final SocketRequestHandleImpl<Identifier> ret = new SocketRequestHandleImpl<Identifier>(i,options,logger);
+    final SocketRequestHandleImpl<Identifier> ret = new SocketRequestHandleImpl<>(i, options, logger);
     
     ret.setSubCancellable(tl.openSocket(i, new SocketCallback<Identifier>() {
 
@@ -205,84 +194,84 @@ public class TableTransprotLayerImpl<Identifier, Key, Value> implements
         ByteBuffer writeMe = ByteBuffer.allocate(1);
         writeMe.put(PASSTHROUGH);
         writeMe.clear();
-        new BufferWriter<Identifier>(writeMe, sock, new Continuation<P2PSocket<Identifier>, Exception>() {
+          new BufferWriter<>(writeMe, sock, new Continuation<P2PSocket<Identifier>, Exception>() {
 
-          public void receiveException(Exception exception) {
-            deliverSocketToMe.receiveException(ret, exception);
-          }
+              public void receiveException(Exception exception) {
+                  deliverSocketToMe.receiveException(ret, exception);
+              }
 
-          public void receiveResult(P2PSocket<Identifier> result) {
-            deliverSocketToMe.receiveResult(ret, result);
-          }
-        
-        }, false);
+              public void receiveResult(P2PSocket<Identifier> result) {
+                  deliverSocketToMe.receiveResult(ret, result);
+              }
+
+          }, false);
       }
       
     }, options));
     return ret;
   }
   
-  public void incomingSocket(final P2PSocket<Identifier> sock) throws IOException {
+  public void incomingSocket(final P2PSocket<Identifier> sock) {
     if (logger.level <= Logger.FINEST) logger.log("incomingSocket() from "+sock);
-    new BufferReader<Identifier>(sock,new Continuation<ByteBuffer, Exception>() {    
-      public void receiveResult(ByteBuffer result) {
-        byte type = result.get();
-        if (logger.level <= Logger.FINEST) logger.log("incomingSocket() from "+sock+" "+type);
-        
-        switch (type) {
-        case PASSTHROUGH:
-          try {
-            callback.incomingSocket(sock);
-          } catch (IOException ioe) {
-            errorHandler.receivedException(sock.getIdentifier(), ioe);
+      new BufferReader<>(sock, new Continuation<ByteBuffer, Exception>() {
+          public void receiveResult(ByteBuffer result) {
+              byte type = result.get();
+              if (logger.level <= Logger.FINEST) logger.log("incomingSocket() from " + sock + " " + type);
+
+              switch (type) {
+                  case PASSTHROUGH:
+                      try {
+                          callback.incomingSocket(sock);
+                      } catch (IOException ioe) {
+                          errorHandler.receivedException(sock.getIdentifier(), ioe);
+                      }
+                      return;
+                  case REQUEST:
+                      handleValueRequest(sock);
+                      return;
+                  default:
+                      errorHandler.receivedUnexpectedData(sock.getIdentifier(), new byte[]{type}, 0, sock.getOptions());
+                      sock.close();
+              }
           }
-          return;
-        case REQUEST:
-          handleValueRequest(sock);
-          return;
-        default:
-          errorHandler.receivedUnexpectedData(sock.getIdentifier(), new byte[] {type}, 0, sock.getOptions());
-          sock.close();
-        }
-      }
-    
-      public void receiveException(Exception exception) {
-        errorHandler.receivedException(sock.getIdentifier(), exception);
-      }    
-    },1);    
+
+          public void receiveException(Exception exception) {
+              errorHandler.receivedException(sock.getIdentifier(), exception);
+          }
+      }, 1);
   }
 
   public void handleValueRequest(final P2PSocket<Identifier> sock) {
     if (logger.level <= Logger.FINER) logger.log("handleValueRequest() from "+sock);
-    new BufferReader<Identifier>(sock,new Continuation<ByteBuffer, Exception>() {
-    
-      public void receiveResult(ByteBuffer result) {
-        try {
-          SimpleInputBuffer sib = new SimpleInputBuffer(result);
-          Key principal = keySerializer.deserialize(sib);
-          ByteBuffer writeMe;
-          if (knownValues.containsKey(principal)) {
-            SimpleOutputBuffer sob = new SimpleOutputBuffer();
-            sob.writeByte(RESPONSE_SUCCESS);
-            valueSerializer.serialize(knownValues.get(principal), sob);
-            writeMe = sob.getByteBuffer();
-          } else {
-            writeMe = ByteBuffer.allocate(1);
-            writeMe.put(RESPONSE_FAILED);
-            writeMe.clear();
+      new BufferReader<>(sock, new Continuation<ByteBuffer, Exception>() {
+
+          public void receiveResult(ByteBuffer result) {
+              try {
+                  SimpleInputBuffer sib = new SimpleInputBuffer(result);
+                  Key principal = keySerializer.deserialize(sib);
+                  ByteBuffer writeMe;
+                  if (knownValues.containsKey(principal)) {
+                      SimpleOutputBuffer sob = new SimpleOutputBuffer();
+                      sob.writeByte(RESPONSE_SUCCESS);
+                      valueSerializer.serialize(knownValues.get(principal), sob);
+                      writeMe = sob.getByteBuffer();
+                  } else {
+                      writeMe = ByteBuffer.allocate(1);
+                      writeMe.put(RESPONSE_FAILED);
+                      writeMe.clear();
+                  }
+                  new BufferWriter<>(writeMe, sock, null);
+              } catch (Exception ioe) {
+                  errorHandler.receivedException(sock.getIdentifier(), ioe);
+                  sock.close();
+              }
           }
-          new BufferWriter<Identifier>(writeMe,sock,null);
-        } catch (Exception ioe) {
-          errorHandler.receivedException(sock.getIdentifier(), ioe);
-          sock.close();
-        }
-      }
-    
-      public void receiveException(Exception exception) {
-        errorHandler.receivedException(sock.getIdentifier(), exception);
-      }
-    
-    });
+
+          public void receiveException(Exception exception) {
+              errorHandler.receivedException(sock.getIdentifier(), exception);
+          }
+
+      });
   }
   
   public boolean hasKey(Key i) {

@@ -39,21 +39,17 @@ advised of the possibility of such damage.
  */
 package org.mpisws.p2p.transport.sourceroute.manager.simple;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
 import org.mpisws.p2p.transport.liveness.LivenessProvider;
 import org.mpisws.p2p.transport.sourceroute.SourceRoute;
 import org.mpisws.p2p.transport.sourceroute.SourceRouteFactory;
 import org.mpisws.p2p.transport.sourceroute.manager.SourceRouteStrategy;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.util.TimerWeakHashMap;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * This is a simple implementation of the SourceRouteStrategy.  It caches 
@@ -89,7 +85,7 @@ public class SimpleSourceRouteStrategy<Identifier> implements SourceRouteStrateg
     this.strategy = strategy;
     this.environment = env;
     this.logger = environment.getLogManager().getLogger(SimpleSourceRouteStrategy.class, null);
-    routes = new TimerWeakHashMap<Identifier, SourceRoute>(environment.getSelectorManager(),300000);
+    routes = new TimerWeakHashMap<>(environment.getSelectorManager(), 300000);
   }
 
   /**
@@ -98,10 +94,10 @@ public class SimpleSourceRouteStrategy<Identifier> implements SourceRouteStrateg
    */
   public Collection<SourceRoute<Identifier>> getSourceRoutes(Identifier destination) {
     Collection<Identifier> nextHops = strategy.getNextHops(destination);
-    List<SourceRoute<Identifier>> ret = new ArrayList<SourceRoute<Identifier>>(nextHops.size());
+    List<SourceRoute<Identifier>> ret = new ArrayList<>(nextHops.size());
     for (Identifier intermediate : nextHops) {
       if (!intermediate.equals(destination)) {
-        List<Identifier> hopList = new ArrayList<Identifier>(3);
+        List<Identifier> hopList = new ArrayList<>(3);
         
         hopList.add(localAddress);
         hopList.add(intermediate);

@@ -39,22 +39,20 @@ advised of the possibility of such damage.
  */
 package org.mpisws.p2p.transport.direct;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.P2PSocket;
 import org.mpisws.p2p.transport.P2PSocketReceiver;
 import org.mpisws.p2p.transport.SocketCallback;
 import org.mpisws.p2p.transport.SocketRequestHandle;
 import org.mpisws.p2p.transport.exception.NodeIsFaultyException;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
+
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.nio.ByteBuffer;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
 
 public class DirectAppSocket<Identifier, MessageType> {
   public static final byte[] EOF = new byte[0];
@@ -121,7 +119,7 @@ public class DirectAppSocket<Identifier, MessageType> {
     /**
      * of byte[]
      */
-    LinkedList<byte[]> byteDeliveries = new LinkedList<byte[]>();
+    LinkedList<byte[]> byteDeliveries = new LinkedList<>();
     /**
      * The offset of the first delivery, in case the reader didn't have enough space to read everything available.
      */
@@ -141,7 +139,7 @@ public class DirectAppSocket<Identifier, MessageType> {
       return counterpart.localNodeHandle;
     }
   
-    public long read(ByteBuffer dsts) throws IOException {
+    public long read(ByteBuffer dsts) {
 //      ByteBuffer[] foo = new ByteBuffer[1];
 //      foo[0] = dsts;
 //      return read(foo, 0, 1);
@@ -165,13 +163,12 @@ public class DirectAppSocket<Identifier, MessageType> {
           
           // loop through all the dsts, and fill them with the current message if possible
 //          for (int dstCtr = offset; dstCtr < offset+length;dstCtr++) {
-            ByteBuffer curBuffer = dsts;
-            int lengthToPut = curBuffer.remaining();
+          int lengthToPut = dsts.remaining();
             if (lengthToPut > (msg.length-firstOffset)) {
               lengthToPut = msg.length-firstOffset;
             }
             
-            curBuffer.put(msg,firstOffset,lengthToPut);
+            dsts.put(msg,firstOffset,lengthToPut);
             firstOffset+=lengthToPut;
             lengthRead+=lengthToPut;
             
@@ -210,7 +207,7 @@ public class DirectAppSocket<Identifier, MessageType> {
       return lengthRead;
     }
 
-    public long write(ByteBuffer srcs) throws IOException {
+    public long write(ByteBuffer srcs) {
 //      ByteBuffer[] foo = new ByteBuffer[1];
 //      foo[0] = srcs;
 //      return write(foo, 0, 1);
@@ -414,11 +411,11 @@ public class DirectAppSocket<Identifier, MessageType> {
           simulator.enqueueDelivery(new ConnectorDelivery(),
               (int)Math.round(simulator.networkDelay(acceptor, connector))); 
         } else {
-          simulator.enqueueDelivery(new ConnectorExceptionDelivery<Identifier>(connectorReceiver,connectorHandle,new SocketTimeoutException()),
+          simulator.enqueueDelivery(new ConnectorExceptionDelivery<>(connectorReceiver, connectorHandle, new SocketTimeoutException()),
               (int)Math.round(simulator.networkDelay(acceptor, connector))); 
         }
       } else {
-        simulator.enqueueDelivery(new ConnectorExceptionDelivery<Identifier>(connectorReceiver,connectorHandle,new NodeIsFaultyException(acceptor)),0);
+        simulator.enqueueDelivery(new ConnectorExceptionDelivery<>(connectorReceiver, connectorHandle, new NodeIsFaultyException(acceptor)),0);
         // TODO: this should probably take into account a real delay, however, acceptor has already been removed from the simulator
 //            (int)Math.round(simulator.networkDelay(acceptor, connector))+
 //            (int)Math.round(simulator.networkDelay(connector, acceptor))); 

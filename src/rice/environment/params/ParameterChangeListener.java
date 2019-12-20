@@ -49,5 +49,5 @@ package rice.environment.params;
  *
  */
 public interface ParameterChangeListener {
-  public void parameterChange(String paramName, String newVal);
+  void parameterChange(String paramName, String newVal);
 }

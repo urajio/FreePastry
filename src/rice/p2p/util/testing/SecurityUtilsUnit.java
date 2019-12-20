@@ -36,18 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.util.testing;
 
-import rice.p2p.util.*;
-import java.io.*;
-import java.math.*;
+import rice.p2p.util.MathUtils;
+import rice.p2p.util.SecurityUtils;
 
-import java.security.*;
-import java.security.cert.*;
-import java.security.interfaces.*;
-import java.security.spec.*;
-import java.util.*;
-import java.util.zip.*;
-import javax.crypto.*;
-import javax.crypto.spec.*;
+import java.io.IOException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.Arrays;
 
 public class SecurityUtilsUnit {
 
@@ -61,7 +58,7 @@ public class SecurityUtilsUnit {
    * @exception ClassNotFoundException If the encryption does not happen
    *      properly
    */
-  public static void main(String[] argv) throws NoSuchAlgorithmException, IOException, ClassNotFoundException {
+  public static void main(String[] argv) throws IOException, ClassNotFoundException {
     System.out.println("SecurityUtils Test Suite");
     System.out.println("-------------------------------------------------------------");
     System.out.println("  Initializing Tests");

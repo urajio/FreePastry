@@ -37,15 +37,14 @@ advised of the possibility of such damage.
 
 package rice.p2p.past.messaging;
 
-import java.io.IOException;
-
-import rice.*;
+import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.past.*;
-import rice.p2p.util.rawserialization.JavaSerializedMessage;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.Message;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.past.PastException;
 
 /**
  * @(#) MessageLostMessage.java
@@ -120,7 +119,7 @@ public class MessageLostMessage extends PastMessage {
     return TYPE; 
   }
   
-  public void serialize(OutputBuffer buf) throws IOException {
+  public void serialize(OutputBuffer buf) {
     throw new RuntimeException("serialize() not supported in MessageLostMessage"); 
     
 //    super.serialize(buf); 

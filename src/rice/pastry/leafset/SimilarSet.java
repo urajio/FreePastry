@@ -37,10 +37,12 @@ advised of the possibility of such damage.
 package rice.pastry.leafset;
 
 import rice.pastry.*;
-import rice.pastry.routing.*;
+import rice.pastry.routing.RouteSet;
+import rice.pastry.routing.RoutingTable;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
-import java.io.*;
 
 /**
  * A set of nodes, ordered by numerical distance of their Id from the local
@@ -79,7 +81,7 @@ public class SimilarSet extends Observable implements NodeSetEventSource, Serial
    * swap two elements
    * 
    * @param i the index of the first element
-   * @param j the indes of the second element
+   * @param j the index of the second element
    */
 
   protected void swap(int i, int j) {
@@ -212,7 +214,7 @@ public class SimilarSet extends Observable implements NodeSetEventSource, Serial
     return true;
   }
 
-  transient ArrayList<NodeSetListener> listeners = new ArrayList<NodeSetListener>();
+  transient ArrayList<NodeSetListener> listeners = new ArrayList<>();
   
   /**
    * Generates too many objects to use this interface
@@ -247,9 +249,9 @@ public class SimilarSet extends Observable implements NodeSetEventSource, Serial
   protected void notifyListeners(NodeHandle handle, boolean added) {
     // pass the event to the Observers of this RoutingTable
     synchronized (listeners) {
-      for (int i = 0; i < listeners.size(); i++) {
-        ((NodeSetListener)listeners.get(i)).nodeSetUpdate(this,handle,added); 
-      }
+        for (NodeSetListener listener : listeners) {
+            listener.nodeSetUpdate(this, handle, added);
+        }
     }
     // handle deprecated interface
     if (countObservers() > 0) {
@@ -450,7 +452,7 @@ public class SimilarSet extends Observable implements NodeSetEventSource, Serial
     }
     
     // the complicated case: we have to sort the live entries
-    ArrayList<NodeHandle> toUse = new ArrayList<NodeHandle>();
+    ArrayList<NodeHandle> toUse = new ArrayList<>();
     for (int index = 0; index < rs.size(); index++) {
       NodeHandle nh = rs.get(index);
       if (nh.isAlive())
@@ -470,18 +472,16 @@ public class SimilarSet extends Observable implements NodeSetEventSource, Serial
         break;
       default:
         // more than 1 node, and both are live, need to sort by direction
-        Collections.sort(toUse,new Comparator<NodeHandle>() {
-        
+        toUse.sort(new Comparator<NodeHandle>() {
+
           public int compare(NodeHandle a, NodeHandle b) {
             // smallest to biggest: TODO, verify this does the right thing... it's pretty minor though...
             if (clockwise) return a.getId().compareTo(b.getId());
             return b.getId().compareTo(a.getId());
-          }        
+          }
         });
-        Iterator<NodeHandle> i = toUse.iterator();
-        while(i.hasNext()) {
-          NodeHandle nh = i.next();
-          if (put(nh)) {      
+        for (NodeHandle nh : toUse) {
+          if (put(nh)) {
 //            System.out.println("SimilarSet.addNextEntry()3:"+nh+" "+leafSet);
           }
         }
@@ -501,8 +501,8 @@ public class SimilarSet extends Observable implements NodeSetEventSource, Serial
       return null;
     NodeHandle handle = nodes[i];
 
-    for (int j = i + 1; j < theSize; j++) {
-      nodes[j - 1] = nodes[j];
+    if (theSize - i + 1 >= 0) {
+      System.arraycopy(nodes, i + 1, nodes, i + 1 - 1, theSize - i + 1);
     }
 
     theSize--;
@@ -695,7 +695,7 @@ public class SimilarSet extends Observable implements NodeSetEventSource, Serial
    * @return
    */
   public Collection<NodeHandle> getCollection() {
-    ArrayList<NodeHandle> al = new ArrayList<NodeHandle>();
+    ArrayList<NodeHandle> al = new ArrayList<>();
     for (int i = 0; i < theSize; i++) {
       NodeHandle nh = nodes[i];
       if (nh != null) {
@@ -710,7 +710,7 @@ public class SimilarSet extends Observable implements NodeSetEventSource, Serial
     in.defaultReadObject();
     d1 = new Id.Distance();
     d = new Id.Distance();
-    listeners = new ArrayList<NodeSetListener>();
+    listeners = new ArrayList<>();
   }
 
   public String toString() {

@@ -37,21 +37,19 @@ advised of the possibility of such damage.
 
 package rice.pastry.standard;
 
-import java.io.*;
-import java.net.InetAddress;
-import java.security.*;
-import java.security.cert.*;
-import java.security.spec.*;
-import java.util.*;
-import java.util.zip.*;
-import javax.crypto.*;
-import javax.crypto.spec.*;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.environment.random.simple.SimpleRandomSource;
-import rice.pastry.*;
-import rice.p2p.util.*;
+import rice.p2p.util.SecurityUtils;
+import rice.p2p.util.XMLObjectInputStream;
+import rice.p2p.util.XMLObjectOutputStream;
+import rice.pastry.Id;
+import rice.pastry.NodeIdFactory;
+
+import java.io.*;
+import java.net.InetAddress;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Builds nodeIds in a certified manner, guaranteeing that a given node will always

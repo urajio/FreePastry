@@ -36,14 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post;
 
-import java.io.*;
-import java.security.*;
-import java.security.cert.*;
+import rice.Continuation;
+import rice.post.log.Log;
+import rice.post.security.PostCertificate;
 
-import rice.*;
-import rice.post.log.*;
-import rice.post.storage.*;
-import rice.post.security.*;
+import java.io.Serializable;
+import java.security.PublicKey;
 
 /**
  * This class represents the Log which sits at the address of the user's

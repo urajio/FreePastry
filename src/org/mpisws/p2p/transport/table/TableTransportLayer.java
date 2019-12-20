@@ -36,13 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.table;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.TransportLayer;
-
 import rice.Continuation;
 import rice.p2p.commonapi.Cancellable;
+
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 /**
  * Keeps a store of information at each node, such that other nodes can query for the information.
@@ -63,8 +62,8 @@ public interface TableTransportLayer<Identifier, Key, Value> extends TransportLa
    * @param options
    * @return UnknownValueException if the source doesn't value for the key
    */
-  public Cancellable requestValue(Identifier source, Key key, Continuation<Value, Exception> c, Map<String, Object> options);
+  Cancellable requestValue(Identifier source, Key key, Continuation<Value, Exception> c, Map<String, Object> options);
   
-  public boolean hasKey(Key k);
+  boolean hasKey(Key k);
 
 }

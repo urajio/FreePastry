@@ -36,8 +36,7 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.util;
 
-import java.util.*;
-import java.io.*;
+import java.util.Objects;
 
 /**
  * Implementation of a cache of strings
@@ -264,9 +263,7 @@ public class StringCache {
    */
   public void clear() {
     modCount++;
-    Entry tab[] = table;
-    for (int i = 0; i < tab.length; i++) 
-      tab[i] = null;
+    Entry[] tab = table;
     size = 0;
   }
     
@@ -295,7 +292,7 @@ public class StringCache {
       Entry e = (Entry) o;
       String v1 = getValue();
       String v2 = e.getValue();
-      return (v1 == v2 || (v1 != null && v1.equals(v2)));
+      return (Objects.equals(v1, v2));
     }
     
     public int hashCode() {

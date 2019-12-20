@@ -36,16 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.util;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.P2PSocket;
 import org.mpisws.p2p.transport.TransportLayerCallback;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
+
+import java.util.Map;
 
 public class DefaultCallback<Identifier, MessageType> implements
     TransportLayerCallback<Identifier, MessageType> {
@@ -59,8 +55,7 @@ public class DefaultCallback<Identifier, MessageType> implements
     this.logger = logger;
   }
 
-  public void incomingSocket(P2PSocket s)
-      throws IOException {
+  public void incomingSocket(P2PSocket s) {
     logger.log("incomingSocket("+s+")");
   }
 
@@ -68,8 +63,7 @@ public class DefaultCallback<Identifier, MessageType> implements
     logger.log("livenessChanged("+i+","+state+")");
   }
 
-  public void messageReceived(Identifier i, MessageType m, Map<String, Object> options)
-      throws IOException {
+  public void messageReceived(Identifier i, MessageType m, Map<String, Object> options) {
     logger.log("messageReceived("+i+","+m+")");
   }
 

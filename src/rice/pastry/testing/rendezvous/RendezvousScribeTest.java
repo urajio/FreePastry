@@ -36,14 +36,13 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 
 package rice.pastry.testing.rendezvous;
-import java.io.IOException;
-import java.io.PrintStream;
 
 import rice.environment.Environment;
-import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
-import rice.p2p.scribe.Topic;
 import rice.p2p.scribe.testing.RawScribeRegrTest;
+
+import java.io.IOException;
+import java.io.PrintStream;
 
 /**
  * @(#) DistScribeRegrTest.java Provides regression testing for the Scribe service using distributed
@@ -65,9 +64,9 @@ public class RendezvousScribeTest /*extends RawScribeRegrTest*/ {
    *
    * @param args DESCRIBE THE PARAMETER
    */
-  public static void main(String args[]) throws IOException {
-    for (int i = 0; i < args.length; i++) {
-      if (args[i].equals("-tofile")) {
+  public static void main(String[] args) throws IOException {
+    for (String arg : args) {
+      if (arg.equals("-tofile")) {
         System.setOut(new PrintStream("delme.txt"));
         System.setErr(System.out);
         break;

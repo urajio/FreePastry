@@ -39,10 +39,8 @@ package org.mpisws.p2p.filetransfer;
 import java.io.File;
 import java.nio.ByteBuffer;
 
-import rice.p2p.commonapi.Cancellable;
-
 public interface FileReceipt extends Receipt {
-  public File getFile();
+  File getFile();
   
   /**
    * Note that the ByteBuffer will be constructed every time it is requested.  Thus you can always read the metadata from the beginning, but 
@@ -52,6 +50,6 @@ public interface FileReceipt extends Receipt {
    * 
    * @return A ByteBuffer wrapping the metadata
    */
-  public ByteBuffer getMetadata();
-  public long getOffset();
+  ByteBuffer getMetadata();
+  long getOffset();
 }

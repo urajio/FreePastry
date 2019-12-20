@@ -36,12 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.join;
 
-import java.util.Collection;
-
 import rice.pastry.NodeHandle;
 
+import java.util.Collection;
+
 public interface JoinProtocol {
-  public void initiateJoin(Collection<NodeHandle> bootstrap);
+  void initiateJoin(Collection<NodeHandle> bootstrap);
 
   
 //  @Override

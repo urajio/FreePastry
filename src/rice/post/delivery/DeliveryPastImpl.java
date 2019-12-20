@@ -37,18 +37,25 @@ advised of the possibility of such damage.
 
 package rice.post.delivery;
 
-import java.util.*;
-
-import rice.*;
-import rice.Continuation.*;
-import rice.environment.Environment;
+import rice.Continuation;
+import rice.Continuation.StandardContinuation;
 import rice.environment.logging.Logger;
-import rice.post.*;
-import rice.post.messaging.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.past.*;
-import rice.p2p.past.gc.*;
-import rice.persistence.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdFactory;
+import rice.p2p.commonapi.Node;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.past.PastImpl;
+import rice.p2p.past.PastPolicy;
+import rice.p2p.past.gc.GCId;
+import rice.p2p.past.gc.GCIdRange;
+import rice.p2p.past.gc.GCPastImpl;
+import rice.p2p.past.gc.GCPastMetadata;
+import rice.persistence.Cache;
+import rice.persistence.StorageManager;
+import rice.post.PostEntityAddress;
+
+import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * @(#) DeliveryyPastImpl.java
@@ -98,7 +105,7 @@ public class DeliveryPastImpl extends GCPastImpl implements DeliveryPast {
     
     if (delivered.exists(((GCId) id).getId())) {
       if (logger.level <= Logger.FINER) logger.log( endpoint.getId() + ": Skipping Id " + id + " because we have receipt.");
-      command.receiveResult(new Boolean(true));
+      command.receiveResult(Boolean.TRUE);
     } else {
       if (logger.level <= Logger.FINER) logger.log( endpoint.getId() + ": Actually fetching Id " + id);
       super.fetch(id, hint, command);
@@ -149,11 +156,11 @@ public class DeliveryPastImpl extends GCPastImpl implements DeliveryPast {
         } 
         
         if (logger.level <= Logger.FINER) logger.log( endpoint.getId() + ": Done Synchronizing...");
-        parent.receiveResult(new Boolean(true));
+        parent.receiveResult(Boolean.TRUE);
       }
     };
     
-    c.receiveResult(new Boolean(true));
+    c.receiveResult(Boolean.TRUE);
   }
   
   /**

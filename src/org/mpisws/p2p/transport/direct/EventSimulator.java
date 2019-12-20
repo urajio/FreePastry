@@ -49,7 +49,7 @@ public class EventSimulator {
 
   protected RandomSource random;
   
-  protected SelectorManager manager;
+  protected final SelectorManager manager;
 
   // true if we are responsible for incrementing the time
   private boolean isDirectTimeSource = false;

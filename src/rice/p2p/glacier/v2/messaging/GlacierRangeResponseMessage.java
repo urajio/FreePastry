@@ -36,12 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.glacier.v2.messaging;
 
-import java.io.IOException;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.IdRange;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.glacier.*;
+import java.io.IOException;
 
 public class GlacierRangeResponseMessage extends GlacierMessage {
   public static final short TYPE = 8;
@@ -75,12 +77,10 @@ public class GlacierRangeResponseMessage extends GlacierMessage {
 
   public static GlacierRangeResponseMessage build(InputBuffer buf, Endpoint endpoint) throws IOException {
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        return new GlacierRangeResponseMessage(buf, endpoint);
-      default:
-        throw new IOException("Unknown Version: "+version);
-    }
+      if (version == 0) {
+          return new GlacierRangeResponseMessage(buf, endpoint);
+      }
+      throw new IOException("Unknown Version: " + version);
   }
     
   private GlacierRangeResponseMessage(InputBuffer buf, Endpoint endpoint) throws IOException {

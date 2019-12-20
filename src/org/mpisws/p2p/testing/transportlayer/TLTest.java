@@ -36,37 +36,24 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.testing.transportlayer;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
-
-import rice.Continuation;
+import org.mpisws.p2p.transport.*;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.*;
+
+import static org.junit.Assert.assertTrue;
 
 public abstract class TLTest<Identifier> {
   
   static Environment env;
   static Logger logger;
-  static Map<String, Object> options = new HashMap<String, Object>();
+  static Map<String, Object> options = new HashMap<>();
   static TransportLayer alice, bob;
   static final byte[] sentBytes = {0,1,2,3,4,5,6,7};
   static final int START_PORT = 5009;
@@ -77,7 +64,7 @@ public abstract class TLTest<Identifier> {
   }
   
   @AfterClass
-  public static void tearDownAfterClass() throws Exception {
+  public static void tearDownAfterClass() {
     env.destroy();
   }
 
@@ -111,24 +98,22 @@ public abstract class TLTest<Identifier> {
    */
   @Test
   public void openTCP() throws Exception {
-    final List<P2PSocket<Identifier>> aliceSockets = new ArrayList<P2PSocket<Identifier>>();
-    final List<P2PSocket<Identifier>> bobSockets = new ArrayList<P2PSocket<Identifier>>();
-    final List<Exception> exceptionList = new ArrayList<Exception>(1);
-    final List<ByteBuffer> receivedList = new ArrayList<ByteBuffer>(1);
-    final List<ByteBuffer> sentList = new ArrayList<ByteBuffer>(1);
+    final List<P2PSocket<Identifier>> aliceSockets = new ArrayList<>();
+    final List<P2PSocket<Identifier>> bobSockets = new ArrayList<>();
+    final List<Exception> exceptionList = new ArrayList<>(1);
+    final List<ByteBuffer> receivedList = new ArrayList<>(1);
+    final List<ByteBuffer> sentList = new ArrayList<>(1);
     final Object lock = new Object();
     
     // Part I opening a connection
     bob.setCallback(new TransportLayerCallback<Identifier, ByteBuffer>() {
     
-      public void messageReceived(Identifier i, ByteBuffer m, Map<String, Object> options)
-          throws IOException {
+      public void messageReceived(Identifier i, ByteBuffer m, Map<String, Object> options) {
         // TODO Auto-generated method stub
     
       }
     
-      public void incomingSocket(P2PSocket<Identifier> s)
-          throws IOException {
+      public void incomingSocket(P2PSocket<Identifier> s) {
         synchronized(lock) {
           bobSockets.add(s);
           lock.notify();
@@ -232,7 +217,7 @@ public abstract class TLTest<Identifier> {
     assertTrue(exceptionList.isEmpty());
 
     // Part III test shutdown/close()
-    final List<P2PSocket> closed = new ArrayList<P2PSocket>();
+    final List<P2PSocket> closed = new ArrayList<>();
     
     aliceSockets.get(0).shutdownOutput();
     
@@ -335,15 +320,15 @@ public abstract class TLTest<Identifier> {
     }
     
     // added to every time bob receives something
-    final List<Tupel> receivedList = new ArrayList<Tupel>(1);
-    final List<Exception> exceptionList = new ArrayList<Exception>(1);
-    final List<MessageRequestHandle> sentList = new ArrayList<MessageRequestHandle>(1);
+    final List<Tupel> receivedList = new ArrayList<>(1);
+    final List<Exception> exceptionList = new ArrayList<>(1);
+    final List<MessageRequestHandle> sentList = new ArrayList<>(1);
     final Object lock = new Object();
 //    TestEnv<Identifier> tenv = getTestEnv();
 
     // make a way for bob to receive the callback
     bob.setCallback(new TransportLayerCallback<Identifier, ByteBuffer>() {    
-      public void messageReceived(Identifier i, ByteBuffer buf, Map<String, Object> options) throws IOException {
+      public void messageReceived(Identifier i, ByteBuffer buf, Map<String, Object> options) {
         synchronized(lock) {
           receivedList.add(new Tupel(i, buf));
           lock.notify();
@@ -404,9 +389,9 @@ public abstract class TLTest<Identifier> {
     final ByteBuffer sentBuffer = ByteBuffer.wrap(sentBytes); 
    
     // added to every time bob receives something
-    final List<MessageRequestHandle> failedList = new ArrayList<MessageRequestHandle>(1);
-    final List<MessageRequestHandle> sentList = new ArrayList<MessageRequestHandle>(1);
-    final List<Exception> exceptionList = new ArrayList<Exception>(1);
+    final List<MessageRequestHandle> failedList = new ArrayList<>(1);
+    final List<MessageRequestHandle> sentList = new ArrayList<>(1);
+    final List<Exception> exceptionList = new ArrayList<>(1);
     final Object lock = new Object();
 //    TestEnv<Identifier> tenv = getTestEnv();
 
@@ -464,14 +449,14 @@ public abstract class TLTest<Identifier> {
     }
     
     // added to every time bob receives something
-    final List<Tupel> receivedList = new ArrayList<Tupel>(1);
-    final List<Exception> exceptionList = new ArrayList<Exception>(1);
+    final List<Tupel> receivedList = new ArrayList<>(1);
+    final List<Exception> exceptionList = new ArrayList<>(1);
     final Object lock = new Object();
 //    TestEnv<Identifier> tenv = getTestEnv();
 
     // make a way for bob to receive the callback
     bob.setCallback(new TransportLayerCallback<Identifier, ByteBuffer>() {    
-      public void messageReceived(Identifier i, ByteBuffer buf, Map<String, Object> options) throws IOException {
+      public void messageReceived(Identifier i, ByteBuffer buf, Map<String, Object> options) {
         synchronized(lock) {
           receivedList.add(new Tupel(i, buf));
           lock.notify();

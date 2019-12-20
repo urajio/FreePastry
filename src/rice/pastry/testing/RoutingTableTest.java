@@ -36,29 +36,29 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.testing;
 
-import java.io.*;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.util.*;
-
 import rice.Destructable;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.environment.random.RandomSource;
-import rice.p2p.commonapi.*;
 import rice.p2p.commonapi.Id;
-import rice.p2p.commonapi.RouteMessage;
+import rice.p2p.commonapi.*;
 import rice.p2p.scribe.*;
-import rice.pastry.*;
 import rice.pastry.NodeHandle;
+import rice.pastry.*;
 import rice.pastry.commonapi.PastryIdFactory;
-import rice.pastry.direct.*;
+import rice.pastry.direct.DirectNodeHandle;
+import rice.pastry.direct.DirectPastryNode;
+import rice.pastry.direct.DirectPastryNodeFactory;
+import rice.pastry.direct.EuclideanNetwork;
 import rice.pastry.leafset.LeafSet;
-import rice.pastry.routing.*;
+import rice.pastry.routing.InitiateRouteSetMaintenance;
+import rice.pastry.routing.RouteSet;
+import rice.pastry.routing.RoutingTable;
 import rice.pastry.standard.RandomNodeIdFactory;
-import rice.selector.SelectorManager;
 import rice.selector.TimerTask;
-import rice.tutorial.direct.MyMsg;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @author Jeff Hoye
@@ -69,7 +69,7 @@ public class RoutingTableTest {
   boolean printLeafSets = false;
   
   // this will keep track of our nodes
-  Vector<PastryNode> nodes = new Vector<PastryNode>();
+  Vector<PastryNode> nodes = new Vector<>();
   
   HashMap apps = new HashMap();
   
@@ -205,7 +205,7 @@ public class RoutingTableTest {
     }    
   }
   
-  public void createNodes() throws InterruptedException {    
+  public void createNodes() {
     CreatorTimerTask ctt = new CreatorTimerTask();    
     env.getSelectorManager().getTimer().schedule(ctt,1000,1000); 
 //    synchronized(ctt) {
@@ -217,23 +217,21 @@ public class RoutingTableTest {
   
   public void sendSomeMessages() {        
     // for each app
-    Iterator appIterator = apps.values().iterator();
-    while(appIterator.hasNext()) {
-      MyApp app = (MyApp)appIterator.next();
-      
+    for (Object o : apps.values()) {
+      MyApp app = (MyApp) o;
+
       // pick a key at random
       Id randId = nidFactory.generateNodeId();
-      
+
       // send to that key
-      app.routeMyMsg(randId);
+      app.routeRoutingTableTestMyMsg(randId);
     }
   }
   
   public void sendSomeScribeMessages() {        
     // for each app
-    Iterator appIterator = apps.values().iterator();
-    while(appIterator.hasNext()) {
-      Scribe app = (Scribe)appIterator.next();
+    for (Object o : apps.values()) {
+      Scribe app = (Scribe) o;
       app.publish(topic, new TestScribeContent(topic, 0));
     }
   }
@@ -293,7 +291,7 @@ public class RoutingTableTest {
   }
 
 
-  public PastryNode createNode() throws InterruptedException, IOException {
+  public PastryNode createNode() throws IOException {
     NodeHandle bootHandle = null;
     if (nodes.size() > 0) {
       PastryNode bootNode = null;
@@ -350,7 +348,7 @@ public class RoutingTableTest {
       public void update(Observable o, Object arg) {
 //        System.out.println("observer.update("+arg+")");
         if (arg instanceof Boolean) {
-          if (!((Boolean) arg).booleanValue()) return;
+          if (!(Boolean) arg) return;
           
           node.deleteObserver(this);
           finishNode(node);
@@ -435,21 +433,19 @@ public class RoutingTableTest {
   
   private void testLeafSets() {
 //    if (!logHeavy) return;
-    ArrayList<PastryNode> nds = new ArrayList<PastryNode>(nodes);
-    Collections.sort(nds,new Comparator<PastryNode>() {
-    
+    ArrayList<PastryNode> nds = new ArrayList<>(nodes);
+    nds.sort(new Comparator<PastryNode>() {
+
       public int compare(PastryNode one, PastryNode two) {
-        PastryNode n1 = (PastryNode)one;
-        PastryNode n2 = (PastryNode)two;
+        PastryNode n1 = (PastryNode) one;
+        PastryNode n2 = (PastryNode) two;
         return n1.getId().compareTo(n2.getId());
       }
-    
+
     });
-    
-    Iterator i = nds.iterator();
-    while(i.hasNext()) {
-      PastryNode n = (PastryNode)i.next(); 
-      System.out.println(n.isReady()+" "+n.getLeafSet());
+
+    for (PastryNode n : nds) {
+      System.out.println(n.isReady() + " " + n.getLeafSet());
     }
   }
   
@@ -495,23 +491,21 @@ public class RoutingTableTest {
     while(nodeIterator.hasNext()) {
       PastryNode node = (PastryNode)nodeIterator.next();
       RoutingTable rt = node.getRoutingTable();
-      Iterator i2 = nodes.iterator();
-      while(i2.hasNext()) {
-        PastryNode that = (PastryNode)i2.next();
+      for (PastryNode that : nodes) {
         if ((that != node) && that.isReady() && node.isReady()) {
-          NodeHandle thatHandle = that.getLocalHandle();        
-          int latency = calcLatency(node,thatHandle);
+          NodeHandle thatHandle = that.getLocalHandle();
+          int latency = calcLatency(node, thatHandle);
           int proximity = node.proximity(thatHandle);
           if (proximity == 0) {
-            throw new RuntimeException("proximity zero:"+node+".proximity("+thatHandle+")"); 
+            throw new RuntimeException("proximity zero:" + node + ".proximity(" + thatHandle + ")");
           }
           if (latency < proximity) { // due to rounding error
-            latency = proximity;            
+            latency = proximity;
 //            calcLatency(node, thatHandle); 
-          }          
-          double streatch = (1.0*latency)/(1.0*proximity);
+          }
+          double streatch = (1.0 * latency) / (1.0 * proximity);
 //          if (streatch > 3.0) System.out.println("streatch: "+streatch);
-          acc+=streatch;
+          acc += streatch;
           ctr++;
         }
       }
@@ -562,9 +556,7 @@ public class RoutingTableTest {
       if (!node.isReady()) continue;
       PastryNode temp = DirectPastryNode.setCurrentNode(node);
       RoutingTable rt = node.getRoutingTable();
-      Iterator i2 = nodes.iterator();
-      while(i2.hasNext()) {
-        PastryNode that = (PastryNode)i2.next();
+      for (PastryNode that : nodes) {
         if (!that.isReady()) continue;
         NodeHandle thatHandle = that.getLocalHandle();
         int response = rt.test(thatHandle);
@@ -572,7 +564,7 @@ public class RoutingTableTest {
           ctrs[response]++;
           ctr++;
           if (logHeavy)
-            System.out.println(response+": ("+curNodeIndex+")"+node+" could have held "+thatHandle);    
+            System.out.println(response + ": (" + curNodeIndex + ")" + node + " could have held " + thatHandle);
         }
       }
       DirectPastryNode.setCurrentNode(temp);
@@ -756,20 +748,20 @@ public class RoutingTableTest {
     /**
      * Called to route a message to the id
      */
-    public void routeMyMsg(Id id) {
+    public void routeRoutingTableTestMyMsg(Id id) {
       if (logHeavy)
         System.out.println(this+" sending to "+id);    
-      Message msg = new MyMsg(endpoint.getId(), id);
+      Message msg = new RoutingTableTestMyMsg(endpoint.getId(), id);
       endpoint.route(id, msg, null);
     }
     
     /**
      * Called to directly send a message to the nh
      */
-    public void routeMyMsgDirect(NodeHandle nh) {
+    public void routeRoutingTableTestMyMsgDirect(NodeHandle nh) {
       if (logHeavy)
         System.out.println(this+" sending direct to "+nh);    
-      Message msg = new MyMsg(endpoint.getId(), nh.getId());
+      Message msg = new RoutingTableTestMyMsg(endpoint.getId(), nh.getId());
       endpoint.route(null, msg, nh);
     }
       

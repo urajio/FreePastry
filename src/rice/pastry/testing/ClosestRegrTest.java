@@ -38,12 +38,19 @@ advised of the possibility of such damage.
 package rice.pastry.testing;
 
 import rice.environment.Environment;
-import rice.pastry.*;
-import rice.pastry.direct.*;
-import rice.pastry.standard.*;
+import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
+import rice.pastry.PastryNodeFactory;
+import rice.pastry.direct.DirectNodeHandle;
+import rice.pastry.direct.DirectPastryNodeFactory;
+import rice.pastry.direct.NetworkSimulator;
+import rice.pastry.direct.SphereNetwork;
+import rice.pastry.standard.RandomNodeIdFactory;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.NoSuchElementException;
+import java.util.Vector;
 
 /**
  * ClosestRegrTest
@@ -74,7 +81,7 @@ public class ClosestRegrTest {
   /**
    * constructor
    */
-  private ClosestRegrTest() throws IOException {
+  private ClosestRegrTest() {
     environment = Environment.directEnvironment();
     simulator = new SphereNetwork(environment);
     factory = new DirectPastryNodeFactory(new RandomNodeIdFactory(environment), simulator, environment);
@@ -132,11 +139,9 @@ public class ClosestRegrTest {
 
   protected double getAvgNumEntries(Collection<PastryNode> nds) {
     double sum = 0;
-    Iterator<PastryNode> i = nds.iterator(); 
-    while(i.hasNext()) {
-      PastryNode pn = (PastryNode)i.next(); 
-      sum+=pn.getRoutingTable().numUniqueEntries();
-    }
+      for (PastryNode pn : nds) {
+          sum += pn.getRoutingTable().numUniqueEntries();
+      }
     return sum/nds.size();
   }
   
@@ -180,7 +185,7 @@ public class ClosestRegrTest {
   /**
    * main
    */
-  public static void main(String args[]) throws IOException {
+  public static void main(String[] args) throws IOException {
     ClosestRegrTest pt = new ClosestRegrTest();
     pt.run();
     System.out.println("pass:"+pt.pass());

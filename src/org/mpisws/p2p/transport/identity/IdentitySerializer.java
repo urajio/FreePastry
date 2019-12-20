@@ -36,21 +36,21 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.identity;
 
-import java.io.IOException;
-
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 
-public interface IdentitySerializer<UpperIdentifier, MiddleIdentifier, LowerIdentifier> {
-  public void serialize(OutputBuffer buf, UpperIdentifier i) throws IOException;
+import java.io.IOException;
 
-  public UpperIdentifier deserialize(InputBuffer buf, LowerIdentifier l) throws IOException;
+public interface IdentitySerializer<UpperIdentifier, MiddleIdentifier, LowerIdentifier> {
+  void serialize(OutputBuffer buf, UpperIdentifier i) throws IOException;
+
+  UpperIdentifier deserialize(InputBuffer buf, LowerIdentifier l) throws IOException;
   
-  public MiddleIdentifier translateDown(UpperIdentifier i);
+  MiddleIdentifier translateDown(UpperIdentifier i);
   
-  public MiddleIdentifier translateUp(LowerIdentifier i);
+  MiddleIdentifier translateUp(LowerIdentifier i);
   
-  public void addSerializerListener(SerializerListener<UpperIdentifier> listener);
-  public void removeSerializerListener(SerializerListener<UpperIdentifier> listener);
+  void addSerializerListener(SerializerListener<UpperIdentifier> listener);
+  void removeSerializerListener(SerializerListener<UpperIdentifier> listener);
 
 }

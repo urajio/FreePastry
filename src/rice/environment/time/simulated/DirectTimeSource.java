@@ -39,14 +39,15 @@ advised of the possibility of such damage.
  */
 package rice.environment.time.simulated;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
-import rice.Destructable;
-import rice.environment.logging.*;
+import rice.environment.logging.LogManager;
+import rice.environment.logging.Logger;
 import rice.environment.params.Parameters;
 import rice.environment.time.TimeSource;
-import rice.selector.*;
+import rice.selector.SelectorManager;
+import rice.selector.TimerTask;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 
 public class DirectTimeSource implements TimeSource {
 
@@ -58,7 +59,7 @@ public class DirectTimeSource implements TimeSource {
   /**
    * When destry is called, throw an interrupted exception on all of these.
    */
-  protected HashSet<BlockingTimerTask> pendingTimers = new HashSet<BlockingTimerTask>();
+  protected HashSet<BlockingTimerTask> pendingTimers = new HashSet<>();
   
   public DirectTimeSource(long time) {
     this(time, null);
@@ -165,7 +166,7 @@ public class DirectTimeSource implements TimeSource {
    * TODO: Get the synchronization on this correct
    */
   public void destroy() {
-    for (BlockingTimerTask btt : new ArrayList<BlockingTimerTask>(pendingTimers)) {
+    for (BlockingTimerTask btt : new ArrayList<>(pendingTimers)) {
       btt.interrupt();
     }
     pendingTimers.clear();

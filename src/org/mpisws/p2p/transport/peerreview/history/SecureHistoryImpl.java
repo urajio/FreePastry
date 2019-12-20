@@ -36,20 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.history;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-
 import org.mpisws.p2p.transport.peerreview.audit.LogSnippet;
 import org.mpisws.p2p.transport.peerreview.audit.SnippetEntry;
-import org.mpisws.p2p.transport.util.FileInputBuffer;
-import org.mpisws.p2p.transport.util.FileOutputBuffer;
-
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.p2p.util.RandomAccessFileIOBuffer;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 /**
  * The following class implements PeerReview's log. A log entry consists of
@@ -339,7 +334,7 @@ public class SecureHistoryImpl implements SecureHistory {
     indexFile.seek((idxFrom-1) * indexFactory.getSerializedSize());
     ie = indexFactory.build(indexFile);
     byte[] baseHash = ie.nodeHash;
-    ArrayList<SnippetEntry> entryList = new ArrayList<SnippetEntry>();
+    ArrayList<SnippetEntry> entryList = new ArrayList<>();
     
     // Go through entries one by one    
     long previousSeq = -1;
@@ -379,10 +374,9 @@ public class SecureHistoryImpl implements SecureHistory {
       SnippetEntry entry = new SnippetEntry((byte)ie.type, ie.seq, hashIt, buffer);
       entryList.add(entry);
     }
-    
-    LogSnippet ret = new LogSnippet(baseHash,entryList);
-//    logger.log("serializeRange("+idxFrom+","+idxTo+"):"+ret);
-    return ret;
+
+    //    logger.log("serializeRange("+idxFrom+","+idxTo+"):"+ret);
+    return new LogSnippet(baseHash,entryList);
   }
   
   public boolean serializeRange2(long idxFrom, long idxTo, HashPolicy hashPolicy, OutputBuffer outfile) throws IOException {
@@ -590,9 +584,9 @@ public class SecureHistoryImpl implements SecureHistory {
       IndexEntry ie = statEntry(currentIdx);
 
       if (ie == null) throw new IllegalStateException("Cannot stat history entry #"+currentIdx+" (num="+numEntries+")");
-       
-      for (int i=0; i<types.length; i++)
-        if (ie.type == types[i])
+
+      for (short type : types)
+        if (ie.type == type)
           return currentIdx;
          
       currentIdx--;

@@ -36,13 +36,10 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.util;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.Map;
-
 import org.mpisws.p2p.transport.ErrorHandler;
-
 import rice.environment.logging.Logger;
+
+import java.util.Map;
 
 /**
  * Just logs the problems.

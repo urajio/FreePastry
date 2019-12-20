@@ -41,7 +41,7 @@ import rice.environment.logging.Logger;
 import rice.p2p.commonapi.IdRange;
 
 public class GlacierStatistics {
-  public int messagesSentByTag[];
+  public int[] messagesSentByTag;
   public int pendingRequests;
   public int numNeighbors;
   public int numFragments;
@@ -74,8 +74,8 @@ public class GlacierStatistics {
     this.bucketMin = 0;
     this.bucketMax = 0;
     this.bucketConsumed = 0;
-  };
-  
+  }
+
   public void dump(Logger logger) {
     String s = "";
     s+="@L.ME free="+Runtime.getRuntime().freeMemory()+" max="+Runtime.getRuntime().maxMemory()+" total="+Runtime.getRuntime().totalMemory()+"\n";
@@ -86,9 +86,8 @@ public class GlacierStatistics {
     s+="@L.GL   activeFetches="+activeFetches+" bucketMin="+bucketMin+" bucketMax="+bucketMax+"\n";
     s+="@L.GL   bucketConsumed="+bucketConsumed+"\n";
     s+="@L.GL   byTag=";
-    for (int i=0; i<messagesSentByTag.length; i++)
-      s+=messagesSentByTag[i]+" ";
+      for (int value : messagesSentByTag) s += value + " ";
     s+="\n";
     if (logger.level <= Logger.INFO) logger.log(s);
   }
-};
+}

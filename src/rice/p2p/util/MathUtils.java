@@ -36,10 +36,6 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.util;
 
-import java.io.*;
-import java.math.*;
-import java.util.*;
-
 import rice.environment.random.RandomSource;
 
 /**
@@ -118,11 +114,11 @@ public class MathUtils {
    * @return A string representation
    */
   public static String toHex(byte[] text) {
-    StringBuffer buffer = new StringBuffer();
-    
-    for (int i=0; i<text.length; i++) {
-      buffer.append(HEX_ARRAY[0x0f & (text[i] >> 4)]);
-      buffer.append(HEX_ARRAY[0x0f & text[i]]);
+    StringBuilder buffer = new StringBuilder();
+
+    for (byte b : text) {
+      buffer.append(HEX_ARRAY[0x0f & (b >> 4)]);
+      buffer.append(HEX_ARRAY[0x0f & b]);
     }
     
     return buffer.toString(); 
@@ -174,9 +170,9 @@ public class MathUtils {
    */
   public static int simpleHash(byte[] b) {
     int hash = 0;
-      
-    for (int i = 0; i < b.length; i++) {
-      hash += b[i];
+
+    for (byte value : b) {
+      hash += value;
       hash += (hash << 10);
       hash ^= (hash >> 6);
     }

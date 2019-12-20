@@ -38,14 +38,16 @@ package rice.pastry.standard;
 
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.pastry.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.MessageDeserializer;
+import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
 import rice.pastry.client.PastryAppl;
-import rice.pastry.messaging.*;
+import rice.pastry.messaging.Message;
+import rice.pastry.messaging.PJavaSerializedDeserializer;
 import rice.pastry.routing.*;
 
 import java.io.IOException;
-import java.util.*;
 
 /**
  * An implementation of a simple route set protocol.
@@ -118,9 +120,7 @@ public class StandardRouteSetProtocol extends PastryAppl implements RouteSetProt
       if (nh.isAlive())
         routeTable.put(nh);
 
-      for (int i = 0; i < row.length; i++) {
-        RouteSet rs = row[i];
-
+      for (RouteSet rs : row) {
         for (int j = 0; rs != null && j < rs.size(); j++) {
           nh = rs.get(j);
           if (nh.isAlive() == false)
@@ -137,7 +137,7 @@ public class StandardRouteSetProtocol extends PastryAppl implements RouteSetProt
       int reqRow = rrr.getRow();
       NodeHandle nh = rrr.returnHandle();
 
-      RouteSet row[] = routeTable.getRow(reqRow);
+      RouteSet[] row = routeTable.getRow(reqRow);
       BroadcastRouteRow brr = new BroadcastRouteRow(thePastryNode.getLocalHandle(), row);
       if (logger.level <= Logger.FINER+5) logger.log("Responding to "+rrr+" with "+brr.toStringFull());
       thePastryNode.send(nh,brr,null,options);
@@ -171,7 +171,7 @@ public class StandardRouteSetProtocol extends PastryAppl implements RouteSetProt
 
     // for each populated row in our routing table
     for (short i = (short)(routeTable.numRows() - 1); i >= 0; i--) {
-      RouteSet row[] = routeTable.getRow(i);
+      RouteSet[] row = routeTable.getRow(i);
       BroadcastRouteRow brr = new BroadcastRouteRow(thePastryNode.getLocalHandle(), row);
       RequestRouteRow rrr = new RequestRouteRow(thePastryNode.getLocalHandle(), i);
       int myCol = thePastryNode.getLocalHandle().getNodeId().getDigit(i,

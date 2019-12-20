@@ -39,14 +39,11 @@ advised of the possibility of such damage.
  */
 package rice.environment.logging.simple;
 
-import java.io.PrintStream;
-import java.text.*;
+import rice.environment.logging.AbstractLogManager;
+import rice.environment.logging.HeirarchyLogger;
+
+import java.text.ParseException;
 import java.util.Date;
-
-import javax.swing.text.DateFormatter;
-
-import rice.environment.logging.*;
-import rice.environment.time.TimeSource;
 
 /**
  * This logger writes its name:time:message to the printstream provided, unless the 
@@ -64,7 +61,7 @@ public class SimpleLogger extends HeirarchyLogger {
   /**
    * The stream to print to.
    */
-  AbstractLogManager alm;
+  final AbstractLogManager alm;
   
   /**
    * Constructor.

@@ -36,19 +36,15 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.transport;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import org.mpisws.p2p.transport.P2PSocket;
 import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.multiaddress.MultiInetSocketAddress;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.appsocket.AppSocket;
 import rice.p2p.commonapi.appsocket.AppSocketReceiver;
-import rice.pastry.NodeHandle;
-import rice.pastry.socket.TransportLayerNodeHandle;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public class SocketAdapter<Identifier> implements AppSocket, P2PSocketReceiver<Identifier> {
   P2PSocket<Identifier> internal;

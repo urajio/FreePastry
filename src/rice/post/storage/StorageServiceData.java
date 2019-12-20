@@ -36,15 +36,21 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.storage;
 
-import java.io.*;
-import java.security.*;
-import java.util.*;
-
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.past.*;
-import rice.p2p.past.gc.*;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.past.Past;
+import rice.p2p.past.PastContentHandle;
+import rice.p2p.past.gc.GCPast;
+import rice.p2p.past.gc.GCPastContentHandle;
+import rice.p2p.past.gc.GCPastImpl;
+import rice.p2p.past.gc.GCPastMetadata;
 import rice.p2p.past.gc.rawserialization.RawGCPastContent;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 /**
  * This class is the abstraction of a class used by the storage package to

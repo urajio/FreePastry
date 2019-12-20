@@ -37,7 +37,7 @@ advised of the possibility of such damage.
 
 package rice.pastry;
 
-import java.util.*;
+import java.util.NoSuchElementException;
 
 /**
  * An interface to a generic set of nodes.
@@ -57,7 +57,7 @@ public interface NodeSetI extends rice.p2p.commonapi.NodeHandleSet
      * @return true if the put succeeded, false otherwise.
      */
 
-    public boolean put(NodeHandle handle);
+    boolean put(NodeHandle handle);
     
     /**
      * Finds the NodeHandle associated with the NodeId.
@@ -65,8 +65,8 @@ public interface NodeSetI extends rice.p2p.commonapi.NodeHandleSet
      * @param nid a node id.
      * @return the handle associated with that id or null if no such handle is found.
      */
-    
-    public NodeHandle get(Id nid);
+
+    NodeHandle get(Id nid);
 
 
     /**
@@ -75,8 +75,8 @@ public interface NodeSetI extends rice.p2p.commonapi.NodeHandleSet
      * @param i an index.
      * @return the handle associated with that id or null if no such handle is found.
      */
-    
-    public NodeHandle get(int i);
+
+    NodeHandle get(int i);
     
     /**
      * Verifies if the set contains this particular id.
@@ -85,7 +85,7 @@ public interface NodeSetI extends rice.p2p.commonapi.NodeHandleSet
      * @return true if that node id is in the set, false otherwise.
      */
 
-    public boolean member(NodeHandle nh);
+    boolean member(NodeHandle nh);
     
     /**
      * Removes a node id and its handle from the set.
@@ -95,7 +95,7 @@ public interface NodeSetI extends rice.p2p.commonapi.NodeHandleSet
      * @return the node handle removed or null if nothing.
      */
 
-    public NodeHandle remove(NodeHandle nh);
+    NodeHandle remove(NodeHandle nh);
         
     /**
      * Gets the size of the set.
@@ -103,7 +103,7 @@ public interface NodeSetI extends rice.p2p.commonapi.NodeHandleSet
      * @return the size.
      */
 
-    public int size();
+    int size();
 
     /**
      * Gets the index of the element with the given node id.
@@ -113,7 +113,7 @@ public interface NodeSetI extends rice.p2p.commonapi.NodeHandleSet
      * @return the index or throws a NoSuchElementException.
      */
 
-  public int getIndex(Id nid) throws NoSuchElementException;
+    int getIndex(Id nid) throws NoSuchElementException;
 
-  public int getIndex(NodeHandle nh) throws NoSuchElementException;
+  int getIndex(NodeHandle nh) throws NoSuchElementException;
 }

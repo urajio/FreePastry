@@ -40,12 +40,12 @@ import java.util.Map;
 
 public interface ProximityProvider<Identifier> {
   // the default distance, which is used before a ping
-  public static final int DEFAULT_PROXIMITY = 60*60*1000; // 1 hour
+  int DEFAULT_PROXIMITY = 60*60*1000; // 1 hour
 
-  public int proximity(Identifier i, Map<String, Object> options);
+  int proximity(Identifier i, Map<String, Object> options);
 
-  public void addProximityListener(ProximityListener<Identifier> listener);
-  public boolean removeProximityListener(ProximityListener<Identifier> listener);
+  void addProximityListener(ProximityListener<Identifier> listener);
+  boolean removeProximityListener(ProximityListener<Identifier> listener);
   
-  public void clearState(Identifier i);
+  void clearState(Identifier i);
 }

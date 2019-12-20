@@ -39,12 +39,11 @@ advised of the possibility of such damage.
  */
 package rice.pastry.messaging;
 
-import java.io.IOException;
-
 import rice.p2p.commonapi.rawserialization.InputBuffer;
-import rice.pastry.*;
 import rice.pastry.NodeHandle;
-import rice.pastry.messaging.Message;
+import rice.pastry.PastryNode;
+
+import java.io.IOException;
 
 /**
  * The purpose of this class is just for programming convienience to disambiguate

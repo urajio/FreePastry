@@ -36,25 +36,26 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.glacier.v2;
 
-import rice.p2p.commonapi.*;
-import rice.p2p.glacier.*;
+import rice.Continuation;
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.glacier.Fragment;
+import rice.p2p.glacier.VersionKey;
 import rice.p2p.past.PastContent;
 import rice.p2p.past.rawserialization.PastContentDeserializer;
-import rice.Continuation;
 
 public interface GlacierPolicy {
 
-  public boolean checkSignature(Manifest manifest, VersionKey key);
+  boolean checkSignature(Manifest manifest, VersionKey key);
   
-  public Fragment[] encodeObject(PastContent obj, boolean[] generateFragment);
+  Fragment[] encodeObject(PastContent obj, boolean[] generateFragment);
   
-  public Manifest[] createManifests(VersionKey key, PastContent obj, Fragment[] fragments, long expiration);
+  Manifest[] createManifests(VersionKey key, PastContent obj, Fragment[] fragments, long expiration);
 
-  public Manifest updateManifest(VersionKey key, Manifest manifest, long newExpiration);
+  Manifest updateManifest(VersionKey key, Manifest manifest, long newExpiration);
 
-  public PastContent decodeObject(Fragment[] fragments, Endpoint endpoint, PastContentDeserializer pcd);
+  PastContent decodeObject(Fragment[] fragments, Endpoint endpoint, PastContentDeserializer pcd);
  
   @SuppressWarnings("unchecked")
-  public void prefetchLocalObject(VersionKey key, Continuation command);
+  void prefetchLocalObject(VersionKey key, Continuation command);
  
 }

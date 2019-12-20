@@ -36,34 +36,22 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.evidence;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.mpisws.p2p.transport.MessageCallback;
 import org.mpisws.p2p.transport.peerreview.PeerReview;
-import org.mpisws.p2p.transport.peerreview.PeerReviewCallback;
 import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
-import org.mpisws.p2p.transport.peerreview.WitnessListener;
 import org.mpisws.p2p.transport.peerreview.identity.IdentityTransport;
 import org.mpisws.p2p.transport.peerreview.infostore.Evidence;
 import org.mpisws.p2p.transport.peerreview.infostore.EvidenceRecord;
 import org.mpisws.p2p.transport.peerreview.infostore.PeerInfoStore;
 import org.mpisws.p2p.transport.peerreview.message.AccusationMessage;
 import org.mpisws.p2p.transport.peerreview.message.PeerReviewMessage;
-import org.mpisws.p2p.transport.priority.MessageInfo;
-
 import rice.Continuation;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.rawserialization.RawSerializable;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 /**
  *  This protocol transfers evidence to the witnesses 
@@ -80,9 +68,9 @@ public class EvidenceTransferProtocolImpl<Handle extends RawSerializable, Identi
   IdentityTransport<Handle, Identifier> transport;
   PeerInfoStore<Handle, Identifier> infoStore;
 
-  Map<Identifier, CacheInfo> witnessCache = new HashMap<Identifier, CacheInfo>();
-  Map<Identifier, LinkedList<MessageInfo>> pendingMessage = new HashMap<Identifier, LinkedList<MessageInfo>>();
-  Collection<QueryInfo> pendingQuery = new HashSet<QueryInfo>();
+  Map<Identifier, CacheInfo> witnessCache = new HashMap<>();
+  Map<Identifier, LinkedList<MessageInfo>> pendingMessage = new HashMap<>();
+  Collection<QueryInfo> pendingQuery = new HashSet<>();
 
   Logger logger;
   
@@ -149,7 +137,7 @@ public class EvidenceTransferProtocolImpl<Handle extends RawSerializable, Identi
     if (witnesses == null) {
       LinkedList<MessageInfo> foo = pendingMessage.get(subject);
       if (foo == null) {
-        foo = new LinkedList<MessageInfo>();
+        foo = new LinkedList<>();
         pendingMessage.put(subject, foo);
       }
       foo.addLast(m);
@@ -260,7 +248,7 @@ public class EvidenceTransferProtocolImpl<Handle extends RawSerializable, Identi
     boolean done = false;
 
     public QueryInfo(Collection<Identifier> subjects, Continuation<Map<Identifier, Collection<Handle>>, Exception> c) {      
-      subjectList = new HashMap<Identifier, Collection<Handle>>();
+      subjectList = new HashMap<>();
       numWitnessesWaitingFor = subjects.size();
       this.c = c;
 
@@ -330,8 +318,8 @@ public class EvidenceTransferProtocolImpl<Handle extends RawSerializable, Identi
     try {
       /* Put together an ACCUSATION message */
       Evidence evidence = infoStore.getEvidence(evidenceRecord.getOriginator(),subject, evidenceRecord.getTimeStamp());
-      AccusationMessage<Identifier> accusation = 
-        new AccusationMessage<Identifier>(subject, evidenceRecord, evidence);
+      AccusationMessage<Identifier> accusation =
+              new AccusationMessage<>(subject, evidenceRecord, evidence);
   
       /* ... and send it */
   

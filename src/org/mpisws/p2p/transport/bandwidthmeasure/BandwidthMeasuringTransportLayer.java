@@ -36,31 +36,22 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.bandwidthmeasure;
 
+import org.mpisws.p2p.transport.*;
+import org.mpisws.p2p.transport.util.DefaultErrorHandler;
+import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
+import org.mpisws.p2p.transport.util.SocketWrapperSocket;
+import rice.environment.Environment;
+import rice.environment.logging.Logger;
+import rice.p2p.util.tuples.Tuple;
+import rice.p2p.util.tuples.Tuple3;
+import rice.selector.TimerTask;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
-import org.mpisws.p2p.transport.util.DefaultErrorHandler;
-import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
-import org.mpisws.p2p.transport.util.SocketWrapperSocket;
-
-import rice.environment.Environment;
-import rice.environment.logging.Logger;
-import rice.p2p.util.tuples.Tuple;
-import rice.p2p.util.tuples.Tuple3;
-import rice.selector.TimerTask;
 
 /**
  * Measure the bandwidth of the connections.
@@ -99,7 +90,7 @@ public class BandwidthMeasuringTransportLayer<Identifier> implements
   /**
    * Current measure, last measure
    */
-  Map<Identifier, Tuple<int[], Collection<MySocket>>> measured = new HashMap<Identifier, Tuple<int[], Collection<MySocket>>>();
+  final Map<Identifier, Tuple<int[], Collection<MySocket>>> measured = new HashMap<>();
   protected rice.environment.time.TimeSource time;
   
   public BandwidthMeasuringTransportLayer(int measurementPeriod, TransportLayer<Identifier, ByteBuffer> tl, Environment env) {
@@ -107,7 +98,7 @@ public class BandwidthMeasuringTransportLayer<Identifier> implements
     tl.setCallback(this);
     this.measurementPeriod = measurementPeriod;
     this.logger = env.getLogManager().getLogger(BandwidthMeasuringTransportLayer.class, null);
-    this.errorHandler = new DefaultErrorHandler<Identifier>(logger);
+    this.errorHandler = new DefaultErrorHandler<>(logger);
     this.time = env.getTimeSource();
     this.lastMeasure = time.currentTimeMillis();
     
@@ -164,7 +155,7 @@ public class BandwidthMeasuringTransportLayer<Identifier> implements
   public Tuple<int[], Collection<MySocket>> getVals(Identifier i) {
     Tuple<int[], Collection<MySocket>> ret = measured.get(i);
     if (ret == null) {
-      ret = new Tuple<int[], Collection<MySocket>>(new int[NUM_VALS], new ArrayList<MySocket>());
+      ret = new Tuple<>(new int[NUM_VALS], new ArrayList<>());
       measured.put(i, ret);      
     }
     return ret;
@@ -177,11 +168,11 @@ public class BandwidthMeasuringTransportLayer<Identifier> implements
    */
   public Map<Identifier, Tuple3<Integer, Integer, Boolean>> getBandwidthUsed() {
     synchronized(measured) {
-      HashMap<Identifier, Tuple3<Integer, Integer, Boolean>> ret = new HashMap<Identifier, Tuple3<Integer, Integer, Boolean>>();
+      HashMap<Identifier, Tuple3<Integer, Integer, Boolean>> ret = new HashMap<>();
       for (Identifier i : measured.keySet()) {
         Tuple<int[], Collection<MySocket>> t = measured.get(i);
         int[] vals = t.a();
-        ret.put(i,new Tuple3(vals[LAST_DOWN], vals[LAST_UP], (vals[LAST_SATURATED] == SATURATED)?true:false));
+        ret.put(i,new Tuple3(vals[LAST_DOWN], vals[LAST_UP], vals[LAST_SATURATED] == SATURATED));
       }
       return ret;
     }
@@ -280,7 +271,7 @@ public class BandwidthMeasuringTransportLayer<Identifier> implements
   public SocketRequestHandle<Identifier> openSocket(final Identifier i,
       final SocketCallback<Identifier> deliverSocketToMe, 
       final Map<String, Object> options) {
-    final SocketRequestHandleImpl<Identifier> ret = new SocketRequestHandleImpl<Identifier>(i,options,logger);
+    final SocketRequestHandleImpl<Identifier> ret = new SocketRequestHandleImpl<>(i, options, logger);
     ret.setSubCancellable(tl.openSocket(i, new SocketCallback<Identifier>() {
 
       public void receiveException(SocketRequestHandle<Identifier> s,

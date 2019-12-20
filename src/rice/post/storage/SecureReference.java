@@ -36,12 +36,10 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.storage;
 
-import java.security.*;
-import java.io.*;
-import java.util.*;
+import rice.p2p.commonapi.Id;
 
-import rice.p2p.commonapi.*;
-import rice.p2p.past.*;
+import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * This class serves as a reference to a PostObject

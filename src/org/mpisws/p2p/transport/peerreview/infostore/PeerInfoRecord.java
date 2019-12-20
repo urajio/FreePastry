@@ -36,19 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.peerreview.infostore;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.mpisws.p2p.transport.peerreview.PeerReviewConstants;
 import org.mpisws.p2p.transport.peerreview.commitment.Authenticator;
-import org.mpisws.p2p.transport.peerreview.commitment.AuthenticatorSerializer;
 import org.mpisws.p2p.transport.util.FileOutputBuffer;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This is just an index to the real evidence which is on disk
@@ -77,8 +72,8 @@ public class PeerInfoRecord<Handle, Identifier> implements PeerReviewConstants {
     this.subject = id;
     this.store = store;
 
-    unansweredEvidence = new HashMap<Identifier, Map<Long, EvidenceRecordImpl>>();
-    answeredEvidence = new HashMap<Identifier, Map<Long, EvidenceRecordImpl>>();
+    unansweredEvidence = new HashMap<>();
+    answeredEvidence = new HashMap<>();
     status = STATUS_TRUSTED;
   }
   
@@ -97,7 +92,7 @@ public class PeerInfoRecord<Handle, Identifier> implements PeerReviewConstants {
     foo = unansweredEvidence.get(originator);
     if (foo == null) {
       if (create) {
-        foo = new HashMap<Long, EvidenceRecordImpl>();
+        foo = new HashMap<>();
         unansweredEvidence.put(originator,foo);
         EvidenceRecordImpl bar = new EvidenceRecordImpl(originator,timestamp);
         foo.put(timestamp, bar);
@@ -169,7 +164,7 @@ public class PeerInfoRecord<Handle, Identifier> implements PeerReviewConstants {
       // put into answered
       foo = answeredEvidence.get(originator);
       if (foo == null) {
-        foo = new HashMap<Long, EvidenceRecordImpl>();
+        foo = new HashMap<>();
         answeredEvidence.put(originator, foo);
       }
       foo.put(timestamp, this);

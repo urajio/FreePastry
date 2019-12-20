@@ -36,16 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.post.log;
 
-import java.io.*;
-import java.security.*;
+import rice.Continuation;
+import rice.Continuation.StandardContinuation;
 
-import rice.*;
-import rice.Continuation.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.util.*;
-import rice.post.*;
-import rice.post.storage.*;
-import rice.post.security.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 /**
  * Class for all entries in the encrypted log.  Applications should *NOT* use
@@ -85,9 +80,9 @@ final class CoalescedLogEntry extends LogEntry {
   protected boolean contains(LogEntry entry) {
     if (entry == null)
       return false;
-    
-    for (int i=0; i<entries.length; i++)
-      if ((entries[i] != null) && (entries[i].equals(entry)))
+
+    for (LogEntry logEntry : entries)
+      if ((logEntry != null) && (logEntry.equals(entry)))
         return true;
     
     return false;
@@ -208,10 +203,10 @@ final class CoalescedLogEntry extends LogEntry {
    */
   private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
     ois.defaultReadObject();
-    
-    for (int i=0; i<entries.length; i++) 
-      if (entries[i] != null)
-        entries[i].setParent(new PhantomLogEntry(entries[i]));
+
+    for (LogEntry entry : entries)
+      if (entry != null)
+        entry.setParent(new PhantomLogEntry(entry));
   }
   
   /**

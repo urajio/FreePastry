@@ -39,7 +39,6 @@ advised of the possibility of such damage.
  */
 package rice.pastry.direct;
 
-import rice.pastry.ScheduledMessage;
 import rice.selector.TimerTask;
 
 public class DirectTimerTask extends TimerTask {

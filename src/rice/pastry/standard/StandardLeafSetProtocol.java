@@ -37,13 +37,18 @@ advised of the possibility of such damage.
 package rice.pastry.standard;
 
 import rice.environment.logging.Logger;
-import rice.pastry.*;
-import rice.pastry.messaging.*;
+import rice.pastry.IdSet;
+import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
 import rice.pastry.client.PastryAppl;
 import rice.pastry.leafset.*;
-import rice.pastry.routing.*;
+import rice.pastry.messaging.Message;
+import rice.pastry.routing.RoutingTable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * An implementation of a simple leaf set protocol.
@@ -69,12 +74,10 @@ public class StandardLeafSetProtocol extends PastryAppl implements LeafSetProtoc
       LeafSet ls, RoutingTable rt) {
     super(ln, LeafSetProtocolAddress.getCode());
     leafSet = ls;
-    Iterator<NodeHandle> i = leafSet.asList().iterator();
-    while(i.hasNext()) {
-      NodeHandle nh = (NodeHandle)i.next(); 
-      nh.addObserver(this);
-    }    
-    cachedSet = new HashSet<NodeHandle>(leafSet.maxSize() * 2);  
+      for (NodeHandle nh : leafSet.asList()) {
+          nh.addObserver(this);
+      }
+    cachedSet = new HashSet<>(leafSet.maxSize() * 2);
     routeTable = rt;
     logger = ln.getEnvironment().getLogManager().getLogger(getClass(), null);
   }
@@ -199,12 +202,10 @@ public class StandardLeafSetProtocol extends PastryAppl implements LeafSetProtoc
         // for now, conservatively send to everyone
         // broadcast(BroadcastLeafSet.Correction);
 
-        Iterator<NodeHandle> it = new ArrayList<NodeHandle>(insertedHandles).iterator();
-        while (it.hasNext()) {
-          // send leafset to missing node
-          NodeHandle nh = (NodeHandle) it.next();
-          thePastryNode.send(nh,bl,null, options);
-        }
+          for (NodeHandle nh : new ArrayList<>(insertedHandles)) {
+              // send leafset to missing node
+              thePastryNode.send(nh, bl, null, options);
+          }
       }
     }
 

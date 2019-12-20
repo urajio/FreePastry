@@ -36,16 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.testing.transportlayer.peerreview;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-
-import org.mpisws.p2p.transport.simpleidentity.InetSocketAddressSerializer;
 import org.mpisws.p2p.transport.util.Serializer;
-
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.p2p.commonapi.rawserialization.RawSerializable;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 public class MyInetSocketAddress extends InetSocketAddress implements RawSerializable {
   public static final Serializer<MyInetSocketAddress> serializer = new Serializer<MyInetSocketAddress>(){

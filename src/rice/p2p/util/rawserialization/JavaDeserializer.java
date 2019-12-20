@@ -42,11 +42,12 @@ advised of the possibility of such damage.
  */
 package rice.p2p.util.rawserialization;
 
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.NodeHandle;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-
-import rice.p2p.commonapi.*;
 
 /**
  * coalesces NodeHandles on the fly during java deserialization
@@ -68,7 +69,7 @@ public class JavaDeserializer extends ObjectInputStream {
     enableResolveObject(true);
   }
 
-  protected Object resolveObject(Object input) throws IOException {
+  protected Object resolveObject(Object input) {
     if (input instanceof NodeHandle) {
 //      System.out.println("POIS.resolveObject("+input+"@"+System.identityHashCode(input)+"):"+node);
       if (endpoint != null) {

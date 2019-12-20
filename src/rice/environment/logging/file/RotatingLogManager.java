@@ -40,26 +40,22 @@ advised of the possibility of such damage.
  */
 package rice.environment.logging.file;
 
+import rice.environment.logging.AbstractLogManager;
+import rice.environment.logging.Logger;
+import rice.environment.logging.simple.SimpleLogger;
+import rice.environment.params.Parameters;
+import rice.environment.time.TimeSource;
+import rice.selector.SelectorManager;
+import rice.selector.TimerTask;
+
+import javax.swing.text.DateFormatter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.text.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import javax.swing.text.DateFormatter;
-
-import rice.environment.Environment;
-import rice.environment.logging.AbstractLogManager;
-import rice.environment.logging.LogManager;
-import rice.environment.logging.Logger;
-import rice.environment.logging.simple.SimpleLogManager;
-import rice.environment.logging.simple.SimpleLogger;
-import rice.environment.params.Parameters;
-import rice.environment.time.TimeSource;
-import rice.p2p.commonapi.CancellableTask;
-import rice.selector.SelectorManager;
-import rice.selector.TimerTask;
 
 /**
  * The file name is 

@@ -36,13 +36,13 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.socket.appsocket;
 
-import java.net.InetSocketAddress;
-import java.nio.channels.SocketChannel;
-import java.util.Map;
-
 import rice.Continuation;
 import rice.p2p.commonapi.Cancellable;
 import rice.p2p.commonapi.appsocket.AppSocket;
+
+import java.net.InetSocketAddress;
+import java.nio.channels.SocketChannel;
+import java.util.Map;
 
 /**
  * Allows opening a socket directly to an Application on a FreePastry node.  
@@ -61,6 +61,6 @@ public interface SocketFactory {
    * @param options use these transport layer specific options when opening the socket
    * @return use this to cancel the call
    */
-  public Cancellable getAppSocket(InetSocketAddress addr, int appid, Continuation<AppSocket, Exception> c, Map<String, Object> options);
-  public Cancellable getSocketChannel(InetSocketAddress addr, int appid, Continuation<SocketChannel, Exception> c, Map<String, Object> options);
+  Cancellable getAppSocket(InetSocketAddress addr, int appid, Continuation<AppSocket, Exception> c, Map<String, Object> options);
+  Cancellable getSocketChannel(InetSocketAddress addr, int appid, Continuation<SocketChannel, Exception> c, Map<String, Object> options);
 }

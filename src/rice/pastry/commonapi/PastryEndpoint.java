@@ -37,17 +37,17 @@ advised of the possibility of such damage.
 
 package rice.pastry.commonapi;
 
-import java.io.IOException;
-import java.util.*;
-
 import org.mpisws.p2p.transport.priority.PriorityTransportLayer;
 import org.mpisws.p2p.transport.util.OptionsFactory;
-
-import rice.*;
+import rice.Continuation;
+import rice.Destructable;
+import rice.Executable;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.MessageDeserializer;
+import rice.p2p.commonapi.rawserialization.RawMessage;
 import rice.pastry.NodeSet;
 import rice.pastry.PastryNode;
 import rice.pastry.client.PastryAppl;
@@ -56,6 +56,9 @@ import rice.pastry.routing.RouteMessageNotification;
 import rice.pastry.routing.RouteSet;
 import rice.pastry.routing.SendOptions;
 import rice.pastry.standard.StandardAddress;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * This class serves as gluecode, which allows applications written for the common
@@ -672,7 +675,7 @@ public class PastryEndpoint extends PastryAppl implements Endpoint {
   }
 
   public List<NodeHandle> networkNeighbors(int num) {
-    HashSet<NodeHandle> handles = new HashSet<NodeHandle>();    
+    HashSet<NodeHandle> handles = new HashSet<>();
     List<rice.pastry.NodeHandle> l = (List<rice.pastry.NodeHandle>)thePastryNode.getRoutingTable().asList();    
     Iterator<rice.pastry.NodeHandle> i = l.iterator();
     while(i.hasNext()) {

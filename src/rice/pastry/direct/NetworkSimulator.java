@@ -36,18 +36,13 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.direct;
 
-import org.mpisws.p2p.transport.TransportLayer;
 import org.mpisws.p2p.transport.direct.Delivery;
 import org.mpisws.p2p.transport.direct.DirectTransportLayer;
 import org.mpisws.p2p.transport.direct.GenericNetworkSimulator;
 import org.mpisws.p2p.transport.liveness.LivenessProvider;
-import org.mpisws.p2p.transport.proximity.ProximityProvider;
-
 import rice.environment.Environment;
 import rice.p2p.commonapi.CancellableTask;
-import rice.p2p.commonapi.rawserialization.RawMessage;
-import rice.pastry.*;
-import rice.pastry.messaging.*;
+import rice.pastry.PastryNode;
 
 /**
  * Interface to an object which is simulating the network.
@@ -59,7 +54,7 @@ import rice.pastry.messaging.*;
 
 public interface NetworkSimulator<Identifier, MessageType> {
 
-  public Environment getEnvironment();
+  Environment getEnvironment();
   
 
   /**
@@ -70,7 +65,7 @@ public interface NetworkSimulator<Identifier, MessageType> {
    * @return true if alive, false otherwise.
    */
 
-  public boolean isAlive(Identifier nh);
+  boolean isAlive(Identifier nh);
 
   /**
    * Determines rtt between two nodes.
@@ -80,7 +75,7 @@ public interface NetworkSimulator<Identifier, MessageType> {
    * 
    * @return proximity of b to a.
    */
-  public float proximity(Identifier a, Identifier b);
+  float proximity(Identifier a, Identifier b);
   
   /**
    * Determines delivery time from a to b.
@@ -90,7 +85,7 @@ public interface NetworkSimulator<Identifier, MessageType> {
    * 
    * @return proximity of b to a.
    */
-  public float networkDelay(Identifier a, Identifier b);
+  float networkDelay(Identifier a, Identifier b);
   
 //  /**
 //   * Deliver message.
@@ -129,9 +124,9 @@ public interface NetworkSimulator<Identifier, MessageType> {
 //   */
 //  public ScheduledMessage deliverMessage(Message msg, DirectPastryNode node);
 
-  public void setTestRecord(TestRecord tr);
+  void setTestRecord(TestRecord tr);
 
-  public TestRecord getTestRecord();
+  TestRecord getTestRecord();
 
   /**
    * Returns the closest Node in proximity.
@@ -139,16 +134,16 @@ public interface NetworkSimulator<Identifier, MessageType> {
    * @param nid
    * @return
    */
-  public DirectNodeHandle getClosest(DirectNodeHandle nh);
+  DirectNodeHandle getClosest(DirectNodeHandle nh);
 
-  public void destroy(DirectPastryNode dpn);
+  void destroy(DirectPastryNode dpn);
 
   /**
    * Generates a random node record
    * 
    * @return
    */
-  public NodeRecord generateNodeRecord();
+  NodeRecord generateNodeRecord();
   
   /**
    * Registers a node handle with the simulator.
@@ -157,11 +152,11 @@ public interface NetworkSimulator<Identifier, MessageType> {
    */
 //  public void registerNode(PastryNode dpn, TransportLayer<DirectNodeHandle, RawMessage> tl, NodeRecord nr);
 
-  public void removeNode(PastryNode node);
+  void removeNode(PastryNode node);
 
-  public void start();
+  void start();
   
-  public void stop();
+  void stop();
   
   /**
    * Deliver message.
@@ -172,7 +167,7 @@ public interface NetworkSimulator<Identifier, MessageType> {
    * @param period to deliver the message after the delay
    */
 //  public CancellableTask enqueueDelivery(Delivery del);  
-  public CancellableTask enqueueDelivery(Delivery del, int delay);
+  CancellableTask enqueueDelivery(Delivery del, int delay);
 
   /**
    * The max rate of the simulator compared to realtime. 
@@ -196,13 +191,13 @@ public interface NetworkSimulator<Identifier, MessageType> {
    * zero or less will cause no bound on the simulation speed
    * 
    */
-  public void setMaxSpeed(float rate);
+  void setMaxSpeed(float rate);
 
   /**
    * unlimited maxSpeed
    *
    */
-  public void setFullSpeed();
+  void setFullSpeed();
 
   /**
    * Call this when a message is sent.
@@ -211,7 +206,7 @@ public interface NetworkSimulator<Identifier, MessageType> {
    * @param to the destination 
    * @param delay the network proximity (when the message will be received)
    */
-  public void notifySimulatorListenersSent(MessageType m, Identifier from, Identifier to, int delay);
+  void notifySimulatorListenersSent(MessageType m, Identifier from, Identifier to, int delay);
   
   /**
    * Call this when a message is received.
@@ -219,29 +214,29 @@ public interface NetworkSimulator<Identifier, MessageType> {
    * @param from the source
    * @param to the destination 
    */
-  public void notifySimulatorListenersReceived(MessageType m, Identifier from, Identifier to);
+  void notifySimulatorListenersReceived(MessageType m, Identifier from, Identifier to);
   
   /**
    * 
    * @param sl
    * @return true if added, false if already a listener
    */
-  public boolean addSimulatorListener(GenericSimulatorListener<Identifier, MessageType> sl);
+  boolean addSimulatorListener(GenericSimulatorListener<Identifier, MessageType> sl);
   
   /**
    * 
    * @param sl
    * @return true if removed, false if not already a listener
    */
-  public boolean removeSimulatorListener(GenericSimulatorListener<Identifier, MessageType> sl);
+  boolean removeSimulatorListener(GenericSimulatorListener<Identifier, MessageType> sl);
 
-  public NodeRecord getNodeRecord(DirectNodeHandle handle);
+  NodeRecord getNodeRecord(DirectNodeHandle handle);
   
-  public LivenessProvider<Identifier> getLivenessProvider();
+  LivenessProvider<Identifier> getLivenessProvider();
 
 //  public ProximityProvider<NodeHandle> getProximityProvider();
 
-  public GenericNetworkSimulator<Identifier, MessageType> getGenericSimulator();
+  GenericNetworkSimulator<Identifier, MessageType> getGenericSimulator();
   
-  public void registerNode(Identifier i, DirectTransportLayer<Identifier, MessageType> dtl, NodeRecord nr);  
+  void registerNode(Identifier i, DirectTransportLayer<Identifier, MessageType> dtl, NodeRecord nr);
 }

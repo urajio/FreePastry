@@ -45,11 +45,10 @@ package rice.persistence.testing;
  * 
  * @version $Id$
  */
-import java.util.*;
 
-import rice.*;
 import rice.environment.Environment;
-import rice.persistence.*;
+
+import java.util.Arrays;
 
 /**
  * This class is a class which tests the Storage class

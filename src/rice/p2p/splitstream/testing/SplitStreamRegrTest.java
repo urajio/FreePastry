@@ -37,15 +37,14 @@ advised of the possibility of such damage.
 
 package rice.p2p.splitstream.testing;
 
-import java.io.IOException;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.environment.params.Parameters;
-import rice.environment.params.simple.SimpleParameters;
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.Id;
+import rice.p2p.commonapi.Node;
 import rice.p2p.commonapi.testing.CommonAPITest;
 import rice.p2p.splitstream.*;
+
+import java.io.IOException;
 
 /**
  * @(#) SplitStreamRegrTest.java Provides regression testing for the Scribe
@@ -67,9 +66,9 @@ public class SplitStreamRegrTest extends CommonAPITest {
   /**
    * DESCRIBE THE FIELD
    */
-  protected SplitStreamImpl splitstreams[];
+  protected SplitStreamImpl[] splitstreams;
 
-  protected SplitStreamTestClient ssclients[];
+  protected SplitStreamTestClient[] ssclients;
 
   /**
    * Constructor which sets up all local variables
@@ -86,7 +85,7 @@ public class SplitStreamRegrTest extends CommonAPITest {
    * 
    * @param args DESCRIBE THE PARAMETER
    */
-  public static void main(String args[]) throws IOException {
+  public static void main(String[] args) throws IOException {
 
     // by properly setting the params first, the enviornment will use
     // the specified seed when creating a default RandomSource
@@ -171,8 +170,8 @@ public class SplitStreamRegrTest extends CommonAPITest {
       channel = ssclients[i].getChannel();
       stripes = channel.getStripes();
       num = 0;
-      for (int j = 0; j < stripes.length; j++) {
-        count = stripes[j].getChildren().length;
+      for (Stripe stripe : stripes) {
+        count = stripe.getChildren().length;
         if (count > 0)
           num++;
       }
@@ -295,13 +294,13 @@ public class SplitStreamRegrTest extends CommonAPITest {
     boolean result = true;
     for (int i = startindex; i < num; i++) {
       stripes = ssclients[i].getStripes();
-      for (int j = 0; j < stripes.length; j++) {
-        if (stripes[j].getParent() == null && !stripes[j].isRoot()) {
+      for (Stripe stripe : stripes) {
+        if (stripe.getParent() == null && !stripe.isRoot()) {
           result = false;
           System.out
-              .println("Node " + ssclients[i].getId()
-                  + " is parentless for topic "
-                  + stripes[j].getStripeId().getId());
+                  .println("Node " + ssclients[i].getId()
+                          + " is parentless for topic "
+                          + stripe.getStripeId().getId());
         }
         //if(stripes[j].getParent() == null && stripes[j].isRoot())
         //System.out.println("Node "+ssclients[i].getId()+" is parent less, but
@@ -399,15 +398,15 @@ public class SplitStreamRegrTest extends CommonAPITest {
 
     public void subscribeStripes() {
       log("Subscribing to all Stripes.");
-      for (int i = 0; i < stripes.length; i++) {
-        stripes[i].subscribe(this);
+      for (Stripe stripe : stripes) {
+        stripe.subscribe(this);
       }
     }
 
     public void publishAll(byte[] b) {
       log("Publishing to all Stripes.");
-      for (int i = 0; i < stripes.length; i++) {
-        publish(b, stripes[i]);
+      for (Stripe stripe : stripes) {
+        publish(b, stripe);
       }
     }
 

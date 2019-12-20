@@ -36,15 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.socket.nat.rendezvous;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
 import org.mpisws.p2p.transport.rendezvous.PilotFinder;
-
 import rice.environment.random.RandomSource;
 import rice.pastry.NodeHandle;
 import rice.pastry.PastryNode;
 import rice.pastry.leafset.LeafSet;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 
 public class LeafSetPilotFinder implements
     PilotFinder<RendezvousSocketNodeHandle> {
@@ -63,7 +62,7 @@ public class LeafSetPilotFinder implements
     
     if (leafSet.contains(dest)) {
       // generate intermediate node possibilities
-      HashSet<RendezvousSocketNodeHandle> possibleIntermediates = new HashSet<RendezvousSocketNodeHandle>();
+      HashSet<RendezvousSocketNodeHandle> possibleIntermediates = new HashSet<>();
 
       // Note: It's important to make sure the intermediates are in dest's leafset, which means that the distance between the indexes must be <= leafSet.maxSize()/2      
       if (leafSet.overlaps()) {
@@ -87,7 +86,7 @@ public class LeafSetPilotFinder implements
       }
       
       // return random one
-      ArrayList<RendezvousSocketNodeHandle> list = new ArrayList<RendezvousSocketNodeHandle>(possibleIntermediates);
+      ArrayList<RendezvousSocketNodeHandle> list = new ArrayList<>(possibleIntermediates);
       
       // this is scary...
       if (list.isEmpty()) return null;

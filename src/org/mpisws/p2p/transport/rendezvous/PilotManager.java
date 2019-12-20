@@ -37,7 +37,6 @@ advised of the possibility of such damage.
 package org.mpisws.p2p.transport.rendezvous;
 
 import org.mpisws.p2p.transport.SocketRequestHandle;
-
 import rice.Continuation;
 
 /**
@@ -68,9 +67,9 @@ public interface PilotManager<Identifier> {
    */
   void closePilot(Identifier i);
 
-  public void addOutgoingPilotListener(OutgoingPilotListener<Identifier> listener);
-  public void removeOutgoingPilotListener(OutgoingPilotListener<Identifier> listener);
-  public void addIncomingPilotListener(IncomingPilotListener<Identifier> listener);
-  public void removeIncomingPilotListener(IncomingPilotListener<Identifier> listener);
+  void addOutgoingPilotListener(OutgoingPilotListener<Identifier> listener);
+  void removeOutgoingPilotListener(OutgoingPilotListener<Identifier> listener);
+  void addIncomingPilotListener(IncomingPilotListener<Identifier> listener);
+  void removeIncomingPilotListener(IncomingPilotListener<Identifier> listener);
   
 }

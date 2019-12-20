@@ -36,24 +36,16 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.testing.transportlayer.peerreview;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
-import org.mpisws.p2p.testing.transportlayer.peerreview.PRRegressionTest.BogusApp;
-import org.mpisws.p2p.testing.transportlayer.peerreview.PRRegressionTest.HandleImpl;
-import org.mpisws.p2p.testing.transportlayer.peerreview.PRRegressionTest.IdImpl;
-import org.mpisws.p2p.testing.transportlayer.peerreview.PRRegressionTest.Player;
 import org.mpisws.p2p.transport.peerreview.PeerReview;
 import org.mpisws.p2p.transport.peerreview.PeerReviewImpl;
 import org.mpisws.p2p.transport.peerreview.infostore.StatusChangeListener;
-
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.util.MathUtils;
 import rice.selector.TimerTask;
+
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 /**
  * Bob deviates from the protocol by sending an extra message.
@@ -112,7 +104,7 @@ public class PRNonconform1 extends PRRegressionTest {
       
       @Override
       public void messageReceived(HandleImpl i, ByteBuffer m,
-          Map<String, Object> options) throws IOException {
+          Map<String, Object> options) {
 //        if (player.localHandle.id.id != 2) logger.logException("accepted illegal message", new Exception("stack trace"));
         if (logger.level <= Logger.INFO) logger.log("Message received: "+MathUtils.toBase64(m.array()));
       }

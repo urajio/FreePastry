@@ -36,12 +36,12 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.join;
 
-import rice.pastry.*;
-import rice.pastry.messaging.*;
-import rice.pastry.socket.nat.rendezvous.RendezvousSocketNodeHandle;
+import rice.pastry.NodeHandle;
+import rice.pastry.messaging.Message;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Date;
 
 /**
  * Request for the join protocols on the local node to join the overlay.
@@ -101,8 +101,8 @@ public class InitiateJoin extends Message implements Serializable {
    * @return the handle.
    */
   public NodeHandle getHandle() {
-    for (int i = 0; i < handle.length; i++) {
-      if (handle[i].isAlive()) return handle[i];
+    for (NodeHandle nodeHandle : handle) {
+      if (nodeHandle.isAlive()) return nodeHandle;
     }
     return null;
   }

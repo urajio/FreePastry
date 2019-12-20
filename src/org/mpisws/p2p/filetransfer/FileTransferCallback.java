@@ -44,18 +44,18 @@ public interface FileTransferCallback {
    * Called when a message is received.
    * @param bb
    */
-  public void messageReceived(ByteBuffer bb);
+  void messageReceived(ByteBuffer bb);
   
   /**
    * Called when a file is received.
    * @param f
    * @param metadata
    */
-  public void fileReceived(File f, ByteBuffer metadata);
+  void fileReceived(File f, ByteBuffer metadata);
   
   /**
    * Called when the FileTransfer fails.
    * @param ioe
    */
-  public void receiveException(Exception ioe);
+  void receiveException(Exception ioe);
 }

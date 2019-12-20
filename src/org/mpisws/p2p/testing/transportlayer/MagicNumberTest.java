@@ -36,39 +36,22 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.testing.transportlayer;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
+import org.mpisws.p2p.transport.*;
 import org.mpisws.p2p.transport.wire.WireTransportLayer;
 import org.mpisws.p2p.transport.wire.WireTransportLayerImpl;
 import org.mpisws.p2p.transport.wire.exception.StalledSocketException;
 import org.mpisws.p2p.transport.wire.magicnumber.MagicNumberTransportLayer;
-
-import rice.Continuation;
 import rice.environment.Environment;
-import rice.environment.logging.Logger;
+
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.*;
+
+import static org.junit.Assert.assertTrue;
 
 public class MagicNumberTest extends WireTest {
   static TransportLayer<InetSocketAddress, ByteBuffer> carol, dave;
@@ -103,12 +86,12 @@ public class MagicNumberTest extends WireTest {
     bob = new MagicNumberTransportLayer(
       new WireTransportLayerImpl(new InetSocketAddress(addr,startPort+1),env, null)
       ,env, null, GOOD_HDR, 2000);
-    carol = new MagicNumberTransportLayer<InetSocketAddress>(
-        new WireTransportLayerImpl(new InetSocketAddress(addr,startPort+2),env, null)
-        ,env, null,BAD_HDR, 2000);
-    dave = new MagicNumberTransportLayer<InetSocketAddress>(
-        new WireTransportLayerImpl(new InetSocketAddress(addr,startPort+3),env, null)
-        ,env, null,NO_HDR, 2000);
+    carol = new MagicNumberTransportLayer<>(
+            new WireTransportLayerImpl(new InetSocketAddress(addr, startPort + 2), env, null)
+            , env, null, BAD_HDR, 2000);
+    dave = new MagicNumberTransportLayer<>(
+            new WireTransportLayerImpl(new InetSocketAddress(addr, startPort + 3), env, null)
+            , env, null, NO_HDR, 2000);
   }
 
   /*********************** TCP *************************/  
@@ -121,26 +104,24 @@ public class MagicNumberTest extends WireTest {
    */
   @Test
   public void wrongHeaderTCP() throws Exception {
-    Map<String, Object> options = new HashMap<String, Object>();
+    Map<String, Object> options = new HashMap<>();
     options.put(WireTransportLayer.OPTION_TRANSPORT_TYPE, WireTransportLayer.TRANSPORT_TYPE_GUARANTEED);
     
-    final List<P2PSocket> aliceSockets = new ArrayList<P2PSocket>();
-    final List<P2PSocket> carolSockets = new ArrayList<P2PSocket>();
-    final List<Throwable> exceptionList = new ArrayList<Throwable>(1);
-    final List<byte[]> unexpectedData = new ArrayList<byte[]>(1);
+    final List<P2PSocket> aliceSockets = new ArrayList<>();
+    final List<P2PSocket> carolSockets = new ArrayList<>();
+    final List<Throwable> exceptionList = new ArrayList<>(1);
+    final List<byte[]> unexpectedData = new ArrayList<>(1);
     final Object lock = new Object();
     
     // Part I opening a connection
     carol.setCallback(new TransportLayerCallback<InetSocketAddress, ByteBuffer>() {
     
-      public void messageReceived(InetSocketAddress i, ByteBuffer m, Map<String, Object> options)
-          throws IOException {
+      public void messageReceived(InetSocketAddress i, ByteBuffer m, Map<String, Object> options) {
         // TODO Auto-generated method stub
     
       }
     
-      public void incomingSocket(P2PSocket s)
-          throws IOException {
+      public void incomingSocket(P2PSocket s) {
         synchronized(lock) {
           carolSockets.add(s);
           lock.notify();
@@ -215,25 +196,23 @@ public class MagicNumberTest extends WireTest {
    */
   @Test
   public void stallTCP() throws Exception {
-    Map<String, Object> options = new HashMap<String, Object>();
+    Map<String, Object> options = new HashMap<>();
     options.put(WireTransportLayer.OPTION_TRANSPORT_TYPE, WireTransportLayer.TRANSPORT_TYPE_GUARANTEED);
     
-    final List<P2PSocket> aliceSockets = new ArrayList<P2PSocket>();
-    final List<P2PSocket> daveSockets = new ArrayList<P2PSocket>();
-    final List<Throwable> exceptionList = new ArrayList<Throwable>(1);
-    final List<ByteBuffer> receivedList = new ArrayList<ByteBuffer>(1);
-    final List<ByteBuffer> sentList = new ArrayList<ByteBuffer>(1);
+    final List<P2PSocket> aliceSockets = new ArrayList<>();
+    final List<P2PSocket> daveSockets = new ArrayList<>();
+    final List<Throwable> exceptionList = new ArrayList<>(1);
+    final List<ByteBuffer> receivedList = new ArrayList<>(1);
+    final List<ByteBuffer> sentList = new ArrayList<>(1);
     final Object lock = new Object();
     
     // Part I opening a connection
     alice.setCallback(new TransportLayerCallback<InetSocketAddress, ByteBuffer>() {    
-      public void messageReceived(InetSocketAddress i, ByteBuffer m, Map<String, Object> options)
-          throws IOException {
+      public void messageReceived(InetSocketAddress i, ByteBuffer m, Map<String, Object> options) {
         // TODO Auto-generated method stub    
       }
     
-      public void incomingSocket(P2PSocket s)
-          throws IOException {
+      public void incomingSocket(P2PSocket s) {
         synchronized(lock) {
           aliceSockets.add(s);
           lock.notify();
@@ -308,20 +287,20 @@ public class MagicNumberTest extends WireTest {
     final ByteBuffer sentBuffer = ByteBuffer.wrap(sentBytes); 
    
     // added to every time bob receives something
-    final List<ByteBuffer> receivedList = new ArrayList<ByteBuffer>(1);
-    final List<Throwable> exceptionList = new ArrayList<Throwable>(1);
-    final List<MessageRequestHandle> sentList = new ArrayList<MessageRequestHandle>(1);
-    final List<byte[]> unexpectedData = new ArrayList<byte[]>(1);
+    final List<ByteBuffer> receivedList = new ArrayList<>(1);
+    final List<Throwable> exceptionList = new ArrayList<>(1);
+    final List<MessageRequestHandle> sentList = new ArrayList<>(1);
+    final List<byte[]> unexpectedData = new ArrayList<>(1);
     final Object lock = new Object();
     
-    Map<String, Object> options = new HashMap<String, Object>();
+    Map<String, Object> options = new HashMap<>();
     options.put(WireTransportLayer.OPTION_TRANSPORT_TYPE, WireTransportLayer.TRANSPORT_TYPE_DATAGRAM);
     
     
     
     // make a way for bob to receive the callback
     carol.setCallback(new TransportLayerCallback<InetSocketAddress, ByteBuffer>() {    
-      public void messageReceived(InetSocketAddress i, ByteBuffer buf, Map<String, Object> options) throws IOException {
+      public void messageReceived(InetSocketAddress i, ByteBuffer buf, Map<String, Object> options) {
         synchronized(lock) {
           receivedList.add(buf);
           lock.notify();
@@ -398,7 +377,7 @@ public class MagicNumberTest extends WireTest {
   /**
    * @param args
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
     JUnitCore.main("org.mpisws.p2p.testing.transportlayer.MagicNumberTest");
   }
 

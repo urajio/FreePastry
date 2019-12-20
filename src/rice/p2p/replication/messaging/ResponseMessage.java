@@ -37,11 +37,11 @@ advised of the possibility of such damage.
 
 package rice.p2p.replication.messaging;
 
-import java.io.IOException;
-
 import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.replication.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+
+import java.io.IOException;
 
 /**
  * @(#) ReaponseMessage.java
@@ -98,8 +98,8 @@ public class ResponseMessage extends ReplicationMessage {
   
   public String toString() {
     int numResponses = 0;
-    for (int a = 0; a < ids.length; a++) {
-      numResponses+=ids[a].length;
+    for (Id[] id : ids) {
+      numResponses += id.length;
     }
     return "ResponseMessage("+getSource()+"):"+numResponses; 
   }
@@ -116,20 +116,19 @@ public class ResponseMessage extends ReplicationMessage {
     // encode the ids table
     // note, can uncomment thes lines if this array turns out to be non-full
     buf.writeInt(ids.length);
-    for (int i=0; i<ids.length; i++) {
-      Id[] thisRow = ids[i];
-//      if (thisRow != null) {
+    for (Id[] thisRow : ids) {
+      //      if (thisRow != null) {
 //        buf.writeByte((byte)1);
-        buf.writeInt(thisRow.length);
-        for (int j=0; j<thisRow.length; j++) {
+      buf.writeInt(thisRow.length);
+      for (Id id : thisRow) {
 //          if (thisRow[j] != null) {
 //            buf.writeByte((byte)1);
-            buf.writeShort(thisRow[j].getType());
-            thisRow[j].serialize(buf);
+        buf.writeShort(id.getType());
+        id.serialize(buf);
 //          } else {
 //            buf.writeByte((byte)0);
 //          }
-        }
+      }
 //      } else {
 //        buf.writeByte((byte)0);
 //      }
@@ -137,19 +136,17 @@ public class ResponseMessage extends ReplicationMessage {
     
     // ranges
     buf.writeInt(ranges.length);
-    for (int i = 0; i < ranges.length; i++) {
-      ranges[i].serialize(buf); 
+    for (IdRange range : ranges) {
+      range.serialize(buf);
     }    
   }
   
   public static ResponseMessage build(InputBuffer buf, Endpoint endpoint) throws IOException {
     byte version = buf.readByte();
-    switch(version) {
-      case 0:
-        return new ResponseMessage(buf, endpoint);
-      default:
-        throw new IOException("Unknown Version: "+version);
-    }
+      if (version == 0) {
+          return new ResponseMessage(buf, endpoint);
+      }
+      throw new IOException("Unknown Version: " + version);
   }
     
   private ResponseMessage(InputBuffer buf, Endpoint endpoint) throws IOException {

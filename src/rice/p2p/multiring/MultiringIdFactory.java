@@ -39,6 +39,7 @@ package rice.p2p.multiring;
 
 import rice.environment.random.RandomSource;
 import rice.p2p.commonapi.*;
+
 import java.util.*;
 
 /**
@@ -219,7 +220,7 @@ public class MultiringIdFactory implements IdFactory {
    * @return The built Id.
    */
   public IdRange buildIdRangeFromPrefix(String string) {
-    if (string.indexOf(", ") < 0) 
+    if (!string.contains(", "))
       return new MultiringIdRange(ringId, factory.buildIdRangeFromPrefix(string));
     
     string = string.substring(1);

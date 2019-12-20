@@ -36,12 +36,17 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.p2p.glacier.v2;
 
-import java.security.*;
-import java.io.*;
-
 import rice.environment.logging.Logger;
-import rice.p2p.commonapi.rawserialization.*;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.p2p.glacier.Fragment;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class Manifest implements Serializable {
   
@@ -114,8 +119,7 @@ public class Manifest implements Serializable {
       if (thisHash[i] != fragmentHash[fragmentID][i]) {
         String s= "*** HASH MISMATCH: POS#"+i+", "+thisHash[i]+" != "+fragmentHash[fragmentID][i]+" ***\n";
         s+="Hash: ";
-        for (int j=0; j<thisHash.length; j++)
-          s+=thisHash[j];
+          for (byte hash : thisHash) s += hash;
         s+="\n"+toStringFull();
         if (logger.level <= Logger.WARNING) logger.log(s);
         return false;
@@ -173,8 +177,7 @@ public class Manifest implements Serializable {
     int dim2 = fragmentHash[0].length;
     byte[] fragmentHashField = new byte[dim1*dim2];
     for (int i=0; i<dim1; i++)
-      for (int j=0; j<dim2; j++)
-        fragmentHashField[i*dim2 + j] = fragmentHash[i][j];
+      System.arraycopy(fragmentHash[i], 0, fragmentHashField, i * dim2, dim2);
     oos.write(fragmentHashField);
     oos.write(signature);
   }
@@ -191,8 +194,8 @@ public class Manifest implements Serializable {
     ois.readFully(fragmentHashField, 0, fragmentHashLength * fragmentHashSubLength);
     fragmentHash = new byte[fragmentHashLength][fragmentHashSubLength];
     for (int i=0; i<fragmentHashLength; i++)
-      for (int j=0; j<fragmentHashSubLength; j++)
-        fragmentHash[i][j] = fragmentHashField[i*fragmentHashSubLength + j];
+      if (fragmentHashSubLength >= 0)
+        System.arraycopy(fragmentHashField, i * fragmentHashSubLength, fragmentHash[i], 0, fragmentHashSubLength);
     signature = new byte[signatureLength];
     ois.readFully(signature, 0, signatureLength);
   }
@@ -207,8 +210,7 @@ public class Manifest implements Serializable {
     int dim2 = fragmentHash[0].length;
     byte[] fragmentHashField = new byte[dim1*dim2];
     for (int i=0; i<dim1; i++)
-      for (int j=0; j<dim2; j++)
-        fragmentHashField[i*dim2 + j] = fragmentHash[i][j];
+      System.arraycopy(fragmentHash[i], 0, fragmentHashField, i * dim2, dim2);
     buf.write(fragmentHashField, 0, fragmentHashField.length);
     buf.write(signature, 0, signature.length);    
   }  
@@ -224,8 +226,8 @@ public class Manifest implements Serializable {
     buf.read(fragmentHashField, 0, fragmentHashLength * fragmentHashSubLength);
     fragmentHash = new byte[fragmentHashLength][fragmentHashSubLength];
     for (int i=0; i<fragmentHashLength; i++)
-      for (int j=0; j<fragmentHashSubLength; j++)
-        fragmentHash[i][j] = fragmentHashField[i*fragmentHashSubLength + j];
+      if (fragmentHashSubLength >= 0)
+        System.arraycopy(fragmentHashField, i * fragmentHashSubLength, fragmentHash[i], 0, fragmentHashSubLength);
     signature = new byte[signatureLength];
     buf.read(signature, 0, signatureLength);    
   }

@@ -39,38 +39,19 @@ advised of the possibility of such damage.
  */
 package org.mpisws.p2p.transport.sourceroute;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
-import org.mpisws.p2p.transport.multiaddress.MultiInetAddressTransportLayer;
-import org.mpisws.p2p.transport.util.MessageRequestHandleImpl;
-import org.mpisws.p2p.transport.util.DefaultCallback;
-import org.mpisws.p2p.transport.util.DefaultErrorHandler;
-import org.mpisws.p2p.transport.util.InsufficientBytesException;
-import org.mpisws.p2p.transport.util.SocketInputBuffer;
-import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
-import org.mpisws.p2p.transport.util.SocketWrapperSocket;
-
-import rice.Continuation;
+import org.mpisws.p2p.transport.*;
+import org.mpisws.p2p.transport.util.*;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
 import rice.p2p.commonapi.Cancellable;
 import rice.p2p.util.rawserialization.SimpleInputBuffer;
 import rice.p2p.util.rawserialization.SimpleOutputBuffer;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * This layer can only send/receive messages from a SourceRoute and determine liveness.  
@@ -109,18 +90,18 @@ public class SourceRouteTransportLayerImpl<Identifier> implements
     this.srFactory = srFactory;
     this.errorHandler = errorHandler;
     localIdentifier = this.srFactory.getSourceRoute(etl.getLocalIdentifier());
-    taps = new ArrayList<SourceRouteTap>();    
+    taps = new ArrayList<>();
     MAX_NUM_HOPS = env.getParameters().getInt("transport_sr_max_num_hops");
     
 //    this.callback = new DefaultCallback<SourceRoute<Identifier>, ByteBuffer>(env);
     this.forwardSourceRouteStrategy = fSRs;
 
     if (this.forwardSourceRouteStrategy == null) {
-      this.forwardSourceRouteStrategy = new DefaultForwardSourceRouteStrategy<Identifier>();
+      this.forwardSourceRouteStrategy = new DefaultForwardSourceRouteStrategy<>();
     }
     
     if (this.errorHandler == null) {
-      this.errorHandler = new DefaultErrorHandler<SourceRoute<Identifier>>(logger); 
+      this.errorHandler = new DefaultErrorHandler<>(logger);
     }
 
     etl.setCallback(this);
@@ -145,7 +126,7 @@ public class SourceRouteTransportLayerImpl<Identifier> implements
         
     if (logger.level <= Logger.FINE) logger.log("openSocket("+i+")");    
     
-    final SocketRequestHandleImpl<SourceRoute<Identifier>> handle = new SocketRequestHandleImpl<SourceRoute<Identifier>>(i, options, logger);
+    final SocketRequestHandleImpl<SourceRoute<Identifier>> handle = new SocketRequestHandleImpl<>(i, options, logger);
     
     SimpleOutputBuffer sob = new SimpleOutputBuffer(i.getSerializedLength());
     try {
@@ -206,7 +187,7 @@ public class SourceRouteTransportLayerImpl<Identifier> implements
       P2PSocket<Identifier> socket, 
       SourceRoute<Identifier> i) {
     
-    deliverSocketToMe.receiveResult(handle, new SocketWrapperSocket<SourceRoute<Identifier>, Identifier>(i, socket, logger, errorHandler, socket.getOptions()));     
+    deliverSocketToMe.receiveResult(handle, new SocketWrapperSocket<>(i, socket, logger, errorHandler, socket.getOptions()));
   }
   
   /**
@@ -217,7 +198,7 @@ public class SourceRouteTransportLayerImpl<Identifier> implements
    * @throws IOException
    */
   protected void incomingSocketHelper(P2PSocket<Identifier> socket, SourceRoute<Identifier> sr) throws IOException {
-    callback.incomingSocket(new SocketWrapperSocket<SourceRoute<Identifier>, Identifier>(sr, socket, logger, errorHandler, socket.getOptions())); 
+    callback.incomingSocket(new SocketWrapperSocket<>(sr, socket, logger, errorHandler, socket.getOptions()));
   }
 
   public void incomingSocket(final P2PSocket<Identifier> socka) throws IOException {
@@ -282,7 +263,7 @@ public class SourceRouteTransportLayerImpl<Identifier> implements
                         for (SourceRouteTap tap : taps) {
                           tap.socketOpened(sr, socka, sockb);
                         }
-                        new Forwarder<Identifier>(sr, socka, sockb, logger);
+                          new Forwarder<>(sr, socka, sockb, logger);
                       }
                     }
                   
@@ -347,7 +328,7 @@ public class SourceRouteTransportLayerImpl<Identifier> implements
     final ByteBuffer buf;
     
     final MessageRequestHandleImpl<SourceRoute<Identifier>, ByteBuffer> handle 
-      = new MessageRequestHandleImpl<SourceRoute<Identifier>, ByteBuffer>(i, m, options);
+      = new MessageRequestHandleImpl<>(i, m, options);
 
     
     SimpleOutputBuffer sob = new SimpleOutputBuffer(m.remaining() + i.getSerializedLength());

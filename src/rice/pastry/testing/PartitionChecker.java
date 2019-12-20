@@ -39,15 +39,22 @@ advised of the possibility of such damage.
  */
 package rice.pastry.testing;
 
-import java.io.*;
-import java.net.InetSocketAddress;
-import java.util.*;
-
 import rice.environment.Environment;
-import rice.pastry.*;
-import rice.pastry.dist.DistPastryNodeFactory;
+import rice.pastry.NodeHandle;
+import rice.pastry.NodeSet;
 import rice.pastry.leafset.LeafSet;
-import rice.pastry.socket.*;
+import rice.pastry.socket.SocketNodeHandle;
+import rice.pastry.socket.SocketPastryNodeFactory;
+
+import java.io.BufferedReader;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.PrintStream;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * Pass in a certificate which contains bootstrap nodes.  
@@ -88,12 +95,12 @@ public class PartitionChecker {
   
   Environment environment;
 
-  HashSet<NodeHandle> dead = new HashSet<NodeHandle>();    
+  HashSet<NodeHandle> dead = new HashSet<>();
 
   public PartitionChecker(String ringIdString) throws Exception {
     environment = new Environment();
     buildBootstrapSetFromCert(ringIdString); 
-    rings = new ArrayList<Ring>();
+    rings = new ArrayList<>();
     
     SocketPastryNodeFactory factory = new SocketPastryNodeFactory(null, 1, environment);
     
@@ -102,17 +109,16 @@ public class PartitionChecker {
       rings.add(buildRing(factory, (InetSocketAddress)(unmatchedBootstraps.iterator().next()))); 
     }
     Collections.sort(rings);
-    Iterator<Ring> i = rings.iterator();
-    while(i.hasNext()) {
-      System.out.println(i.next()); 
-    }
+      for (Ring ring : rings) {
+          System.out.println(ring);
+      }
   }
   
   
   
   protected void buildBootstrapSetFromCert(String ringIdString) throws Exception {
-    unmatchedBootstraps = new HashSet<InetSocketAddress>(); 
-    bootstraps = new HashSet<InetSocketAddress>(); 
+    unmatchedBootstraps = new HashSet<>();
+    bootstraps = new HashSet<>();
     
 //    byte[] ringIdbytes = ringIdString.getBytes();
     
@@ -139,7 +145,7 @@ public class PartitionChecker {
     }
   }
   
-  protected LeafSet getLeafSet(NodeHandle nh) throws IOException {
+  protected LeafSet getLeafSet(NodeHandle nh) {
     // TODO: implement, need to make this an application and have a message to fetch this info
     
     return null;
@@ -152,7 +158,7 @@ public class PartitionChecker {
     final Ring ring = new Ring(bootstrap);
 
 //    final HashMap leafsets = new HashMap();
-    final HashSet<NodeHandle> unseen = new HashSet<NodeHandle>();
+    final HashSet<NodeHandle> unseen = new HashSet<>();
     
     
     unseen.add(factory.getNodeHandle(bootstrap, 20000));
@@ -199,14 +205,6 @@ public class PartitionChecker {
                         unseen.add(ns.get(i));
                   }
                 
-                } catch (java.net.ConnectException e) {
-                  ring.addFailure(handle,e);
-                  dead.add(handle);
-                } catch (java.net.SocketTimeoutException e) {
-                  ring.addFailure(handle,e);
-                  dead.add(handle);
-                } catch (IOException e) {
-//                  environment.getLogManager().getLogger(PastryNetworkTest.class, null).log(Logger.WARNING,"GOT OTHER ERROR CONNECTING TO " + handle + " - " + e);
                 } finally {
                   synchronized (unseen) {
                     numThreads--;
@@ -236,19 +234,19 @@ public class PartitionChecker {
     /**
      * of InetSocketAddress
      */
-    HashSet<InetSocketAddress> myBootstraps;
+    final HashSet<InetSocketAddress> myBootstraps;
     /**
      * of NodeHandle
      */
-    HashSet<NodeHandle> nodes;
+    final HashSet<NodeHandle> nodes;
     
     String name;
     
     public Ring(InetSocketAddress bootAddr) {
       name = bootAddr.toString();
-      myBootstraps = new HashSet<InetSocketAddress>();
+      myBootstraps = new HashSet<>();
       myBootstraps.add(bootAddr);
-      nodes = new HashSet<NodeHandle>();
+      nodes = new HashSet<>();
     }
     
     /**
@@ -301,19 +299,16 @@ public class PartitionChecker {
       }
       s+=" non-boots:";
       synchronized(nodes) {
-        Iterator<NodeHandle> i = nodes.iterator();
-        while(i.hasNext()) {
-          NodeHandle nxt = i.next();
-          if (!bootstraps.contains(nxt))
-            s+=","+nxt;
-        }
+          for (NodeHandle nxt : nodes) {
+              if (!bootstraps.contains(nxt))
+                  s += "," + nxt;
+          }
       }      
       return s;
     }
 
     public int compareTo(Ring arg0) {
-      Ring that = (Ring)arg0;
-      return this.size() - that.size();
+      return this.size() - ((Ring)arg0).size();
 //      return that.size() - this.size();
     }
     

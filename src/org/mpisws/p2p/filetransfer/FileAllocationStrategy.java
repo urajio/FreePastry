@@ -55,7 +55,7 @@ public interface FileAllocationStrategy {
    * @return
    * @throws IOException
    */
-  public File getFile(ByteBuffer metadata, long offset, long length) throws IOException;
+  File getFile(ByteBuffer metadata, long offset, long length) throws IOException;
   
   /**
    * Notification of a cancelled transfer.   
@@ -66,5 +66,5 @@ public interface FileAllocationStrategy {
    * @param downloadedLength the actual "valid" downloaded length
    * @param requestedLength the length of the original file transfer request
    */
-  public void fileCancelled(ByteBuffer metadata, File f, long offset, long downloadedLength, long requestedLength, Exception reason);
+  void fileCancelled(ByteBuffer metadata, File f, long offset, long downloadedLength, long requestedLength, Exception reason);
 }

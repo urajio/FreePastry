@@ -36,9 +36,9 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.commonapi;
 
-import java.util.Map;
-
 import rice.p2p.commonapi.rawserialization.RawMessage;
+
+import java.util.Map;
 
 public interface OptionsAdder {
 
@@ -48,6 +48,6 @@ public interface OptionsAdder {
    * @param m
    * @return
    */
-  public Map<String, Object> addOptions(Map<String, Object> options,RawMessage m);
+  Map<String, Object> addOptions(Map<String, Object> options, RawMessage m);
 
 }

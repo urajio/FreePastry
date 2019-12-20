@@ -37,13 +37,13 @@ advised of the possibility of such damage.
 
 package rice.p2p.splitstream;
 
-import java.io.*;
-import java.util.*;
-
 import rice.environment.logging.Logger;
-import rice.p2p.commonapi.*;
+import rice.p2p.commonapi.NodeHandle;
 import rice.p2p.scribe.*;
 import rice.selector.TimerTask;
+
+import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * This class encapsulates all data about an individual stripe. It is the basic unit in the system.
@@ -117,7 +117,7 @@ public class Stripe implements ScribeClient {
     logger = scribe.getEnvironment().getLogManager().getLogger(Stripe.class, instance);    
     this.channel = channel;
     this.isPrimary = false;
-    this.failed = new Hashtable<Topic, Integer>();
+    this.failed = new Hashtable<>();
     if(SplitStreamScribePolicy.getPrefixMatch(this.channel.getLocalId(), stripeId.getId(), channel.getStripeBase()) > 0)
       this.isPrimary = true;
     
@@ -216,8 +216,8 @@ public class Stripe implements ScribeClient {
 
         SplitStreamClient[] clients = (SplitStreamClient[]) this.clients.toArray(new SplitStreamClient[0]);
 
-        for (int i=0; i<clients.length; i++) {
-          clients[i].deliver(this, data);
+        for (SplitStreamClient client : clients) {
+          client.deliver(this, data);
         }
       } else {
         if (logger.level <= Logger.WARNING) logger.log("Received unexpected content " + content);
@@ -257,11 +257,11 @@ public class Stripe implements ScribeClient {
     Integer count = (Integer) failed.get(topic);
 
     if (count == null) {
-      count = new Integer(0);
+      count = 0;
     }
 
-    if (count.intValue() < MAX_FAILED_SUBSCRIPTION) {
-      count = new Integer(count.intValue() + 1);
+    if (count < MAX_FAILED_SUBSCRIPTION) {
+      count = count + 1;
 
       if (logger.level <= Logger.WARNING) logger.log( 
           "DEBUG :: Subscription failed at " + channel.getLocalId() + " for topic " + topic + " - retrying.");

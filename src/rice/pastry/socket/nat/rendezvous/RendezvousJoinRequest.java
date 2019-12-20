@@ -36,19 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.socket.nat.rendezvous;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-
 import rice.p2p.commonapi.rawserialization.InputBuffer;
 import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.pastry.NodeHandle;
 import rice.pastry.NodeHandleFactory;
 import rice.pastry.PastryNode;
-import rice.pastry.join.JoinAddress;
 import rice.pastry.join.JoinRequest;
-import rice.pastry.leafset.LeafSet;
+
+import java.io.IOException;
 
 /**
  * Includes the bootstrap (or some other node who will have a pilot from the joiner.)

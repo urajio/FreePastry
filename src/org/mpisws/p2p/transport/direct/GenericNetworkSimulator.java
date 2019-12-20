@@ -37,7 +37,6 @@ advised of the possibility of such damage.
 package org.mpisws.p2p.transport.direct;
 
 import org.mpisws.p2p.transport.liveness.LivenessProvider;
-
 import rice.environment.Environment;
 import rice.environment.random.RandomSource;
 import rice.p2p.commonapi.Cancellable;
@@ -45,13 +44,13 @@ import rice.p2p.commonapi.CancellableTask;
 
 public interface GenericNetworkSimulator<Identifier, MessageType> extends LivenessProvider<Identifier> {
 
-  public Environment getEnvironment();
+  Environment getEnvironment();
   /**
    * Get the environment related to a specific node.
    * @param i
    * @return
    */
-  public Environment getEnvironment(Identifier i);
+  Environment getEnvironment(Identifier i);
 
   /**
    * Determines delivery time from a to b.
@@ -61,7 +60,7 @@ public interface GenericNetworkSimulator<Identifier, MessageType> extends Livene
    * 
    * @return delay of b from a.
    */
-  public float networkDelay(Identifier a, Identifier b);
+  float networkDelay(Identifier a, Identifier b);
 
   
   /**
@@ -71,7 +70,7 @@ public interface GenericNetworkSimulator<Identifier, MessageType> extends Livene
    * @param node the Pastry node to deliver it to.
    * @param how long to delay to deliver the message
    */
-  public Cancellable deliverMessage(MessageType msg, Identifier to, Identifier from, int delay);
+  Cancellable deliverMessage(MessageType msg, Identifier to, Identifier from, int delay);
 
   /**
    * Deliver message.
@@ -82,22 +81,22 @@ public interface GenericNetworkSimulator<Identifier, MessageType> extends Livene
    * @param period to deliver the message after the delay
    */
 //  public CancellableTask enqueueDelivery(Delivery del);  
-  public CancellableTask enqueueDelivery(Delivery del, int delay);
+  CancellableTask enqueueDelivery(Delivery del, int delay);
    
-  public DirectTransportLayer<Identifier, MessageType> getTL(Identifier i);
+  DirectTransportLayer<Identifier, MessageType> getTL(Identifier i);
 
-  public boolean isAlive(Identifier i);
+  boolean isAlive(Identifier i);
   
   /**
    * Kill identifier.
    * @param i
    */
-  public void remove(Identifier i);
+  void remove(Identifier i);
   
 
-  public void start();
+  void start();
   
-  public void stop();
+  void stop();
 
   /**
    * The max rate of the simulator compared to realtime. 
@@ -121,14 +120,14 @@ public interface GenericNetworkSimulator<Identifier, MessageType> extends Livene
    * zero or less will cause no bound on the simulation speed
    * 
    */
-  public void setMaxSpeed(float rate);
+  void setMaxSpeed(float rate);
 
   /**
    * unlimited maxSpeed
    *
    */
-  public void setFullSpeed();
+  void setFullSpeed();
 
-  public RandomSource getRandomSource();
+  RandomSource getRandomSource();
 
 }

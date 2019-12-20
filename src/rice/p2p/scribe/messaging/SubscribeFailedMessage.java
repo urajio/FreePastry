@@ -37,17 +37,15 @@ advised of the possibility of such damage.
 
 package rice.p2p.scribe.messaging;
 
+import rice.p2p.commonapi.Endpoint;
+import rice.p2p.commonapi.NodeHandle;
+import rice.p2p.commonapi.rawserialization.InputBuffer;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
+import rice.p2p.scribe.Topic;
+
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-
-import rice.*;
-import rice.p2p.commonapi.*;
-import rice.p2p.commonapi.rawserialization.*;
-import rice.p2p.scribe.*;
-import rice.p2p.scribe.rawserialization.ScribeContentDeserializer;
 
 /**
  * @(#) SubscribeFailedMessage.java
@@ -84,11 +82,10 @@ public class SubscribeFailedMessage extends AbstractSubscribeMessage {
     
     int numTopics = topics.size(); 
     buf.writeInt(numTopics);
-    Iterator<Topic> i = topics.iterator();
-    
-    while (i.hasNext()) {
-      i.next().serialize(buf); 
-    }
+
+      for (Topic topic : topics) {
+          topic.serialize(buf);
+      }
   }
   
   public static SubscribeFailedMessage build(InputBuffer buf, Endpoint endpoint) throws IOException { 
@@ -114,7 +111,7 @@ public class SubscribeFailedMessage extends AbstractSubscribeMessage {
     super(buf, endpoint); 
     
     int numTopics = buf.readInt();
-    topics = new ArrayList<Topic>(numTopics);
+    topics = new ArrayList<>(numTopics);
     
     // note: make sure to start at 1 so we don't overflow
     for (int i = 0; i < numTopics; i++) {

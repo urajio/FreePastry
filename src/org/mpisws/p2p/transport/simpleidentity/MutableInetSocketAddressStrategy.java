@@ -36,12 +36,11 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.simpleidentity;
 
+import rice.p2p.util.rawserialization.SimpleOutputBuffer;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-
-import rice.p2p.util.rawserialization.SimpleOutputBuffer;
 
 /**
  * This is used if you are binding to 0.0.0.0

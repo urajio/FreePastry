@@ -36,17 +36,17 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.testing;
 
-import java.io.IOException;
-import java.util.*;
-
 import rice.environment.Environment;
 import rice.environment.random.RandomSource;
-import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.p2p.commonapi.RangeCannotBeDeterminedException;
+import rice.p2p.commonapi.rawserialization.OutputBuffer;
 import rice.pastry.*;
-import rice.pastry.leafset.*;
+import rice.pastry.leafset.LeafSet;
+import rice.pastry.leafset.SimilarSet;
 import rice.pastry.messaging.Message;
 import rice.pastry.standard.RandomNodeIdFactory;
+
+import java.util.Arrays;
 
 /**
  * This class tests the correctness of the leafset in Pastry.
@@ -331,7 +331,7 @@ public class LeafSetTest {
     return set;
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     LeafSetTest test = new LeafSetTest();
     test.start();
   }
@@ -378,7 +378,7 @@ public class LeafSetTest {
      * @deprecated
      */
     public void receiveMessage(Message m) {
-    };
+    }
 
     public int compareTo(TestNodeHandle o) {
       return id.compareTo(((TestNodeHandle) o).id);
@@ -388,7 +388,7 @@ public class LeafSetTest {
       return id.toString();
     }
 
-    public void serialize(OutputBuffer buf) throws IOException {
+    public void serialize(OutputBuffer buf) {
       throw new RuntimeException("not implemented.");        
     }
   }

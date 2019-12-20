@@ -36,19 +36,23 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package rice.pastry.standard;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.*;
-
 import rice.Continuation;
 import rice.environment.Environment;
 import rice.environment.logging.Logger;
-import rice.pastry.*;
+import rice.pastry.NodeHandle;
+import rice.pastry.NodeSetEventSource;
+import rice.pastry.NodeSetListener;
+import rice.pastry.PastryNode;
 import rice.pastry.join.JoinRequest;
-import rice.pastry.routing.*;
+import rice.pastry.routing.RouteMessage;
+import rice.pastry.routing.RouteSet;
+import rice.pastry.routing.RoutingTable;
 import rice.pastry.socket.SocketPastryNodeFactory;
 import rice.selector.Timer;
 import rice.selector.TimerTask;
+
+import java.net.InetSocketAddress;
+import java.util.*;
 
 /**
  * The PartitionHandler does two things:  it collects a list of candidate nodes 
@@ -110,7 +114,7 @@ public class PartitionHandler extends TimerTask implements NodeSetListener {
     this.factory = factory;
     this.bootstraps = bootstraps;
     env = pastryNode.getEnvironment();
-    gone = new HashMap<rice.p2p.commonapi.Id, GoneSetEntry>();
+    gone = new HashMap<>();
     this.logger = pn.getEnvironment().getLogManager().getLogger(PartitionHandler.class,"");
     
     maxGoneSize = env.getParameters().getInt("partition_handler_max_history_size");
@@ -151,7 +155,7 @@ public class PartitionHandler extends TimerTask implements NodeSetListener {
 
   private List<NodeHandle> getRoutingTableAsList() {
     RoutingTable rt = pastryNode.getRoutingTable();
-    List<NodeHandle> rtHandles = new ArrayList<NodeHandle>(rt.numEntries());
+    List<NodeHandle> rtHandles = new ArrayList<>(rt.numEntries());
 
     for (int r = 0; r < rt.numRows(); r++) {
       RouteSet[] row = rt.getRow(r);
@@ -315,8 +319,7 @@ public class PartitionHandler extends TimerTask implements NodeSetListener {
    * @param target the node to rejoin through
    */
   public void rejoin(NodeHandle target) {
-    JoinRequest jr = new JoinRequest(pastryNode.getLocalHandle(), pastryNode
-        .getRoutingTable().baseBitLength());
+    JoinRequest jr = new JoinRequest(pastryNode.getLocalHandle(), pastryNode.getRoutingTable().baseBitLength());
  
     RouteMessage rm = new RouteMessage(pastryNode.getLocalHandle().getNodeId(), 
         jr, null, null,
@@ -325,11 +328,7 @@ public class PartitionHandler extends TimerTask implements NodeSetListener {
     rm.setPrevNode(pastryNode.getLocalHandle());
     rm.getOptions().setRerouteIfSuspected(false);
     NodeHandle nh = pastryNode.coalesce(target);
-    try {
-      nh.bootstrap(rm);
-    } catch (IOException ioe) {
-      if (logger.level <= Logger.WARNING) logger.logException("Error bootstrapping.",ioe); 
-    }
+    nh.bootstrap(rm);
   }
 
 }

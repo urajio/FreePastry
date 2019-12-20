@@ -36,33 +36,22 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.transport.wire.magicnumber;
 
+import org.mpisws.p2p.transport.*;
+import org.mpisws.p2p.transport.util.DefaultCallback;
+import org.mpisws.p2p.transport.util.DefaultErrorHandler;
+import org.mpisws.p2p.transport.util.MessageRequestHandleImpl;
+import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
+import org.mpisws.p2p.transport.wire.exception.StalledSocketException;
+import rice.environment.Environment;
+import rice.environment.logging.Logger;
+import rice.p2p.commonapi.Cancellable;
+import rice.selector.TimerTask;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
-
-import org.mpisws.p2p.transport.ListenableTransportLayer;
-import org.mpisws.p2p.transport.MessageRequestHandle;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.ErrorHandler;
-import org.mpisws.p2p.transport.MessageCallback;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.TransportLayerCallback;
-import org.mpisws.p2p.transport.TransportLayerListener;
-import org.mpisws.p2p.transport.util.MessageRequestHandleImpl;
-import org.mpisws.p2p.transport.util.SocketRequestHandleImpl;
-import org.mpisws.p2p.transport.util.DefaultCallback;
-import org.mpisws.p2p.transport.util.DefaultErrorHandler;
-import org.mpisws.p2p.transport.wire.exception.StalledSocketException;
-
-import rice.environment.Environment;
-import rice.environment.logging.Logger;
-import rice.p2p.commonapi.Cancellable;
-import rice.selector.TimerTask;
 
 /**
  * This class eliminates random connections by dropping all messages/sockets that don't
@@ -108,10 +97,10 @@ public class MagicNumberTransportLayer<Identifier> implements
     
     this.errorHandler = errorHandler;
     
-    this.callback = new DefaultCallback<Identifier, ByteBuffer>(logger);
+    this.callback = new DefaultCallback<>(logger);
     
     if (this.errorHandler == null) {
-      this.errorHandler = new DefaultErrorHandler<Identifier>(logger); 
+      this.errorHandler = new DefaultErrorHandler<>(logger);
     }
     
     wire.setCallback(this);
@@ -124,7 +113,7 @@ public class MagicNumberTransportLayer<Identifier> implements
   public void setErrorHandler(ErrorHandler<Identifier> handler) {
     wire.setErrorHandler(handler);
     if (handler == null) {
-      this.errorHandler = new DefaultErrorHandler<Identifier>(logger);
+      this.errorHandler = new DefaultErrorHandler<>(logger);
       return;
     }
     this.errorHandler = handler;
@@ -147,7 +136,7 @@ public class MagicNumberTransportLayer<Identifier> implements
       Map<String, Object> options) {
     if (deliverSocketToMe == null) throw new IllegalArgumentException("deliverSocketToMe must be non-null!");
 
-    final SocketRequestHandleImpl<Identifier> cancellable = new SocketRequestHandleImpl<Identifier>(i, options, logger);
+    final SocketRequestHandleImpl<Identifier> cancellable = new SocketRequestHandleImpl<>(i, options, logger);
 
     cancellable.setSubCancellable(wire.openSocket(i, new SocketCallback<Identifier>(){    
       public void receiveResult(SocketRequestHandle<Identifier> c, final P2PSocket<Identifier> result) {
@@ -206,7 +195,7 @@ public class MagicNumberTransportLayer<Identifier> implements
     if (logger.level <= Logger.FINE) logger.log("sendMessage("+i+","+m+")");
 
     final MessageRequestHandleImpl<Identifier, ByteBuffer> cancellable 
-      = new MessageRequestHandleImpl<Identifier, ByteBuffer>(i, m, options);
+      = new MessageRequestHandleImpl<>(i, m, options);
 
     final ByteBuffer buf = ByteBuffer.wrap(msgWithHeader);
     cancellable.setSubCancellable(wire.sendMessage(i, 
@@ -238,7 +227,7 @@ public class MagicNumberTransportLayer<Identifier> implements
     wire.destroy();
   }
 
-  public void incomingSocket(P2PSocket<Identifier> s) throws IOException {
+  public void incomingSocket(P2PSocket<Identifier> s) {
     s.register(true, false, new VerifyHeaderReceiver(s));
   }
 
@@ -319,7 +308,7 @@ public class MagicNumberTransportLayer<Identifier> implements
   }
 
   // ******************************** TransportLayerListeners *******************************
-  ArrayList<TransportLayerListener<Identifier>> listeners = new ArrayList<TransportLayerListener<Identifier>>();
+  final ArrayList<TransportLayerListener<Identifier>> listeners = new ArrayList<>();
   public void addTransportLayerListener(
       TransportLayerListener<Identifier> listener) {
     synchronized(listeners) {
@@ -338,7 +327,7 @@ public class MagicNumberTransportLayer<Identifier> implements
       Map<String, Object> options, boolean passthrough, boolean socket) {
     Iterable<TransportLayerListener<Identifier>> i;
     synchronized(listeners) {
-      i = new ArrayList<TransportLayerListener<Identifier>>(listeners);
+      i = new ArrayList<>(listeners);
     }
     for (TransportLayerListener<Identifier> l : i) {
       l.read(bytesRead, identifier, options, passthrough, socket);
@@ -349,7 +338,7 @@ public class MagicNumberTransportLayer<Identifier> implements
       Map<String, Object> options, boolean passthrough, boolean socket) {
     Iterable<TransportLayerListener<Identifier>> i;
     synchronized(listeners) {
-      i = new ArrayList<TransportLayerListener<Identifier>>(listeners);
+      i = new ArrayList<>(listeners);
     }
     for (TransportLayerListener<Identifier> l : i) {
       l.wrote(bytesRead, identifier, options, passthrough, socket);

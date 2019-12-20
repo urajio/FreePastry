@@ -36,7 +36,16 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.testing.transportlayer;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mpisws.p2p.transport.P2PSocket;
+import org.mpisws.p2p.transport.TransportLayer;
+import org.mpisws.p2p.transport.sourceroute.*;
+import org.mpisws.p2p.transport.sourceroute.factory.WireSourceRouteFactory;
+import org.mpisws.p2p.transport.wire.WireTransportLayerImpl;
+import org.mpisws.p2p.transport.wire.magicnumber.MagicNumberTransportLayer;
+import rice.environment.Environment;
+import rice.environment.logging.CloneableLogManager;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -45,21 +54,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.TransportLayer;
-import org.mpisws.p2p.transport.sourceroute.SourceRoute;
-import org.mpisws.p2p.transport.sourceroute.SourceRouteFactory;
-import org.mpisws.p2p.transport.sourceroute.SourceRouteTap;
-import org.mpisws.p2p.transport.sourceroute.SourceRouteTransportLayer;
-import org.mpisws.p2p.transport.sourceroute.SourceRouteTransportLayerImpl;
-import org.mpisws.p2p.transport.sourceroute.factory.WireSourceRouteFactory;
-import org.mpisws.p2p.transport.wire.WireTransportLayerImpl;
-import org.mpisws.p2p.transport.wire.magicnumber.MagicNumberTransportLayer;
-
-import rice.environment.Environment;
-import rice.environment.logging.CloneableLogManager;
+import static org.junit.Assert.assertTrue;
 
 public class WireSRTest extends TLTest<SourceRoute<InetSocketAddress>> {
   static SourceRouteTransportLayer<InetSocketAddress> carol_tap; // going to be the middle hop for alice/bob
@@ -75,7 +70,7 @@ public class WireSRTest extends TLTest<SourceRoute<InetSocketAddress>> {
     SourceRoute<InetSocketAddress> intermediate = (SourceRoute)carol.getLocalIdentifier();
     SourceRoute<InetSocketAddress> dest = b.getLocalIdentifier();
     
-    List<InetSocketAddress> retArr = new ArrayList<InetSocketAddress>(3);
+    List<InetSocketAddress> retArr = new ArrayList<>(3);
     retArr.add(src.getFirstHop());
     retArr.add(intermediate.getFirstHop());
     retArr.add(dest.getFirstHop());
@@ -138,10 +133,10 @@ public class WireSRTest extends TLTest<SourceRoute<InetSocketAddress>> {
   @Override
   public void openTCP() throws Exception {
     final Object lock = new Object();
-    final List<Triplet> opened = new ArrayList<Triplet>(1);
-    final List<Triplet> closed = new ArrayList<Triplet>(1);
-    final List<Triplet> received = new ArrayList<Triplet>(1);
-    final List<Triplet> bad = new ArrayList<Triplet>(1);
+    final List<Triplet> opened = new ArrayList<>(1);
+    final List<Triplet> closed = new ArrayList<>(1);
+    final List<Triplet> received = new ArrayList<>(1);
+    final List<Triplet> bad = new ArrayList<>(1);
     
     SourceRouteTap tap = new SourceRouteTap(){    
       public void socketOpened(SourceRoute path, P2PSocket a, P2PSocket b) {
@@ -200,7 +195,7 @@ public class WireSRTest extends TLTest<SourceRoute<InetSocketAddress>> {
       }
     }
     final Object lock = new Object();    
-    final List<TapTupel> taptupels = new ArrayList<TapTupel>(1);
+    final List<TapTupel> taptupels = new ArrayList<>(1);
     
     SourceRouteTap tap = new SourceRouteTap(){    
       public void socketOpened(SourceRoute path, P2PSocket a, P2PSocket b) {

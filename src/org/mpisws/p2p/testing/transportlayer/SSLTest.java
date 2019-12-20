@@ -36,6 +36,14 @@ advised of the possibility of such damage.
 *******************************************************************************/ 
 package org.mpisws.p2p.testing.transportlayer;
 
+import org.mpisws.p2p.pki.x509.CATool;
+import org.mpisws.p2p.pki.x509.CAToolImpl;
+import org.mpisws.p2p.transport.*;
+import org.mpisws.p2p.transport.ssl.SSLTransportLayerImpl;
+import org.mpisws.p2p.transport.wire.WireTransportLayer;
+import org.mpisws.p2p.transport.wire.WireTransportLayerImpl;
+import rice.environment.Environment;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -47,21 +55,7 @@ import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.Date;
 import java.util.Map;
-
-import org.mpisws.p2p.pki.x509.CATool;
-import org.mpisws.p2p.pki.x509.CAToolImpl;
-import org.mpisws.p2p.transport.P2PSocket;
-import org.mpisws.p2p.transport.P2PSocketReceiver;
-import org.mpisws.p2p.transport.SocketCallback;
-import org.mpisws.p2p.transport.SocketRequestHandle;
-import org.mpisws.p2p.transport.TransportLayerCallback;
-import org.mpisws.p2p.transport.ssl.SSLTransportLayerImpl;
-import org.mpisws.p2p.transport.wire.WireTransportLayer;
-import org.mpisws.p2p.transport.wire.WireTransportLayerImpl;
-
-import rice.environment.Environment;
 
 public class SSLTest {
   public static void main(String[] args) throws Exception {
@@ -106,8 +100,8 @@ public class SSLTest {
 //    aliceStore.setKeyEntry("private",alicePair.getPrivate(), "".toCharArray(), new Certificate[] {carolCert, aliceCert});
 
     WireTransportLayer aliceWire = new WireTransportLayerImpl(aliceAddr,aliceEnv,null);
-    SSLTransportLayerImpl<InetSocketAddress, ByteBuffer> aliceSSL = new SSLTransportLayerImpl<InetSocketAddress, ByteBuffer>(
-        aliceWire,aliceStore,aliceStore,aliceEnv);
+    SSLTransportLayerImpl<InetSocketAddress, ByteBuffer> aliceSSL = new SSLTransportLayerImpl<>(
+            aliceWire, aliceStore, aliceStore, aliceEnv);
     
     Environment bobEnv = rootEnv.cloneEnvironment("bob");
     InetSocketAddress bobAddr = new InetSocketAddress(addr,9002); 
@@ -120,13 +114,12 @@ public class SSLTest {
     bobStore.setCertificateEntry("cert", caTool.getCertificate());
 
     WireTransportLayer bobWire = new WireTransportLayerImpl(bobAddr,bobEnv,null);
-    SSLTransportLayerImpl<InetSocketAddress, ByteBuffer> bobSSL = new SSLTransportLayerImpl<InetSocketAddress, ByteBuffer>(
-        bobWire,bobStore,bobStore,bobEnv);
+    SSLTransportLayerImpl<InetSocketAddress, ByteBuffer> bobSSL = new SSLTransportLayerImpl<>(
+            bobWire, bobStore, bobStore, bobEnv);
 
     aliceSSL.setCallback(new TransportLayerCallback<InetSocketAddress, ByteBuffer>() {
 
-      public void incomingSocket(P2PSocket<InetSocketAddress> s)
-          throws IOException {
+      public void incomingSocket(P2PSocket<InetSocketAddress> s) {
         System.out.println("************* Alice: Incoming Socket "+s);
         s.register(true, false, new P2PSocketReceiver<InetSocketAddress>() {
           ByteBuffer readMe = ByteBuffer.allocate(new String("foo").getBytes().length);
@@ -152,7 +145,7 @@ public class SSLTest {
       }
 
       public void messageReceived(InetSocketAddress i, ByteBuffer m,
-          Map<String, Object> options) throws IOException {
+          Map<String, Object> options) {
         // TODO Auto-generated method stub
         
       }});
