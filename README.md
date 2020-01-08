@@ -4,7 +4,7 @@
 
 * * *
 
-Release 2.1,  13 March, 2009.
+Release 2.1,  13 March, 2009.
 
 FreePastry is a modular, open source implementation of the [Pastry](http://freepastry.org/) p2p structured overlay network.  
 
@@ -12,19 +12,19 @@ FreePastry is a modular, open source implementation of the [Pastry](http://freep
 
 [Peter Druschel](http://www.mpi-sws.mpg.de/people/Peter_Druschel), Eric Engineer , Romer Gil , [Andreas Haeberlen](http://www.mpi-sws.mpg.de/people/Andreas_Haeberlen), [Jeff Hoye](http://www.mpi-sws.mpg.de/people/Jeff_Hoye), [Y. Charlie Hu](http://www.cs.rice.edu/%7Eychu/) , [Sitaram Iyer](http://www.cs.rice.edu/%7Essiyer/) , [Andrew Ladd](http://www.cs.rice.edu/%7Ealadd/) , [Alan Mislove](http://www.mpi-sws.mpg.de/people/Alan_Mislove), [Animesh Nandi](http://www.cs.rice.edu/%7Eanimesh) , [Ansley Post](http://www.mpi-sws.mpg.de/people/Ansley_Post), [Charlie Reis](http://www.cs.rice.edu/%7Ecreis) , [Dan Sandler](http://www.cs.rice.edu/%7Edsandler) , [Jim Stewart](http://www.mpi-sws.mpg.de/people/James_Stewart), [Atul Singh](http://www.cs.rice.edu/%7Eatuls) , and [RongMei Zhang](http://composer.ecn.purdue.edu/%7Erongmei/) contributed to the FreePastry code. The code is based on algorithms and protocols described in the following papers:  
 
-*   A. Rowstron and P. Druschel, _Pastry: Scalable, distributed object location and routing for large-scale peer-to-peer systems_.  IFIP/ACM International Conference on Distributed Systems Platforms (Middleware), Heidelberg, Germany, pages 329-350, November, 2001\. [_[pdf.zip](http://www.research.microsoft.com/%7Eantr/PAST/pastry.pdf.zip) | [ps.zip](http://www.research.microsoft.com/%7Eantr/PAST/pastry.ps.zip) | [pdf](http://www.research.microsoft.com/%7Eantr/PAST/pastry.pdf) | [ps](http://www.research.microsoft.com/%7Eantr/PAST/pastry.ps)_ ]</font>
+*   A. Rowstron and P. Druschel, _Pastry: Scalable, distributed object location and routing for large-scale peer-to-peer systems_.  IFIP/ACM International Conference on Distributed Systems Platforms (Middleware), Heidelberg, Germany, pages 329-350, November, 2001. [_[pdf.zip](http://www.research.microsoft.com/%7Eantr/PAST/pastry.pdf.zip) | [ps.zip](http://www.research.microsoft.com/%7Eantr/PAST/pastry.ps.zip) | [pdf](http://www.research.microsoft.com/%7Eantr/PAST/pastry.pdf) | [ps](http://www.research.microsoft.com/%7Eantr/PAST/pastry.ps)_]
 
-*   M. Castro, P. Druschel, Y. C. Hu, A. Rowstron, _Proximity neighbor selection in tree-based structured peer-to-peer overlays_.  Microsoft Technical Report MSR-TR-20032-52, 2003.  [ _[pdf.zip](http://freepastry.rice.edu/PAST/location-msrtr-2003-52.zip) | [ps.zip](http://freepastry.rice.edu/PAST/location-msrtr-2003-52.ps.zip) |[pdf](http://freepastry.rice.edu/PAST/location-msrtr-2003-52.pdf) |[ps](http://freepastry.rice.edu/PAST/location-msrtr-2003-52.ps)_ ]</font>
+*   M. Castro, P. Druschel, Y. C. Hu, A. Rowstron, _Proximity neighbor selection in tree-based structured peer-to-peer overlays_.  Microsoft Technical Report MSR-TR-20032-52, 2003.  [_[pdf.zip](http://freepastry.rice.edu/PAST/location-msrtr-2003-52.zip) | [ps.zip](http://freepastry.rice.edu/PAST/location-msrtr-2003-52.ps.zip) |[pdf](http://freepastry.rice.edu/PAST/location-msrtr-2003-52.pdf) |[ps](http://freepastry.rice.edu/PAST/location-msrtr-2003-52.ps)_]
 
-*   M. Castro, P. Druschel, A.-M. Kermarrec  and A. Rowstron, "_SCRIBE: A large-scale and decentralized application-level multicast infrastructure_", IEEE Journal on Selected Areas in Communications (JSAC) (Special issue on Network Support for Multicast Communications). 2002, to appear.  [_[pdf.zip](http://www.research.microsoft.com/%7Eantr/PAST/jsac.pdf.zip) | [ps.zip](http://www.research.microsoft.com/%7Eantr/PAST/jsac.ps.zip) | [pdf](http://www.research.microsoft.com/%7Eantr/PAST/jsac.pdf) | [ps](http://www.research.microsoft.com/%7Eantr/PAST/jsac.ps)_ ]</font>
+*   M. Castro, P. Druschel, A.-M. Kermarrec  and A. Rowstron, "_SCRIBE: A large-scale and decentralized application-level multicast infrastructure_", IEEE Journal on Selected Areas in Communications (JSAC) (Special issue on Network Support for Multicast Communications). 2002, to appear.  [_[pdf.zip](http://www.research.microsoft.com/%7Eantr/PAST/jsac.pdf.zip) | [ps.zip](http://www.research.microsoft.com/%7Eantr/PAST/jsac.ps.zip) | [pdf](http://www.research.microsoft.com/%7Eantr/PAST/jsac.pdf) | [ps](http://www.research.microsoft.com/%7Eantr/PAST/jsac.ps)_ ]
 
-*   A. Rowstron and P. Druschel, "_Storage management and caching in PAST, a large-scale, persistent peer-to-peer storage utility_", 18th ACM SOSP'01, Lake Louise, Alberta, Canada, October 2001.  [ _[pdf.zip](http://www.cs.rice.edu/CS/Systems/PAST/past-sosp.pdf.zip) | [ps.zip](http://www.cs.rice.edu/CS/Systems/PAST/past-sosp.ps.zip) | [pdf](http://www.cs.rice.edu/CS/Systems/PAST/past-sosp.pdf) | [ps](http://www.cs.rice.edu/CS/Systems/PAST/past-sosp.ps)_ ] (Corrected - erratum for original version: _ [ps](http://www.cs.rice.edu/CS/Systems/PAST/sosp-erratum.ps))_</font>  
+*   A. Rowstron and P. Druschel, "_Storage management and caching in PAST, a large-scale, persistent peer-to-peer storage utility_", 18th ACM SOSP'01, Lake Louise, Alberta, Canada, October 2001.  [_[pdf.zip](http://www.cs.rice.edu/CS/Systems/PAST/past-sosp.pdf.zip) | [ps.zip](http://www.cs.rice.edu/CS/Systems/PAST/past-sosp.ps.zip) | [pdf](http://www.cs.rice.edu/CS/Systems/PAST/past-sosp.pdf) | [ps](http://www.cs.rice.edu/CS/Systems/PAST/past-sosp.ps)_ ] (Corrected - erratum for original version: [[ps]](http://www.cs.rice.edu/CS/Systems/PAST/sosp-erratum.ps))
 
-*   F. Dabek, P. Druschel, B. Zhao, J. Kubiatowicz, and I. Stoica, "_Towards a Common API for Structured Peer-to-Peer Overlays_", 2nd IPTP'03, Berkeley, CA, February, 2003.  [ _[pdf](http://www.cs.rice.edu/%7Edruschel/publications/kbr-api.pdf)_ ]</font>
+*   F. Dabek, P. Druschel, B. Zhao, J. Kubiatowicz, and I. Stoica, "_Towards a Common API for Structured Peer-to-Peer Overlays_", 2nd IPTP'03, Berkeley, CA, February, 2003.  [[pdf]](http://www.cs.rice.edu/%7Edruschel/publications/kbr-api.pdf)
 
-*   Miguel Castro, Peter Druschel, Anne-Marie Kermarrec, Animesh Nandi, Antony Rowstron and Atul Singh, _SplitStream: High-bandwidth multicast in a cooperative environment._ In Proceedings of the 19th ACM Symposium on Operating Systems Principles (SOSP'03). Lake George, New York, October 2003. [ _[pdf](http://freepastry.rice.edu/PAST/SplitStream-results.pdf)_]</font>
+*   Miguel Castro, Peter Druschel, Anne-Marie Kermarrec, Animesh Nandi, Antony Rowstron and Atul Singh, _SplitStream: High-bandwidth multicast in a cooperative environment._ In Proceedings of the 19th ACM Symposium on Operating Systems Principles (SOSP'03). Lake George, New York, October 2003. [[pdf](http://freepastry.rice.edu/PAST/SplitStream-results.pdf)]
 
-*   Andreas Haeberlen, Jeff Hoye, Alan Mislove, and Peter Druschel, _Consistent Key Mapping in Structured Overlays._ Technical Report TR05-456, Department of Computer Science, Rice University, forthcoming. [ _[pdf](http://freepastry.rice.edu/papers/consistency.pdf)_ ]</font>
+*   Andreas Haeberlen, Jeff Hoye, Alan Mislove, and Peter Druschel, _Consistent Key Mapping in Structured Overlays._ Technical Report TR05-456, Department of Computer Science, Rice University, forthcoming. [[pdf](http://freepastry.rice.edu/papers/consistency.pdf)]
 
 
 ### Requirements
@@ -402,7 +402,7 @@ We have done extensive routing consistency testing on [Planetlab](http://www.pla
 
 *   Supports [ePOST](http://www.epostmail.org/), which is now in production use.[[Download](http://www.epostmail.org/code.html)]
 
-*   Single threaded:  We have adapted a single threaded model to improve performance. Calls into Pastry are still properly synchronized. In fact if you run multiple nodes within the same JVM they will execute on the same thread. The scheduler is implemented in rice.selector.
+*   Single threaded:  We have adapted a single threaded model to improve performance. Calls into Pastry are still properly synchronized. In fact if you run multiple nodes within the same JVM they will execute on the same thread. The scheduler is implemented in rice.selector.
 
 *   Transport Layer/Routing:
 
@@ -480,7 +480,7 @@ We have done extensive routing consistency testing on [Planetlab](http://www.pla
 
 *   FreePastry now supports the common API, as described in the IPTPS'03 paper listed above. Newly developed applications should use this API, and only import the p2p.commonapi package. The previous, native FreePastry API continues to be supported for backward compatibility.  
 
-*   A more general implementation of the [PAST](http://www.cs.rice.edu/CS/Systems/PAST/default.htm) archival storage system was added in this release. The release adds support for replication and caching of data.  The implementation provides a generic distributed hash table (DHT) facility, and allows control over the semantics of tuple insertion for a given, application-specific value type. The previous version of PAST has been marked as deprecated and may not be included in future releases. Applications that use Past should migrate to the new version.
+*   A more general implementation of the [PAST](http://www.cs.rice.edu/CS/Systems/PAST/default.htm) archival storage system was added in this release. The release adds support for replication and caching of data.  The implementation provides a generic distributed hash table (DHT) facility, and allows control over the semantics of tuple insertion for a given, application-specific value type. The previous version of PAST has been marked as deprecated and may not be included in future releases. Applications that use Past should migrate to the new version.
 
 *   A version of the replication manager, which provides application-independent management of replicas, is included. Application that need to replicate data on the set of _n_ nodes closest to a given key can use the replication manager in order to perform this task.
 
@@ -520,12 +520,12 @@ Release 1.4 has the following limitations.
 
 To use the binary distribution, download the pastry jar file and set the Java classpath to include the path of the jar file. This can be done using the "-cp" command line argument, or by setting the CLASSPATH variable in your shell environment. For some applications you may need the 3rd party libraries included with the distribution. These are available in the source distributions. Simply unpack the distribution and include the jars in the lib/ directory in your classpath.
 
-To compile the source distribution we have switched to ant for the build process. You will need to have ANT installed (available from [http://ant.apache.org/](http://ant.apache.org/)) on your system. Expand the archive (FreePastry-1.4.2-source.tgz or FreePastry-1.4.2-source.zip) into a directory. Execute "ant" in the top level directory (you may have to increase the maximum memory for ant by setting the environment variable ANT_OPTS=-Xmx128m), then change to the "classes" directory to run FreePastry. 
+To compile the source distribution we have switched to ant for the build process. You will need to have ANT installed (available from [http://ant.apache.org/](http://ant.apache.org/)) on your system. Expand the archive (FreePastry-1.4.2-source.tgz or FreePastry-1.4.2-source.zip) into a directory. Execute "ant" in the top level directory (you may have to increase the maximum memory for ant by setting the environment variable ANT_OPTS=-Xmx128m), then change to the "classes" directory to run FreePastry. 
 
 You may have to provide a Java security policy file with sufficient permissions to allow FreePastry to contact other nodes. The simplest way to do this is to install a ".java.policy" file with the following content into your home directory:
 
 grant {  
-    permission java.security.AllPermission;  
+    permission java.security.AllPermission;  
 };
 
 * * *
